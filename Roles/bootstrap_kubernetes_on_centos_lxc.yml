@@ -1,0 +1,5 @@
+---
+- hosts: all
+  tasks:
+      - include_tasks: ./Playbooks/upgrade_system_packages.yml
+      - include_tasks: ./Playbooks/install_base_packages.yml
