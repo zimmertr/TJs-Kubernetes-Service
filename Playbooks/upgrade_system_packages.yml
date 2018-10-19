@@ -1,7 +1,0 @@
----
-- hosts: all
-  tasks:
-      - name: Perform Package Upgrade
-        yum:
-            name: '*'
-            state: latest
