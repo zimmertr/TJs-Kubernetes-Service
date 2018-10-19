@@ -1,0 +1,12 @@
+---
+- hosts: all
+  tasks:
+      - name: Installing the epel repo
+        yum:
+            name: epel-release
+            state: latest
+
+      - name: Installing base packages 
+        yum:
+            name: ['vim', 'wget', 'tree', 'curl', 'mlocate', 'nmap', 'net-tools', 'bind-utils', 'lsof', 'htop', 'iotop', 'bmon', 'sysstat']
+            state: latest
