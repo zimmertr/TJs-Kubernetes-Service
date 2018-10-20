@@ -10,3 +10,6 @@
         yum:
             name: ['vim', 'wget', 'tree', 'curl', 'mlocate', 'nmap', 'net-tools', 'bind-utils', 'lsof', 'htop', 'iotop', 'bmon', 'sysstat']
             state: latest
+
+      - name: Update database for mlocate
+        shell: updatedb

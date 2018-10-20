@@ -1,0 +1,3 @@
+---
+- import_playbook: Playbooks/upgrade_system_packages.yml
+- import_playbook: Playbooks/install_base_packages.yml
