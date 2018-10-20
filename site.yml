@@ -1,3 +1,6 @@
 ---
+- import_playbook: Playbooks/deploy_lxc_containers.yml
+
 - import_playbook: Playbooks/upgrade_system_packages.yml
 - import_playbook: Playbooks/install_base_packages.yml
+- import_playbook: Playbooks/perform_miscellaneous_tasks.yml

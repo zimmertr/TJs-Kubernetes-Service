@@ -1,0 +1,66 @@
+#The user to run commands as on your Proxmox server.
+ansible_user: 'root'
+
+#The arguments you want to use with SSH
+ansible_ssh_common_args: '-o ServerAliveInterval=5 -o StrictHostKeyChecking=no'
+
+#The storage to download the LXC containers to.
+template_storage: 'Hub'
+
+#The LXC template to use for your containers.
+#The newest version can be obtained by running this command on your ProxMox server: pveam available | grep centos-7 | awk '{print $2}'
+centos_template: 'centos-7-default_20171212_amd64.tar.xz'
+
+#The resource pool for your containers to be placed in.
+k8s_resource_pool: "Kubernetes"
+
+#The path to the SSH Public Key to use with your containers.
+k8s_ssh_key: "/root/.ssh/sol.milkyway.kubernetes.pub"
+
+#The IDs for your containers
+k8s_master_id: '170'
+k8s_node1_id: '180'
+k8s_node2_id: '181'
+k8s_node3_id: '182'
+
+#The hostnames for your containers
+k8s_master_hn: "Pluto"
+k8s_node1_hn: "Ceres"
+k8s_node2_hn: "Eris"
+k8s_node3_hn: "Haumea"
+
+#The memory for each of your containers
+k8s_master_mem: "4096"
+k8s_node1_mem: "8192"
+k8s_node2_mem: "8192"
+k8s_node3_mem: "8192"
+
+#The disk sizes for your containers.
+k8s_master_size: "50G"
+k8s_node1_size: "50G"
+k8s_node2_size: "50G"
+k8s_node3_size: "50G"
+
+#The static ip for each of your containers
+k8s_master_ip: "192.168.1.170/24"
+k8s_node1_ip: "192.168.1.180/24"
+k8s_node2_ip: "192.168.1.181/24"
+k8s_node3_ip: "192.168.1.182/24"
+
+#The gateway for each of your containers
+k8s_master_gw: "192.168.1.1"
+k8s_node1_gw: "192.168.1.1"
+k8s_node2_gw: "192.168.1.1"
+k8s_node3_gw: "192.168.1.1"
+
+#The network bridge for each of your containers
+k8s_master_bridge: "vmbr0"
+k8s_node1_bridge: "vmbr0"
+k8s_node2_bridge: "vmbr0"
+k8s_node3_bridge: "vmbr0"
+
+#The volume for the container mountpoint to be placed in for your containers. 
+k8s_master_stg: "Proxmox_lvm-thin"
+k8s_node1_stg: "SaturnPool"
+k8s_node2_stg: "SaturnPool"
+k8s_node3_stg: "SaturnPool"

@@ -1,0 +1,11 @@
+---
+- hosts: k8s_master:k8s_nodes
+  tasks:
+      - name: Create database for mlocate
+        shell: updatedb
+
+      - name: Enable systemd module for kubelets
+        systemd:
+            state: started
+            name: kubelet
+            enabled: yes

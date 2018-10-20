@@ -1,5 +1,5 @@
 ---
-- hosts: all
+- hosts: k8s_master:k8s_nodes
   tasks:
       - name: Perform Package Upgrade
         yum:
