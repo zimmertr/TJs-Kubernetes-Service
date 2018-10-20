@@ -1,6 +1,9 @@
 ---
 - hosts: k8s_master:k8s_nodes
   tasks:
+      - name: Add Docker-ce repo to yum
+        shell: yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+
       - name: Add Kubernetes repo to yum
         yum_repository:
             name: Kubernetes
@@ -20,4 +23,4 @@
 
       - name: Install required packages to bootstrap a kubernetes cluster
         yum:
-            name: ['kubelet', 'kubeadm', 'kubectl']
+            name: ['docker-ce', 'kubelet', 'kubeadm', 'kubectl']
