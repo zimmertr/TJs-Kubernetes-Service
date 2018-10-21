@@ -1,13 +1,13 @@
 ---
 - hosts: proxmox_server
   tasks:
-      - name: Create a resource pool
+      - name: Creating a resource pool
         shell: pvesh create /pools -poolid "{{ k8s_resource_pool }}" --Comment "Kubernetes Cluster made from CentOS 7 Linux Containers"
 
-      - name: Downloaded newest CentOS LXC template
+      - name: Downloading the newest CentOS LXC template
         shell: pveam download {{ template_storage }} {{ centos_template }}
 
-      - name: Provision Kubernetes Master container
+      - name: Provisioning a Kubernetes Master container
         shell: >
             pct create {{ k8s_master_id }}
             {{ template_storage }}:vztmpl/{{ centos_template }}
@@ -16,6 +16,8 @@
             --hostname "{{ k8s_master_hn }}" 
             --memory "{{ k8s_master_mem }}" 
             --net0 "name=eth0,bridge={{ k8s_master_bridge }},ip={{ k8s_master_ip }},gw={{ k8s_master_gw }},ip6=dhcp" 
+            --nameserver "{{ k8s_nameserver }}"
+            --searchdomain "{{ k8s_searchdomain }}"
             --ostype "centos" 
             --swap "0" 
             --storage "{{ k8s_master_stg }}" 
@@ -24,10 +26,10 @@
       - name: Pausing for 5 seconds to allow the container to finish being created
         wait_for: timeout=5
 
-      - name: Resize the volume for the Master container
+      - name: Resizing the volume for the Master container
         shell: pct resize {{ k8s_master_id }} rootfs {{ k8s_master_size }} 
       
-      - name: Provision Kubernetes Node 1 container
+      - name: Provisioning Kubernetes Node 1 container
         shell: >
             pct create {{ k8s_node1_id }}
             {{ template_storage }}:vztmpl/{{ centos_template }}
@@ -36,6 +38,8 @@
             --hostname "{{ k8s_node1_hn }}" 
             --memory "{{ k8s_node1_mem }}" 
             --net0 "name=eth0,bridge={{ k8s_node1_bridge }},ip={{ k8s_node1_ip }},gw={{ k8s_node1_gw }},ip6=dhcp" 
+            --nameserver "{{ k8s_nameserver }}"
+            --searchdomain "{{ k8s_searchdomain }}"
             --ostype "centos" 
             --swap "0" 
             --storage "{{ k8s_node1_stg }}" 
@@ -44,10 +48,10 @@
       - name: Pausing for 5 seconds to allow the container to finish being created
         wait_for: timeout=5
 
-      - name: Resize the volume for the Node 1 container
+      - name: Resizing the volume for the Node 1 container
         shell: pct resize {{ k8s_node1_id }} rootfs {{ k8s_node1_size }} 
       
-      - name: Provision Kubernetes Node 2 container
+      - name: Provisioning Kubernetes Node 2 container
         shell: >
             pct create {{ k8s_node2_id }}
             {{ template_storage }}:vztmpl/{{ centos_template }}
@@ -55,7 +59,9 @@
             --description "Kubernetes Node 2"
             --hostname "{{ k8s_node2_hn }}" 
             --memory "{{ k8s_node2_mem }}" 
-            --net0 "name=eth0,bridge={{ k8s_node2_bridge }},ip={{ k8s_node2_ip }},gw={{ k8s_node2_gw }},ip6=dhcp" 
+            --net0 "name=eth0,bridge={{ k8s_node2_bridge }},ip={{ k8s_node2_ip }},gw={{ k8s_node2_gw }},ip6=dhcp"
+            --nameserver "{{ k8s_nameserver }}"
+            --searchdomain "{{ k8s_searchdomain }}" 
             --ostype "centos" 
             --swap "0" 
             --storage "{{ k8s_node2_stg }}" 
@@ -64,10 +70,10 @@
       - name: Pausing for 5 seconds to allow the container to finish being created
         wait_for: timeout=5
 
-      - name: Resize the volume for the Node 2 container
+      - name: Resizing the volume for the Node 2 container
         shell: pct resize {{ k8s_node2_id }} rootfs {{ k8s_node2_size }} 
       
-      - name: Provision Kubernetes Node 3 container
+      - name: Provisioning Kubernetes Node 3 container
         shell: >
             pct create {{ k8s_node3_id }}
             {{ template_storage }}:vztmpl/{{ centos_template }}
@@ -75,7 +81,9 @@
             --description "Kubernetes Node 3"
             --hostname "{{ k8s_node3_hn }}" 
             --memory "{{ k8s_node3_mem }}" 
-            --net0 "name=eth0,bridge={{ k8s_node3_bridge }},ip={{ k8s_node3_ip }},gw={{ k8s_node3_gw }},ip6=dhcp"  
+            --net0 "name=eth0,bridge={{ k8s_node3_bridge }},ip={{ k8s_node3_ip }},gw={{ k8s_node3_gw }},ip6=dhcp" 
+            --nameserver "{{ k8s_nameserver }}"
+            --searchdomain "{{ k8s_searchdomain }}" 
             --ostype "centos" 
             --swap "0" 
             --storage "{{ k8s_node3_stg }}" 
@@ -84,7 +92,7 @@
       - name: Pausing for 5 seconds to allow the container to finish being created
         wait_for: timeout=5
 
-      - name: Resize the volume for the Node 3 container
+      - name: Resizing the volume for the Node 3 container
         shell: pct resize {{ k8s_node3_id }} rootfs {{ k8s_node3_size }} 
 
       - name: Starting the containers for the first time

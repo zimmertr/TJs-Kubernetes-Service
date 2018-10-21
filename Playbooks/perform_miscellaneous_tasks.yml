@@ -4,48 +4,71 @@
     - name: Enable overlay module
       shell: echo overlay >> /etc/modules
 
-    - name: Configure LXC configuration to add privileges for nested virtualization
+    - name: Adding additional privileges to the Master container
       shell: |
-        cat >> /etc/pve/lxc/170.conf <<'EOF'
+        cat >> /etc/pve/lxc/{{ k8s_master_id }}.conf <<'EOF'
         lxc.apparmor.profile: unconfined
         lxc.cap.drop: 
         lxc.cgroup.devices.allow: a
         lxc.mount.auto: proc:rw sys:rw
-        EOF
+
+    - name: Adding additional privileges to the Node 1 container
+      shell: |
+        cat >> /etc/pve/lxc/{{ k8s_node1_id }}.conf <<'EOF'
+        lxc.apparmor.profile: unconfined
+        lxc.cap.drop: 
+        lxc.cgroup.devices.allow: a
+        lxc.mount.auto: proc:rw sys:rw
+
+    - name: Adding additional privileges to the Node 2 container
+      shell: |
+        cat >> /etc/pve/lxc/{{ k8s_node2_id }}.conf <<'EOF'
+        lxc.apparmor.profile: unconfined
+        lxc.cap.drop: 
+        lxc.cgroup.devices.allow: a
+        lxc.mount.auto: proc:rw sys:rw
+
+    - name: Adding additional privileges to the Node 3 container
+      shell: |
+        cat >> /etc/pve/lxc/{{ k8s_node3_id }}.conf <<'EOF'
+        lxc.apparmor.profile: unconfined
+        lxc.cap.drop: 
+        lxc.cgroup.devices.allow: a
+        lxc.mount.auto: proc:rw sys:rw
 
 - hosts: k8s_master:k8s_nodes
   tasks:
       - name: Create database for mlocate
         shell: updatedb
 
-      - name: Enable systemd module for docker-ce
+      - name: Enabling the systemd module for docker-ce
         systemd: 
             state: started
             name: docker
             enabled: yes
 
-      - name: Enable systemd module for kubelet
+      - name: Enabling the systemd module for kubelet
         systemd:
             state: started
             name: kubelet
             enabled: yes
 
-      - name: Enable systemd module for rc-local
+      - name: Enabling the systemd module for rc-local
         systemd:
             state: started
             name: rc-local
             enabled: yes
 
-      - name: Set execution bit for rc.local file
+      - name: Setting the execution bit for rc.local
         shell: chmod +x /etc/rc.local
 
-      - name: Enabled shared most for host mounts
+      - name: Enabling the shared mount.
         shell: >
           echo '#!/bin/sh -e
           mount --make-rshared /' > /etc/rc.local
 
-      - name: Copy docker.service for override
+      - name: Copying the docker.service for override
         shell:  cp /{lib,etc}/systemd/system/docker.service
 
-      - name: Reboot hosts
+      - name: Rebooting the containers
         reboot:
