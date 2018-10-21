@@ -22,3 +22,7 @@ This project leverages Ansible and Proxmox to build a four node cluster with Lin
 1) If the playbook fails when trying to install openssh-server and throws a weird `yum` error, it's likely your containers don't have network connectivity.
 2) Delete environment: `ansible-playbook -e @Vars/vars.yml -i Inventories/Kubernetes_LXC.ini Playbooks/delete_all_resources.yml`
 3) It's possible that the `delete_all_resources.yml` playbook will fail to unload the overlay module if it is currently in use. 
+
+# Problems
+
+1) There is a bug in either the `4.15.18` Linux kernel or in the `br_netfilter` module. Preventing this from being a viable solution due to pod networking never being able to work. :( 
