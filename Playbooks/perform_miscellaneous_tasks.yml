@@ -6,35 +6,35 @@
 
     - name: Adding additional privileges to the Master container
       shell: |
-        cat >> /etc/pve/lxc/{{ k8s_master_id }}.conf <<'EOF'
+        echo "
         lxc.apparmor.profile: unconfined
         lxc.cap.drop: 
         lxc.cgroup.devices.allow: a
-        lxc.mount.auto: proc:rw sys:rw
+        lxc.mount.auto: proc:rw sys:rw" >> /etc/pve/lxc/{{ k8s_master_id }}.conf
 
     - name: Adding additional privileges to the Node 1 container
       shell: |
-        cat >> /etc/pve/lxc/{{ k8s_node1_id }}.conf <<'EOF'
+        echo "
         lxc.apparmor.profile: unconfined
         lxc.cap.drop: 
         lxc.cgroup.devices.allow: a
-        lxc.mount.auto: proc:rw sys:rw
+        lxc.mount.auto: proc:rw sys:rw" >> /etc/pve/lxc/{{ k8s_node1_id }}.conf
 
     - name: Adding additional privileges to the Node 2 container
       shell: |
-        cat >> /etc/pve/lxc/{{ k8s_node2_id }}.conf <<'EOF'
+        echo "
         lxc.apparmor.profile: unconfined
         lxc.cap.drop: 
         lxc.cgroup.devices.allow: a
-        lxc.mount.auto: proc:rw sys:rw
+        lxc.mount.auto: proc:rw sys:rw" >> /etc/pve/lxc/{{ k8s_node2_id }}.conf
 
     - name: Adding additional privileges to the Node 3 container
       shell: |
-        cat >> /etc/pve/lxc/{{ k8s_node3_id }}.conf <<'EOF'
+        echo "
         lxc.apparmor.profile: unconfined
         lxc.cap.drop: 
         lxc.cgroup.devices.allow: a
-        lxc.mount.auto: proc:rw sys:rw
+        lxc.mount.auto: proc:rw sys:rw" >> /etc/pve/lxc/{{ k8s_node3_id }}.conf
 
     - name: Enabling overlay kernel module on Proxmox server
       lineinfile:
@@ -70,9 +70,11 @@
             enabled: yes
 
       - name: Setting the execution bit for rc.local
-        shell: chmod +x /etc/rc.local
+        file:
+          path: /etc/rc.local
+          mode: a+x
 
-      - name: Enabling the shared mount.
+      - name: Enabling the shared mount
         shell: >
           echo '#!/bin/sh -e
           mount --make-rshared /' > /etc/rc.local
