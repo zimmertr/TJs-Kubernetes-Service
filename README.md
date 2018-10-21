@@ -20,5 +20,5 @@ This project leverages Ansible and Proxmox to build a four node cluster with Lin
 # Tips
 
 1) If the playbook fails when trying to install openssh-server and throws a weird `yum` error, it's likely your containers don't have network connectivity.
-2) To easily delete all of the deployed resources, execute the `delete_all_resources.yml` playbook. 
+2) To easily delete all of the deployed resources, execute the `delete_all_resources.yml` playbook. `ansible-playbook -e @Vars/vars.yml -i Inventories/Kubernetes_LXC.ini Playbooks/delete_all_resources.yml`
 3) It's possible that the `delete_all_resources.yml` playbook will fail to unload the overlay module if it is currently in use. 
