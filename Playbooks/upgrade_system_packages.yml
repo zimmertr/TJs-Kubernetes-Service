@@ -1,7 +1,0 @@
----
-- hosts: k8s_master:k8s_nodes
-  tasks:
-      - name: Performing a Package Upgrade
-        yum:
-            name: '*'
-            state: latest

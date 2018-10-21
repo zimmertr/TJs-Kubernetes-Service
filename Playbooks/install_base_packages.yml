@@ -1,7 +1,12 @@
 ---
 - hosts: k8s_master:k8s_nodes
   tasks:
-      - name: Addding Docker-ce repo to yum
+      - name: Performing a Package Upgrade
+        yum:
+            name: '*'
+            state: latest
+
+      - name: Adding Docker-ce repo to yum
         shell: yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
 
       - name: Add Kubernetes repo to yum

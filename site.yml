@@ -1,6 +1,10 @@
 ---
+#Deploy the LXCs to your Proxmox server
 - import_playbook: Playbooks/deploy_lxc_containers.yml
 
-- import_playbook: Playbooks/upgrade_system_packages.yml
+#Prepare CentOS for Kubernetes
 - import_playbook: Playbooks/install_base_packages.yml
 - import_playbook: Playbooks/perform_miscellaneous_tasks.yml
+
+#Bootstrap Kubernetes
+- import_playbook: Playbooks/bootstrap_kubernetes.yml
