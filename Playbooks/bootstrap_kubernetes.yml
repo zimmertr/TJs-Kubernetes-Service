@@ -1,0 +1,22 @@
+---
+- hosts: k8s_master
+  tasks:
+    - name: Initializing the master
+      shell: kubeadm init --ignore-preflight-errors=FileContent--proc-sys-net-bridge-bridge-nf-call-iptables,SystemVerification --pod-network-cidr=192.168.0.0/16
+
+    - name: Creating a kube directory on the master for the config files
+      file: 
+        path: $HOME/.kube
+        state: directory
+
+    - name: Copying the kube config to the home directory.
+      shell: cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+
+    - name: Configuring RBAC for Calico Pod Network
+      shell: kubectl apply -f https://docs.projectcalico.org/v3.1/getting-started/kubernetes/installation/hosted/rbac-kdd.yaml
+
+    - name: Deploying the Calico Pod Network
+      shell: kubectl apply -f https://docs.projectcalico.org/v3.1/getting-started/kubernetes/installation/hosted/kubernetes-datastore/calico-networking/1.7/calico.yaml
+
+    - name: Deploying an etcd instance
+      shell: kubectl apply -f https://docs.projectcalico.org/v3.2/getting-started/kubernetes/installation/hosted/etcd.yaml

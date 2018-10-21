@@ -75,9 +75,9 @@
           mode: a+x
 
       - name: Enabling the shared mount
-        shell: >
-          echo '#!/bin/sh -e
-          mount --make-rshared /' > /etc/rc.local
+        shell: |
+          echo "#!/bin/sh -e
+          mount --make-rshared /" > /etc/rc.local
 
       - name: Copying the docker.service for override
         shell:  cp /{lib,etc}/systemd/system/docker.service
