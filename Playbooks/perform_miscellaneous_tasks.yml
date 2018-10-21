@@ -36,6 +36,16 @@
         lxc.cgroup.devices.allow: a
         lxc.mount.auto: proc:rw sys:rw
 
+    - name: Enabling overlay kernel module on Proxmox server
+      lineinfile:
+        path: /etc/modules
+        line: 'overlay'
+
+    - name: Starting overlay module on Proxmox server
+      modprobe: 
+        name: overlay
+
+
 - hosts: k8s_master:k8s_nodes
   tasks:
       - name: Create database for mlocate
