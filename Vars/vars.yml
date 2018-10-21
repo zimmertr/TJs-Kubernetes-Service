@@ -17,6 +17,12 @@ k8s_resource_pool: "Kubernetes"
 #The path to the SSH Public Key to use with your containers.
 k8s_ssh_key: "/root/.ssh/sol.milkyway.kubernetes.pub"
 
+#The DNS server for each of your containers 
+k8s_nameserver: "192.168.1.10"
+
+#The search domain for each of your containers
+k8s_searchdomain: "sol.milkyway"
+
 #The IDs for your containers
 k8s_master_id: '170'
 k8s_node1_id: '180'
@@ -58,6 +64,7 @@ k8s_master_bridge: "vmbr0"
 k8s_node1_bridge: "vmbr0"
 k8s_node2_bridge: "vmbr0"
 k8s_node3_bridge: "vmbr0"
+
 
 #The volume for the container mountpoint to be placed in for your containers. 
 k8s_master_stg: "Proxmox_lvm-thin"
