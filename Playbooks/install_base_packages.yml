@@ -24,7 +24,7 @@
 
       - name: Installing base packages 
         yum:
-            name: ['vim', 'wget', 'tree', 'curl', 'mlocate', 'nmap', 'net-tools', 'bind-utils', 'lsof', 'htop', 'iotop', 'bmon', 'sysstat']
+            name: ['openssl', 'vim', 'wget', 'tree', 'curl', 'mlocate', 'nmap', 'net-tools', 'bind-utils', 'lsof', 'htop', 'iotop', 'bmon', 'sysstat']
 
       - name: Installing the required packages to bootstrap a kubernetes cluster
         yum:

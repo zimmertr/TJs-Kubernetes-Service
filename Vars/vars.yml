@@ -17,12 +17,6 @@ k8s_resource_pool: "Kubernetes"
 #The path to the SSH Public Key to use with your containers.
 k8s_ssh_key: "/root/.ssh/sol.milkyway.kubernetes.pub"
 
-#The DNS server for each of your containers 
-k8s_nameserver: "192.168.1.10"
-
-#The search domain for each of your containers
-k8s_searchdomain: "sol.milkyway"
-
 #The IDs for your containers
 k8s_master_id: '170'
 k8s_node1_id: '180'
@@ -48,10 +42,16 @@ k8s_node2_size: "50G"
 k8s_node3_size: "50G"
 
 #The static ip for each of your containers
-k8s_master_ip: "192.168.1.170/24"
-k8s_node1_ip: "192.168.1.180/24"
-k8s_node2_ip: "192.168.1.181/24"
-k8s_node3_ip: "192.168.1.182/24"
+k8s_master_ip: "192.168.1.170"
+k8s_node1_ip: "192.168.1.180"
+k8s_node2_ip: "192.168.1.181"
+k8s_node3_ip: "192.168.1.182"
+
+#The subnet size for each of your containers
+k8s_master_sn: "/24"
+k8s_node1_sn: "/24"
+k8s_node2_sn: "/24"
+k8s_node3_sn: "/24"
 
 #The gateway for each of your containers
 k8s_master_gw: "192.168.1.1"
@@ -59,12 +59,23 @@ k8s_node1_gw: "192.168.1.1"
 k8s_node2_gw: "192.168.1.1"
 k8s_node3_gw: "192.168.1.1"
 
+#The DNS server for each of your containers 
+k8s_master_ns: "192.168.1.10"
+k8s_node1_ns: "192.168.1.10"
+k8s_node2_ns: "192.168.1.10"
+k8s_node3_ns: "192.168.1.10"
+
+#The search domain for each of your containers
+k8s_master_sd: "sol.milkyway"
+k8s_node1_sd: "sol.milkyway"
+k8s_node2_sd: "sol.milkyway"
+k8s_node3_sd: "sol.milkyway"
+
 #The network bridge for each of your containers
 k8s_master_bridge: "vmbr0"
 k8s_node1_bridge: "vmbr0"
 k8s_node2_bridge: "vmbr0"
 k8s_node3_bridge: "vmbr0"
-
 
 #The volume for the container mountpoint to be placed in for your containers. 
 k8s_master_stg: "Proxmox_lvm-thin"

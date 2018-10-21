@@ -20,3 +20,16 @@
 
     - name: Deploying an etcd instance
       shell: kubectl apply -f https://docs.projectcalico.org/v3.2/getting-started/kubernetes/installation/hosted/etcd.yaml
+
+    - name: Retreiving master discovery token
+      shell: kubeadm token list | awk '{print $1}' | sed -n 2p
+      register: k8s_discovery_token
+
+    - name: Retrieving hash for discovery token
+      shell: openssl x509 -pubkey -in /etc/kubernetes/pki/ca.crt | openssl rsa -pubin -outform der 2>/dev/null |    openssl dgst -sha256 -hex | sed 's/^.* //'
+      register: k8s_discovery_token_hash
+
+- hosts: k8s_nodes
+  tasks:
+    - name: Joining nodes to master
+      shell: kubeadm join --token {{ hostvars['pluto.sol.milkyway']['k8s_discovery_token']['stdout'] }} {{ k8s_master_ip }}:6443 --discovery-token-ca-cert-hash sha256:{{ hostvars['pluto.sol.milkyway']['k8s_discovery_token_hash']['stdout'] }} --ignore-preflight-errors=RequiredIPVSKernelModulesAvailable,FileContent--proc-sys-net-bridge-bridge-nf-call-iptables,SystemVerification
