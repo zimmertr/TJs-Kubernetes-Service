@@ -5,12 +5,12 @@
         shell: pvesh create /pools -poolid "{{ k8s_resource_pool }}" --Comment "Kubernetes Cluster made from CentOS 7 Linux Containers"
 
       - name: Downloading the newest CentOS LXC template
-        shell: pveam download {{ template_storage }} {{ centos_template }}
+        shell: pveam download {{ template_storage }} {{ lxc_template }}
 
       - name: Provisioning a Kubernetes Master container
         shell: >
             pct create {{ k8s_master_id }}
-            {{ template_storage }}:vztmpl/{{ centos_template }}
+            {{ template_storage }}:vztmpl/{{ lxc_template }}
             --pool "{{ k8s_resource_pool }}" 
             --description "Kubernetes Master"
             --hostname "{{ k8s_master_hn }}" 
@@ -32,7 +32,7 @@
       - name: Provisioning Kubernetes Node 1 container
         shell: >
             pct create {{ k8s_node1_id }}
-            {{ template_storage }}:vztmpl/{{ centos_template }}
+            {{ template_storage }}:vztmpl/{{ lxc_template }}
             --pool "{{ k8s_resource_pool }}" 
             --description "Kubernetes Node 1"
             --hostname "{{ k8s_node1_hn }}" 
@@ -54,7 +54,7 @@
       - name: Provisioning Kubernetes Node 2 container
         shell: >
             pct create {{ k8s_node2_id }}
-            {{ template_storage }}:vztmpl/{{ centos_template }}
+            {{ template_storage }}:vztmpl/{{ lxc_template }}
             --pool "{{ k8s_resource_pool }}" 
             --description "Kubernetes Node 2"
             --hostname "{{ k8s_node2_hn }}" 
@@ -76,7 +76,7 @@
       - name: Provisioning Kubernetes Node 3 container
         shell: >
             pct create {{ k8s_node3_id }}
-            {{ template_storage }}:vztmpl/{{ centos_template }}
+            {{ template_storage }}:vztmpl/{{ lxc_template }}
             --pool "{{ k8s_resource_pool }}" 
             --description "Kubernetes Node 3"
             --hostname "{{ k8s_node3_hn }}" 
