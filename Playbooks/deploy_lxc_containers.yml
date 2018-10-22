@@ -3,17 +3,18 @@
   tasks:
       - name: Creating a resource pool for the compute resources.
         shell: pvesh create /pools -poolid "{{ k8s_resource_pool }}" --Comment "Kubernetes Cluster made from CentOS 7 Linux Containers"
+        ignore_errors: yes 
 
       - name: Downloading the newest CentOS LXC template.
         shell: pveam download {{ template_storage }} {{ lxc_template }}
 
       - name: Provisioning a container for the Kubernetes master.
         shell: >
-            pct create {{ k8s_master_id }}
-            {{ template_storage }}:vztmpl/{{ lxc_template }}
+            pct create {{ k8s_master_id }} {{ template_storage }}:vztmpl/{{ lxc_template }}
             --pool "{{ k8s_resource_pool }}" 
             --description "Kubernetes Master"
             --hostname "{{ k8s_master_hn }}" 
+            --cores "{{ k8s_master_cpu" }}
             --memory "{{ k8s_master_mem }}" 
             --net0 "name=eth0,bridge={{ k8s_master_bridge }},ip={{ k8s_master_ip }}{{ k8s_master_sn }},gw={{ k8s_master_gw }},ip6=dhcp" 
             --nameserver "{{ k8s_master_ns }}"
@@ -36,6 +37,7 @@
             --pool "{{ k8s_resource_pool }}" 
             --description "Kubernetes Node 1"
             --hostname "{{ k8s_node1_hn }}" 
+            --cores "{{ k8s_node1_cpu" }}
             --memory "{{ k8s_node1_mem }}" 
             --net0 "name=eth0,bridge={{ k8s_node1_bridge }},ip={{ k8s_node1_ip }}{{ k8s_node1_sn }},gw={{ k8s_node1_gw }},ip6=dhcp" 
             --nameserver "{{ k8s_node1_ns }}"
@@ -58,6 +60,7 @@
             --pool "{{ k8s_resource_pool }}" 
             --description "Kubernetes Node 2"
             --hostname "{{ k8s_node2_hn }}" 
+            --cores "{{ k8s_node2_cpu" }}
             --memory "{{ k8s_node2_mem }}" 
             --net0 "name=eth0,bridge={{ k8s_node2_bridge }},ip={{ k8s_node2_ip }}{{ k8s_node2_sn }},gw={{ k8s_node2_gw }},ip6=dhcp"
             --nameserver "{{ k8s_node2_ns }}"
@@ -80,6 +83,7 @@
             --pool "{{ k8s_resource_pool }}" 
             --description "Kubernetes Node 3"
             --hostname "{{ k8s_node3_hn }}" 
+            --cores "{{ k8s_node3_cpu" }}
             --memory "{{ k8s_node3_mem }}" 
             --net0 "name=eth0,bridge={{ k8s_node3_bridge }},ip={{ k8s_node3_ip }}{{ k8s_node3_sn }},gw={{ k8s_node3_gw }},ip6=dhcp" 
             --nameserver "{{ k8s_node3_ns }}"

@@ -1,12 +1,108 @@
 ---
 - hosts: proxmox_server
+  vars_prompt:
+      - name: apihost
+        prompt: "Please enter the Proxmox cluster that you will be deploying to (ex: saturn.sol.milkyway)"
+        private: no
+
+      - name: apinode
+        prompt: "Please enter the node within the Proxmox cluster that you will be deploying to (ex: saturn)"
+        private: no
+
+      - name: apiuser
+        prompt: "Please enter the API User for your Proxmox server (ex: root@pam)"
+        private: no
+
+      - name: apipassword
+        prompt: "Please enter the password for your API User"
+        private: yes
+
   tasks:
       - name: Creating a resource pool for the compute resources.
         shell: pvesh create /pools -poolid "{{ k8s_resource_pool }}" --Comment "Kubernetes Cluster"
+        ignore_errors: yes
 
       - name: Downloading the newest CentOS qcow2 image.
         get_url:
           url: "{{ qcow2_image }}"
-          dest: "{{ qcow2_download_location }}"CentOS7.qcow2c
+          dest: "{{ qcow2_download_location }}CentOS7.qcow2c"
 
-      - name: Provisioning a virtual machine for the Kubernetes master.
+      - name: Provisioning a virtual machine to become a Kubernetes Template.
+        proxmox_kvm:
+          api_user: "{{ apiuser }}"
+          api_password: "{{ apipassword }}"
+          api_host: "{{ apihost }}"
+          node: "{{ apinode }}"
+          vmid: "{{ proxmox_template_id }}"
+          ostype: "l26"
+          name: "{{ k8s_master_hn }}"
+          description: "Kubernetes Master"
+          agent: yes
+          cores: "{{ k8s_master_cpu }}"
+          memory: "{{ k8s_master_mem }}"
+          net:  '{"net0":"virtio,bridge=vmbr0"}'
+
+      - name: Importing the qemu image as a disk for the template.
+        shell: qm importdisk {{ proxmox_template_id }} {{ qcow2_download_location }}CentOS7.qcow2c {{ k8s_master_stg }}
+
+      - name: Setting the imported disk as scsi0 for the template.
+        shell: qm set {{ proxmox_template_id }} --scsihw virtio-scsi-pci --scsi0 {{ k8s_master_stg }}:vm-{{ proxmox_template_id }}-disk-0
+
+      - name: Resizing the imported disk for the template. 
+        shell: qm resize {{ proxmox_template_id }} scsi0 {{ k8s_master_size }}
+
+      - name: Adding a CD-ROM drive to be used with Cloud-init for the template.
+        shell: qm set {{ proxmox_template_id }} --ide2 {{ k8s_master_stg }}:cloudinit
+
+      - name: Setting the boot disk for the template to scsi0 and restricting BIOS to boot from disk only.
+        shell: qm set {{ proxmox_template_id }} --boot c --bootdisk scsi0
+
+      - name: Adding a serial console for use as a display for the template.
+        shell: qm set {{ proxmox_template_id }} --serial0 socket --vga serial0
+
+      - name: Turning the template VM into a template. 
+        shell: qm template {{ proxmox_template_id }}
+
+      - name: Creating the Kubernetes master from the template.
+        shell: qm clone {{ proxmox_template_id }} {{ k8s_master_id }} --name {{ k8s_master_hn }} --pool {{ k8s_resource_pool }}
+
+      - name: Creating the first Kubernetes node from the template.
+        shell: qm clone {{ proxmox_template_id }} {{ k8s_node1_id }} --name {{ k8s_node1_hn }} --pool {{ k8s_resource_pool }}
+
+      - name: Creating the first Kubernetes node from the template.
+        shell: qm clone {{ proxmox_template_id }} {{ k8s_node2_id }} --name {{ k8s_node2_hn }} --pool {{ k8s_resource_pool }}
+
+      - name: Creating the first Kubernetes node from the template.
+        shell: qm clone {{ proxmox_template_id }} {{ k8s_node3_id }} --name {{ k8s_node3_hn }} --pool {{ k8s_resource_pool }}
+
+      - name: Configuring the Kubernetes master.
+        shell: >
+            qm set {{ k8s_master_id }} 
+            --sshkey {{ k8s_ssh_key }} 
+            --ipconfig0 gw={{ k8s_master_gw }},ip={{ k8s_master_ip }}{{ k8s_master_sn }} 
+            --nameserver {{ k8s_master_ns }} 
+            --searchdomain {{ k8s_master_sd }}
+
+      - name: Configuring the first Kubernetes node. 
+        shell: >
+            qm set {{ k8s_node1_id }} 
+            --sshkey {{ k8s_ssh_key }}
+            --ipconfig0 gw={{ k8s_node1_gw }},ip={{ k8s_node1_ip }}{{ k8s_node1_sn }} 
+            --nameserver {{ k8s_node1_ns }} 
+            --searchdomain {{ k8s_node1_sd }} 
+
+      - name: Configuring the second Kubernetes node. 
+        shell: >
+            qm set {{ k8s_node2_id }} 
+            --sshkey {{ k8s_ssh_key }}
+            --ipconfig0 gw={{ k8s_node2_gw }},ip={{ k8s_node2_ip }}{{ k8s_node2_sn }} 
+            --nameserver {{ k8s_node2_ns }} 
+            --searchdomain {{ k8s_node2_sd }} 
+      
+      - name: Configuring the third Kubernetes node. 
+        shell: >
+            qm set {{ k8s_node3_id }} 
+            --sshkey {{ k8s_ssh_key }}
+            --ipconfig0 gw={{ k8s_node3_gw }},ip={{ k8s_node3_ip }}{{ k8s_node3_sn }} 
+            --nameserver {{ k8s_node3_ns }} 
+            --searchdomain {{ k8s_node3_sd }}
