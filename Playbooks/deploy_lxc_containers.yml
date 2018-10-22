@@ -102,26 +102,86 @@
       - name: Starting the containers for the first time.
         shell: pct start {{ k8s_master_id }} && pct start {{ k8s_node1_id }} && pct start {{ k8s_node2_id }} && pct start {{ k8s_node3_id }}
 
-      - name: Installing openssh-server on the master.
+      - name: Installing openssh-server on the Kubernetes master.
         shell: lxc-attach -n {{ k8s_master_id }} -- yum install -y openssh-server
 
-      - name: Enabling & starting sshd on the master.
+      - name: Enabling & starting sshd on the Kubernetes master.
         shell: lxc-attach -n {{ k8s_master_id }} -- systemctl enable --now sshd
 
-      - name: Installing openssh-server on the first node.
+      - name: Installing openssh-server on the first Kubernetes node.
         shell: lxc-attach -n {{ k8s_node1_id }} -- yum install -y openssh-server
 
-      - name: Enabling & starting sshd on the first node.
+      - name: Enabling & starting sshd on the first Kubernetes node.
         shell: lxc-attach -n {{ k8s_node1_id }} -- systemctl enable --now sshd
 
-      - name: Installing openssh-server on the second node.
+      - name: Installing openssh-server on the second Kubernetes node.
         shell: lxc-attach -n {{ k8s_node2_id }} -- yum install -y openssh-server
 
-      - name: Enabling & starting sshd on the second node.
+      - name: Enabling & starting sshd on the second Kubernetes node.
         shell: lxc-attach -n {{ k8s_node2_id }} -- systemctl enable --now sshd
 
-      - name: Installing openssh-server on the third node.
+      - name: Installing openssh-server on the third Kubernetes node.
         shell: lxc-attach -n {{ k8s_node3_id }} -- yum install -y openssh-server
 
-      - name: Enabling & starting sshd on the third node.
+      - name: Enabling & starting sshd on the third Kubernetes node.
         shell: lxc-attach -n {{ k8s_node3_id }} -- systemctl enable --now sshd
+
+      - name: Creating a centos user on the Kubernetes master.
+        shell: lxc-attach -n {{ k8s_master_id }} -- adduser -G wheel centos 
+
+      - name: Configuring the centos user on the Kubernetes master to be able to sudo without specifying a password.
+        shell: lxc-attach -n {{ k8s_master_id }} -- sed -i 's/^#\s*\(%wheel\s*ALL=(ALL)\s*NOPASSWD:\s*ALL\)/\1/' /etc/sudoers
+
+      - name: Creating a .ssh directory in the home directory of the centos user on the Kubernetes master.
+        shell: lxc-attach -n {{ k8s_master_id }} -- mkdir /home/centos/.ssh
+
+      - name: Adding the ssh key to the centos user's authorized_keys file on the Kubernetes master.
+        shell: lxc-attach -n {{ k8s_master_id }} -- cp /home/centos/.ssh/authorized_keys /home/test/.ssh/authorized_keys
+
+      - name: Setting the correct permissions of the authorized_keys file for the centos user on the Kubernetes master.
+        shell: lxc-attach -n {{ k8s_master_id }} -- chown -R test /home/test/.ssh/
+
+      - name: Creating a centos user on the first Kubernetes node.
+        shell: lxc-attach -n {{ k8s_node1_id }} -- adduser -G wheel centos 
+
+      - name: Configuring the centos user on the first Kubernetes node to be able to sudo without specifying a password.
+        shell: lxc-attach -n {{ k8s_node1_id }} -- sed -i 's/^#\s*\(%wheel\s*ALL=(ALL)\s*NOPASSWD:\s*ALL\)/\1/' /etc/sudoers
+
+      - name: Creating a .ssh directory in the home directory of the centos user on the first Kubernetes node.
+        shell: lxc-attach -n {{ k8s_node1_id }} -- mkdir /home/centos/.ssh
+
+      - name: Adding the ssh key to the centos user's authorized_keys file on the first Kubernetes node.
+        shell: lxc-attach -n {{ k8s_node1_id }} -- cp /home/centos/.ssh/authorized_keys /home/test/.ssh/authorized_keys
+
+      - name: Setting the correct permissions of the authorized_keys file for the centos user on the first Kubernetes node.
+        shell: lxc-attach -n {{ k8s_node1_id }} -- chown -R test /home/test/.ssh/
+
+      - name: Creating a centos user on the second Kubernetes node.
+        shell: lxc-attach -n {{ k8s_node2_id }} -- adduser -G wheel centos 
+
+      - name: Configuring the centos user on the second Kubernetes node to be able to sudo without specifying a password.
+        shell: lxc-attach -n {{ k8s_node2_id }} -- sed -i 's/^#\s*\(%wheel\s*ALL=(ALL)\s*NOPASSWD:\s*ALL\)/\1/' /etc/sudoers
+
+      - name: Creating a .ssh directory in the home directory of the centos user on the second Kubernetes node.
+        shell: lxc-attach -n {{ k8s_node2_id }} -- mkdir /home/centos/.ssh
+
+      - name: Adding the ssh key to the centos user's authorized_keys file on the second Kubernetes node.
+        shell: lxc-attach -n {{ k8s_node2_id }} -- cp /home/centos/.ssh/authorized_keys /home/test/.ssh/authorized_keys
+
+      - name: Setting the correct permissions of the authorized_keys file for the centos user on the second Kubernetes node.
+        shell: lxc-attach -n {{ k8s_node2_id }} -- chown -R test /home/test/.ssh/
+
+      - name: Creating a centos user on the third Kubernetes node.
+        shell: lxc-attach -n {{ k8s_node2_id }} -- adduser -G wheel centos 
+
+      - name: Configuring the centos user on the third Kubernetes node to be able to sudo without specifying a password.
+        shell: lxc-attach -n {{ k8s_node2_id }} -- sed -i 's/^#\s*\(%wheel\s*ALL=(ALL)\s*NOPASSWD:\s*ALL\)/\1/' /etc/sudoers
+
+      - name: Creating a .ssh directory in the home directory of the centos user on the third Kubernetes node.
+        shell: lxc-attach -n {{ k8s_node2_id }} -- mkdir /home/centos/.ssh
+
+      - name: Adding the ssh key to the centos user's authorized_keys file on the third Kubernetes node.
+        shell: lxc-attach -n {{ k8s_node2_id }} -- cp /home/centos/.ssh/authorized_keys /home/test/.ssh/authorized_keys
+
+      - name: Setting the correct permissions of the authorized_keys file for the centos user on the third Kubernetes node.
+        shell: lxc-attach -n {{ k8s_node2_id }} -- chown -R test /home/test/.ssh/
