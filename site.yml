@@ -4,8 +4,8 @@
 ###############################################################################################
 # Only one of these playbooks should be used at a time. See the README for more information.  #
 ###############################################################################################
-#- import_playbook: Playbooks/deploy_lxc_containers.yml
-- import_playbook: Playbooks/deploy_qcow2_vms.yml
+- import_playbook: Playbooks/deploy_lxc_containers.yml
+#- import_playbook: Playbooks/deploy_qcow2_vms.yml
 
 ###############################################################################################
 #                            -Prepare the instances for Kubernetes-                           #
@@ -15,7 +15,7 @@
 # containers for your compute resources. See the README for more information.                 #
 ###############################################################################################
 - import_playbook: Playbooks/install_base_packages.yml
-#- import_playbook: Playbooks/privelege_lxc_instances.yml
+- import_playbook: Playbooks/privelege_lxc_instances.yml
 
 #Bootstrap Kubernetes
-#- import_playbook: Playbooks/bootstrap_kubernetes.yml
+- import_playbook: Playbooks/bootstrap_kubernetes.yml
