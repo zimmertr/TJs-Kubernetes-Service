@@ -11,6 +11,9 @@ lxc_template: 'centos-7-default_20171212_amd64.tar.xz'
 # The Proxmox storage volume where your template will be stored.
 template_storage: 'Hub'
 
+proxmox_template_id: '999'
+
+
 ###############################################################################################
 #                                       -qcow2 Options-                                       #
 ###############################################################################################
@@ -25,6 +28,7 @@ qcow2_image: 'https://cloud.centos.org/centos/7/images/CentOS-7-x86_64-GenericCl
 
 # The location to use for storing the qcow2 image. Be sure to end the directory with a '/'.
 qcow2_download_location: '/tmp/'
+
 
 ###############################################################################################
 #                                     -Universal Options-                                     #
@@ -49,6 +53,12 @@ k8s_master_hn: "Pluto"
 k8s_node1_hn: "Ceres"
 k8s_node2_hn: "Eris"
 k8s_node3_hn: "Haumea"
+
+# The amount of cores for each of your compute resources.
+k8s_master_cpu: "2"
+k8s_node1_cpu: "4"
+k8s_node2_cpu: "4"
+k8s_node3_cpu: "4"
 
 # The amount of memory for each of your compute resources.
 k8s_master_mem: "4096"
