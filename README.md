@@ -4,7 +4,7 @@
 This project leverages Ansible and Proxmox to build a four node cluster with LXC instances or VMs.
 
 # Requirements
-1) A configured Proxmox server
+1) A clustered Proxmox server. Don't worry, a single host can be a `cluster`
 2) Ability to provision DNS records
 3) Ansible 2.7.0+. Known incompatibility with a previous build. 
 4) https://pypi.org/project/proxmoxer/
@@ -12,7 +12,6 @@ This project leverages Ansible and Proxmox to build a four node cluster with LXC
 apt-get install python-pip
 pip install proxmoxer
 ```
-5) Clustered Proxmox. (No worries, this can be done with a single host)
 
 # Instructions
 
@@ -27,15 +26,12 @@ pip install proxmoxer
 
 1) If the playbook fails when trying to install openssh-server and throws a weird `yum` error, it's likely your resources don't have network connectivity.
 2) Delete environment: `ansible-playbook -e @Vars/vars.yml -i Inventories/inventory.ini Playbooks/delete_all_resources.yml`
-3) The `delete_all_resources.yml` is a catch all playbook to delete all possible resources deployed. Therefore, many errors are expected to occur.
-3) It's possible that the `delete_all_resources.yml` playbook will fail to unload the overlay module if it is currently in use. 
+3) The `delete_all_resources.yml` is a catch all playbook to delete all possible resources deployed. Therefore, many errors are expected to occur. It's possible that the playbook will also fail to unload the overlay module if it is currently in use by another kernel module.
 
 # TODO
 
-1) Rewrite `deploy_qcow2_vms.yml` to have better proxmox cluster support.
-2) Support vlan tags.
-3) Determine why it takes so darn long to connect to the qcow2 VMs via SSH.
-4) Fix privilege escalation prompt issue with qcow2 VMs. 
+1) Rewrite `deploy_qcow2_vms.yml` to have better proxmox cluster support & support vlan tags/ids. 
+2) Fix issues affecting qcow2 deployment including insanely long SSH connectivity duration & privilege escalation prompt.
 
 # Problems
 
