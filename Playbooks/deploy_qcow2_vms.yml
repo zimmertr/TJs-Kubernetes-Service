@@ -64,20 +64,39 @@
         shell: qm template {{ proxmox_template_id }}
 
       - name: Creating the Kubernetes master from the template.
-        shell: qm clone {{ proxmox_template_id }} {{ k8s_master_id }} --name {{ k8s_master_hn }} --pool {{ k8s_resource_pool }}
+        shell: >
+            qm clone {{ proxmox_template_id }} {{ k8s_master_id }} 
+            --name {{ k8s_master_hn }} 
+            --pool {{ k8s_resource_pool }}
+            --storage {{k8s_master_stg }}
 
       - name: Creating the first Kubernetes node from the template.
-        shell: qm clone {{ proxmox_template_id }} {{ k8s_node1_id }} --name {{ k8s_node1_hn }} --pool {{ k8s_resource_pool }}
+        shell: >
+            qm clone {{ proxmox_template_id }} {{ k8s_node1_id }} 
+            --name {{ k8s_node1_hn }} 
+            --pool {{ k8s_resource_pool }}
+            --storage {{k8s_node1_stg }}
 
       - name: Creating the first Kubernetes node from the template.
-        shell: qm clone {{ proxmox_template_id }} {{ k8s_node2_id }} --name {{ k8s_node2_hn }} --pool {{ k8s_resource_pool }}
+        shell: >
+            qm clone {{ proxmox_template_id }} {{ k8s_node2_id }} 
+            --name {{ k8s_node2_hn }} 
+            --pool {{ k8s_resource_pool }}
+            --storage {{k8s_node2_stg }}
 
       - name: Creating the first Kubernetes node from the template.
-        shell: qm clone {{ proxmox_template_id }} {{ k8s_node3_id }} --name {{ k8s_node3_hn }} --pool {{ k8s_resource_pool }}
+        shell: >
+            qm clone {{ proxmox_template_id }} {{ k8s_node3_id }} 
+            --name {{ k8s_node3_hn }} 
+            --pool {{ k8s_resource_pool }}
+            --storage {{k8s_node3_stg }}
 
       - name: Configuring the Kubernetes master.
         shell: >
             qm set {{ k8s_master_id }} 
+            --description "Kubernetes Master"
+            --cores {{ k8s_master_cpu }}
+            --memory {{ k8s_master_mem }}
             --sshkey {{ k8s_ssh_key }} 
             --ipconfig0 gw={{ k8s_master_gw }},ip={{ k8s_master_ip }}{{ k8s_master_sn }} 
             --nameserver {{ k8s_master_ns }} 
@@ -86,6 +105,9 @@
       - name: Configuring the first Kubernetes node. 
         shell: >
             qm set {{ k8s_node1_id }} 
+            --description "Kubernetes Node 1"
+            --cores {{ k8s_node1_cpu }}
+            --memory {{ k8s_node1_mem }}
             --sshkey {{ k8s_ssh_key }}
             --ipconfig0 gw={{ k8s_node1_gw }},ip={{ k8s_node1_ip }}{{ k8s_node1_sn }} 
             --nameserver {{ k8s_node1_ns }} 
@@ -94,6 +116,9 @@
       - name: Configuring the second Kubernetes node. 
         shell: >
             qm set {{ k8s_node2_id }} 
+            --description "Kubernetes Node 2"
+            --cores {{ k8s_node1_cpu }}
+            --memory {{ k8s_node1_mem }}
             --sshkey {{ k8s_ssh_key }}
             --ipconfig0 gw={{ k8s_node2_gw }},ip={{ k8s_node2_ip }}{{ k8s_node2_sn }} 
             --nameserver {{ k8s_node2_ns }} 
@@ -102,7 +127,22 @@
       - name: Configuring the third Kubernetes node. 
         shell: >
             qm set {{ k8s_node3_id }} 
+            --description "Kubernetes Node 3"
+            --cores {{ k8s_node1_cpu }}
+            --memory {{ k8s_node1_mem }}
             --sshkey {{ k8s_ssh_key }}
             --ipconfig0 gw={{ k8s_node3_gw }},ip={{ k8s_node3_ip }}{{ k8s_node3_sn }} 
             --nameserver {{ k8s_node3_ns }} 
             --searchdomain {{ k8s_node3_sd }}
+
+      - name: Starting the Kubernetes Master.
+        shell: qm start {{ k8s_master_id }}
+
+      - name: Starting the first Kubernetes Node.
+        shell: qm start {{ k8s_node1_id }}
+
+      - name: Starting the second Kubernetes Node.
+        shell: qm start {{ k8s_node2_id }}
+
+      - name: Starting the third Kubernetes Node.
+        shell: qm start {{ k8s_node3_id }}
