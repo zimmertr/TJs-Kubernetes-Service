@@ -29,3 +29,18 @@
       - name: Installing the required packages to bootstrap a kubernetes cluster
         yum:
             name: ['docker-ce', 'kubelet', 'kubeadm', 'kubectl']
+
+      - name: Create database for mlocate
+        shell: updatedb
+
+      - name: Enabling the systemd module for docker-ce
+        systemd: 
+            state: started
+            name: docker
+            enabled: yes
+
+      - name: Enabling the systemd module for kubelet
+        systemd:
+            state: started
+            name: kubelet
+            enabled: yes

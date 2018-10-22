@@ -1,0 +1,10 @@
+---
+- hosts: proxmox_server
+  tasks:
+      - name: Create a resource pool
+        shell: pvesh create /pools -poolid "{{ k8s_resource_pool }}" --Comment "Kubernetes Cluster"
+
+      - name: Downloading the newest CentOS LXC template
+        shell: pveam download {{ template_storage }} {{ lxc_template }}
+
+      - name: Provisioning a Kubernetes Master container

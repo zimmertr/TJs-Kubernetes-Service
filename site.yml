@@ -1,10 +1,21 @@
 ---
-#Deploy the LXCs to your Proxmox server
+###############################################################################################
+#                                -Deploy the Compute Resources-                               #
+###############################################################################################
+# Only one of these playbooks should be used at a time. See the README for more information.  #
+###############################################################################################
 - import_playbook: Playbooks/deploy_lxc_containers.yml
+#- import_playbook: Playbooks/deploy_qcow2_vms.yml
 
-#Prepare CentOS for Kubernetes
+###############################################################################################
+#                            -Prepare the instances for Kubernetes-                           #
+###############################################################################################
+# Upgrade CentOS, install the necessary packages, enable Systemd modules, and reboot the      #
+# instances. The `privelege_lxc_instances` playbook should only be used if you are deploying  #
+# containers for your compute resources. See the README for more information.                 #
+###############################################################################################
 - import_playbook: Playbooks/install_base_packages.yml
-- import_playbook: Playbooks/perform_miscellaneous_tasks.yml
+- import_playbook: Playbooks/privelege_lxc_instances.yml
 
 #Bootstrap Kubernetes
 - import_playbook: Playbooks/bootstrap_kubernetes.yml

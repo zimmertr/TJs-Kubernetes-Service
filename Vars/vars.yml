@@ -1,83 +1,102 @@
-#The user to run commands as on your Proxmox server.
-ansible_user: 'root'
+###############################################################################################
+#                                        -LXC Options-                                        # 
+###############################################################################################
+# If using LXC containers, these parameters must be filled out.                               #
+###############################################################################################
 
-#The arguments you want to use with SSH
-ansible_ssh_common_args: '-o ServerAliveInterval=5 -o StrictHostKeyChecking=no'
+# The LXC template to use for your containers. To find the newest release,
+# run this command: $pveam available | grep centos-7 | awk '{print $2}'
+lxc_template: 'centos-7-default_20171212_amd64.tar.xz'
 
-#The storage to download the LXC containers to.
+# The Proxmox storage volume where your template will be stored.
 template_storage: 'Hub'
 
-#The LXC template to use for your containers.
-#The newest version can be obtained by running this command on your ProxMox server: pveam available | grep centos-7 | awk '{print $2}'
-centos_template: 'centos-7-default_20171212_amd64.tar.xz'
+###############################################################################################
+#                                       -qcow2 Options-                                       #
+###############################################################################################
+# If using qcow2 images, these parameters must be filled out.                                 #
+###############################################################################################
 
-#The resource pool for your containers to be placed in.
+# The qcow2 image to use for your Virtual Machines. I believe that this 
+# link should ALWAYS be the newest release. If you find that it is out of 
+# date, you can check for a newer image here: 
+# https://cloud.centos.org/centos/7/images/?C=M;O=D
+qcow2_image: 'https://cloud.centos.org/centos/7/images/CentOS-7-x86_64-GenericCloud.qcow2c'
+
+
+###############################################################################################
+#                                     -Universal Options-                                     #
+###############################################################################################
+# All of these parameters must be filled out.                                                 #
+###############################################################################################
+
+# The resource pool for your compute resources to be placed in.
 k8s_resource_pool: "Kubernetes"
 
-#The path to the SSH Public Key to use with your containers.
+# The path to the SSH Public Key to be used with your compute resources.
 k8s_ssh_key: "/root/.ssh/sol.milkyway.kubernetes.pub"
 
-#The IDs for your containers
+# The Proxmox IDs for each of your compute resources.
 k8s_master_id: '170'
 k8s_node1_id: '180'
 k8s_node2_id: '181'
 k8s_node3_id: '182'
 
-#The hostnames for your containers
+# The hostnames for each of your compute resources.
 k8s_master_hn: "Pluto"
 k8s_node1_hn: "Ceres"
 k8s_node2_hn: "Eris"
 k8s_node3_hn: "Haumea"
 
-#The memory for each of your containers
+# The amount of memory for each of your compute resources.
 k8s_master_mem: "4096"
 k8s_node1_mem: "8192"
 k8s_node2_mem: "8192"
 k8s_node3_mem: "8192"
 
-#The disk sizes for your containers.
+# The disk sizes for your compute resources.
 k8s_master_size: "50G"
 k8s_node1_size: "50G"
 k8s_node2_size: "50G"
 k8s_node3_size: "50G"
 
-#The static ip for each of your containers
+# The static ip for each of your compute resources.
 k8s_master_ip: "192.168.1.170"
 k8s_node1_ip: "192.168.1.180"
 k8s_node2_ip: "192.168.1.181"
 k8s_node3_ip: "192.168.1.182"
 
-#The subnet size for each of your containers
+# The subnet size for each of your compute resources.
 k8s_master_sn: "/24"
 k8s_node1_sn: "/24"
 k8s_node2_sn: "/24"
 k8s_node3_sn: "/24"
 
-#The gateway for each of your containers
+# The gateway for each of your compute resources.
 k8s_master_gw: "192.168.1.1"
 k8s_node1_gw: "192.168.1.1"
 k8s_node2_gw: "192.168.1.1"
 k8s_node3_gw: "192.168.1.1"
 
-#The DNS server for each of your containers 
+# The DNS server for each of your compute resources.
 k8s_master_ns: "192.168.1.10"
 k8s_node1_ns: "192.168.1.10"
 k8s_node2_ns: "192.168.1.10"
 k8s_node3_ns: "192.168.1.10"
 
-#The search domain for each of your containers
+# The search domain for each of your compute resources.
 k8s_master_sd: "sol.milkyway"
 k8s_node1_sd: "sol.milkyway"
 k8s_node2_sd: "sol.milkyway"
 k8s_node3_sd: "sol.milkyway"
 
-#The network bridge for each of your containers
+# The network bridge for each of your compute resources.
 k8s_master_bridge: "vmbr0"
 k8s_node1_bridge: "vmbr0"
 k8s_node2_bridge: "vmbr0"
 k8s_node3_bridge: "vmbr0"
 
-#The volume for the container mountpoint to be placed in for your containers. 
+# The Proxmox storage volume where each of your Compute resources will be stored.
 k8s_master_stg: "Proxmox_lvm-thin"
 k8s_node1_stg: "SaturnPool"
 k8s_node2_stg: "SaturnPool"
