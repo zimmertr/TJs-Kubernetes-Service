@@ -32,6 +32,7 @@ pip install proxmoxer
 
 1) Rewrite `deploy_qcow2_vms.yml` to have better proxmox cluster support & support vlan tags/ids. 
 2) Fix issues affecting qcow2 deployment including insanely long SSH connectivity duration & privilege escalation prompt.
+3) Fix linked clone volume assignment issue & remove commented out lines.
 
 # Problems
 
