@@ -85,6 +85,10 @@
           state: absent
         ignore_errors: yes
 
+      - name: Deleting the LXC template.
+        shell: pveam remove {{ template_storage }}:vztmpl/{{ lxc_template }}
+        ignore_errors: yes
+
       - name: Deleting the qcow2 image.
         file:
           path: "/tmp/CentOS7.qcow2c"
