@@ -1,13 +1,13 @@
 ---
 - hosts: proxmox_server
   tasks:
-      - name: Creating a resource pool
+      - name: Creating a resource pool for the compute resources.
         shell: pvesh create /pools -poolid "{{ k8s_resource_pool }}" --Comment "Kubernetes Cluster made from CentOS 7 Linux Containers"
 
-      - name: Downloading the newest CentOS LXC template
+      - name: Downloading the newest CentOS LXC template.
         shell: pveam download {{ template_storage }} {{ lxc_template }}
 
-      - name: Provisioning a Kubernetes Master container
+      - name: Provisioning a container for the Kubernetes master.
         shell: >
             pct create {{ k8s_master_id }}
             {{ template_storage }}:vztmpl/{{ lxc_template }}
@@ -23,13 +23,13 @@
             --storage "{{ k8s_master_stg }}" 
             --ssh-public-keys "{{ k8s_ssh_key }}"
 
-      - name: Pausing for 5 seconds to allow the container to finish being created
+      - name: Pausing for 5 seconds to allow the container to finish being created.
         wait_for: timeout=5
 
-      - name: Resizing the volume for the Master container
+      - name: Resizing the volume for the Master container.
         shell: pct resize {{ k8s_master_id }} rootfs {{ k8s_master_size }} 
       
-      - name: Provisioning Kubernetes Node 1 container
+      - name: Provisioning a container for the first Kubernetes node.
         shell: >
             pct create {{ k8s_node1_id }}
             {{ template_storage }}:vztmpl/{{ lxc_template }}
@@ -45,13 +45,13 @@
             --storage "{{ k8s_node1_stg }}" 
             --ssh-public-keys "{{ k8s_ssh_key }}"
 
-      - name: Pausing for 5 seconds to allow the container to finish being created
+      - name: Pausing for 5 seconds to allow the container to finish being created.
         wait_for: timeout=5
 
-      - name: Resizing the volume for the Node 1 container
+      - name: Resizing the volume for the first node container.
         shell: pct resize {{ k8s_node1_id }} rootfs {{ k8s_node1_size }} 
       
-      - name: Provisioning Kubernetes Node 2 container
+      - name: Provisioning a container for the second Kuberntes node.
         shell: >
             pct create {{ k8s_node2_id }}
             {{ template_storage }}:vztmpl/{{ lxc_template }}
@@ -67,13 +67,13 @@
             --storage "{{ k8s_node2_stg }}" 
             --ssh-public-keys "{{ k8s_ssh_key }}"
 
-      - name: Pausing for 5 seconds to allow the container to finish being created
+      - name: Pausing for 5 seconds to allow the container to finish being created.
         wait_for: timeout=5
 
-      - name: Resizing the volume for the Node 2 container
+      - name: Resizing the volume for the second Kubernetes node.
         shell: pct resize {{ k8s_node2_id }} rootfs {{ k8s_node2_size }} 
       
-      - name: Provisioning Kubernetes Node 3 container
+      - name: Provisioning a container for the third Kubernetes node.
         shell: >
             pct create {{ k8s_node3_id }}
             {{ template_storage }}:vztmpl/{{ lxc_template }}
@@ -89,35 +89,35 @@
             --storage "{{ k8s_node3_stg }}" 
             --ssh-public-keys "{{ k8s_ssh_key }}"
 
-      - name: Pausing for 5 seconds to allow the container to finish being created
+      - name: Pausing for 5 seconds to allow the container to finish being created.
         wait_for: timeout=5
 
-      - name: Resizing the volume for the Node 3 container
+      - name: Resizing the volume for the third Kubernetes node.
         shell: pct resize {{ k8s_node3_id }} rootfs {{ k8s_node3_size }} 
 
-      - name: Starting the containers for the first time
+      - name: Starting the containers for the first time.
         shell: pct start {{ k8s_master_id }} && pct start {{ k8s_node1_id }} && pct start {{ k8s_node2_id }} && pct start {{ k8s_node3_id }}
 
-      - name: Installing openssh-server on the master 
+      - name: Installing openssh-server on the master.
         shell: lxc-attach -n {{ k8s_master_id }} -- yum install -y openssh-server
 
-      - name: Enabling & starting sshd on the master
+      - name: Enabling & starting sshd on the master.
         shell: lxc-attach -n {{ k8s_master_id }} -- systemctl enable --now sshd
 
-      - name: Installing openssh-server on the Node 1 
+      - name: Installing openssh-server on the first node.
         shell: lxc-attach -n {{ k8s_node1_id }} -- yum install -y openssh-server
 
-      - name: Enabling & starting sshd on the Node 1
+      - name: Enabling & starting sshd on the first node.
         shell: lxc-attach -n {{ k8s_node1_id }} -- systemctl enable --now sshd
 
-      - name: Installing openssh-server on the Node 2 
+      - name: Installing openssh-server on the second node.
         shell: lxc-attach -n {{ k8s_node2_id }} -- yum install -y openssh-server
 
-      - name: Enabling & starting sshd on the Node 2
+      - name: Enabling & starting sshd on the second node.
         shell: lxc-attach -n {{ k8s_node2_id }} -- systemctl enable --now sshd
 
-      - name: Installing openssh-server on the Node 3 
+      - name: Installing openssh-server on the third node.
         shell: lxc-attach -n {{ k8s_node3_id }} -- yum install -y openssh-server
 
-      - name: Enabling & starting sshd on the Node 3
+      - name: Enabling & starting sshd on the third node.
         shell: lxc-attach -n {{ k8s_node3_id }} -- systemctl enable --now sshd

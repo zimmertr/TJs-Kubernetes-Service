@@ -1,49 +1,49 @@
 ---
 - hosts: proxmox_server
   tasks: 
-      - name: Stopping the Master container
+      - name: Stopping the Master container.
         shell: pct stop {{ k8s_master_id }}
         ignore_errors: yes
 
-      - name: Stopping the Node 1 container
+      - name: Stopping the Node 1 container.
         shell: pct stop {{ k8s_node1_id }}
         ignore_errors: yes
 
-      - name: Stopping the Node 2 container
+      - name: Stopping the Node 2 container.
         shell: pct stop {{ k8s_node2_id }}
         ignore_errors: yes
 
-      - name: Stopping the Node 3 container
+      - name: Stopping the Node 3 container.
         shell: pct stop {{ k8s_node3_id }}
         ignore_errors: yes
 
-      - name: Destroying the Master container
+      - name: Destroying the Master container.
         shell: pct destroy {{ k8s_master_id }}
         ignore_errors: yes
  
-      - name: Destroying the Node 1 container
+      - name: Destroying the Node 1 container.
         shell: pct destroy {{ k8s_node1_id }}
         ignore_errors: yes
 
-      - name: Destroying the Node 2 container
+      - name: Destroying the Node 2 container.
         shell: pct destroy {{ k8s_node2_id }}
         ignore_errors: yes
 
-      - name: Destroying the Node 3 container
+      - name: Destroying the Node 3 container.
         shell: pct destroy {{ k8s_node3_id }}
         ignore_errors: yes
 
-      - name: Deleting the resource pool
+      - name: Deleting the resource pool.
         shell: pvesh delete /pools/{{ k8s_resource_pool }}
         ignore_errors: yes
 
-      - name: Removing overlay module from /etc/modules
+      - name: Removing the overlay kernel module from /etc/modules.
         replace: 
           path: /etc/modules
           regexp: '^overlay$'
         ignore_errors: yes
 
-      - name: Stopping overlay module on Proxmox server.
+      - name: Stopping the overlay module on the Proxmox server.
         modprobe:
           name: overlay
           state: absent

@@ -1,10 +1,19 @@
 ---
 - hosts: proxmox_server
   tasks: 
-    - name: Enable overlay module
+    - name: Enabling the overlay kernel module on the Proxmox host.
       shell: echo overlay >> /etc/modules
 
-    - name: Adding additional privileges to the Master container
+    - name: Configuring the overlay kernel module to be loaded on boot.
+      lineinfile:
+        path: /etc/modules
+        line: 'overlay'
+
+    - name: Loading the overlay kernel module on the Proxmox host.
+      modprobe: 
+        name: overlay
+
+    - name: Adding some additional privileges to the master container.
       shell: |
         echo "
         lxc.apparmor.profile: unconfined
@@ -12,7 +21,7 @@
         lxc.cgroup.devices.allow: a
         lxc.mount.auto: proc:rw sys:rw" >> /etc/pve/lxc/{{ k8s_master_id }}.conf
 
-    - name: Adding additional privileges to the Node 1 container
+    - name: Adding some additional privileges to the first node's container.
       shell: |
         echo "
         lxc.apparmor.profile: unconfined
@@ -20,7 +29,7 @@
         lxc.cgroup.devices.allow: a
         lxc.mount.auto: proc:rw sys:rw" >> /etc/pve/lxc/{{ k8s_node1_id }}.conf
 
-    - name: Adding additional privileges to the Node 2 container
+    - name: Adding some additional privileges to the second node's container.
       shell: |
         echo "
         lxc.apparmor.profile: unconfined
@@ -28,7 +37,7 @@
         lxc.cgroup.devices.allow: a
         lxc.mount.auto: proc:rw sys:rw" >> /etc/pve/lxc/{{ k8s_node2_id }}.conf
 
-    - name: Adding additional privileges to the Node 3 container
+    - name: Adding some additional privileges to the third node's container.
       shell: |
         echo "
         lxc.apparmor.profile: unconfined
@@ -36,36 +45,27 @@
         lxc.cgroup.devices.allow: a
         lxc.mount.auto: proc:rw sys:rw" >> /etc/pve/lxc/{{ k8s_node3_id }}.conf
 
-    - name: Enabling overlay kernel module on Proxmox server
-      lineinfile:
-        path: /etc/modules
-        line: 'overlay'
-
-    - name: Starting overlay module on Proxmox server
-      modprobe: 
-        name: overlay
-
 
 - hosts: k8s_master:k8s_nodes
   tasks:
-      - name: Enabling the systemd module for rc-local
+      - name: Enabling the systemd module for rc-local.
         systemd:
             state: started
             name: rc-local
             enabled: yes
 
-      - name: Setting the execution bit for rc.local
+      - name: Setting the execution bit for rc.local.
         file:
           path: /etc/rc.local
           mode: a+x
 
-      - name: Enabling the shared mount
+      - name: Enabling the shared mount.
         shell: |
           echo "#!/bin/sh -e
           mount --make-rshared /" > /etc/rc.local
 
-      - name: Copying the docker.service for override
+      - name: Copying the docker.service for override.
         shell:  cp /{lib,etc}/systemd/system/docker.service
 
-      - name: Rebooting the containers
+      - name: Rebooting the containers.
         reboot:
