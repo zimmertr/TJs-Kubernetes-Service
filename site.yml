@@ -12,8 +12,8 @@
 ###############################################################################################
 #                            -Prepare the instances for Kubernetes-                           #
 ###############################################################################################
-# The `privelege_lxc_instances` playbook should only be used if you are using LXC as your     #
-# deployment model above.                                                                     #
+# The `privelege_lxc_instances.yml` playbook should only be used if you are using LXC as your #
+# deployment model above. The `install_base_packages.yml` playbook should always be used.     #
 ###############################################################################################
 - import_playbook: Playbooks/install_base_packages.yml
 #- import_playbook: Playbooks/privelege_lxc_instances.yml
