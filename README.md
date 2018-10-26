@@ -42,4 +42,4 @@ pip install proxmoxer
 
 # Problems
 
-1) There is a bug in either the `4.15.18` Linux kernel or in the `br_netfilter` module. Preventing the LXC strategy from being a viable solution due to pod networking never being able to work. More information can be found here: https://github.com/lxc/lxd/issues/5193#issuecomment-431872713
+1) There is a bug in either the `4.15.18` Linux kernel or in the `br_netfilter` module. Preventing the LXC strategy from being a viable solution due to pod networking never being able to work. More information can be found here: https://github.com/lxc/lxd/issues/5193#issuecomment-431872713A A cluster can still be provisioned without pod networking, for what it is worth. 
