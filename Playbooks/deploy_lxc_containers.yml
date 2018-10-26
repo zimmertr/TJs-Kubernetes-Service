@@ -136,10 +136,10 @@
         shell: lxc-attach -n {{ k8s_master_id }} -- mkdir /home/centos/.ssh
 
       - name: Adding the ssh key to the centos user's authorized_keys file on the Kubernetes master.
-        shell: lxc-attach -n {{ k8s_master_id }} -- cp /home/centos/.ssh/authorized_keys /home/test/.ssh/authorized_keys
+        shell: lxc-attach -n {{ k8s_master_id }} -- cp /root/.ssh/authorized_keys /home/centos/.ssh/authorized_keys
 
       - name: Setting the correct permissions of the authorized_keys file for the centos user on the Kubernetes master.
-        shell: lxc-attach -n {{ k8s_master_id }} -- chown -R test /home/test/.ssh/
+        shell: lxc-attach -n {{ k8s_master_id }} -- chown -R centos /home/centos/.ssh/
 
       - name: Creating a centos user on the first Kubernetes node.
         shell: lxc-attach -n {{ k8s_node1_id }} -- adduser -G wheel centos 
@@ -151,10 +151,10 @@
         shell: lxc-attach -n {{ k8s_node1_id }} -- mkdir /home/centos/.ssh
 
       - name: Adding the ssh key to the centos user's authorized_keys file on the first Kubernetes node.
-        shell: lxc-attach -n {{ k8s_node1_id }} -- cp /home/centos/.ssh/authorized_keys /home/test/.ssh/authorized_keys
+        shell: lxc-attach -n {{ k8s_node1_id }} -- cp /root/.ssh/authorized_keys /home/centos/.ssh/authorized_keys
 
       - name: Setting the correct permissions of the authorized_keys file for the centos user on the first Kubernetes node.
-        shell: lxc-attach -n {{ k8s_node1_id }} -- chown -R test /home/test/.ssh/
+        shell: lxc-attach -n {{ k8s_node1_id }} -- chown -R centos /home/centos/.ssh/
 
       - name: Creating a centos user on the second Kubernetes node.
         shell: lxc-attach -n {{ k8s_node2_id }} -- adduser -G wheel centos 
@@ -166,22 +166,22 @@
         shell: lxc-attach -n {{ k8s_node2_id }} -- mkdir /home/centos/.ssh
 
       - name: Adding the ssh key to the centos user's authorized_keys file on the second Kubernetes node.
-        shell: lxc-attach -n {{ k8s_node2_id }} -- cp /home/centos/.ssh/authorized_keys /home/test/.ssh/authorized_keys
+        shell: lxc-attach -n {{ k8s_node2_id }} -- cp /root/.ssh/authorized_keys /home/centos/.ssh/authorized_keys
 
       - name: Setting the correct permissions of the authorized_keys file for the centos user on the second Kubernetes node.
-        shell: lxc-attach -n {{ k8s_node2_id }} -- chown -R test /home/test/.ssh/
+        shell: lxc-attach -n {{ k8s_node2_id }} -- chown -R centos /home/centos/.ssh/
 
       - name: Creating a centos user on the third Kubernetes node.
-        shell: lxc-attach -n {{ k8s_node2_id }} -- adduser -G wheel centos 
+        shell: lxc-attach -n {{ k8s_node3_id }} -- adduser -G wheel centos 
 
       - name: Configuring the centos user on the third Kubernetes node to be able to sudo without specifying a password.
-        shell: lxc-attach -n {{ k8s_node2_id }} -- sed --in-place 's/^#\s*\(%wheel\s\+ALL=(ALL)\s\+NOPASSWD:\s\+ALL\)/\1/' /etc/sudoers
+        shell: lxc-attach -n {{ k8s_node3_id }} -- sed --in-place 's/^#\s*\(%wheel\s\+ALL=(ALL)\s\+NOPASSWD:\s\+ALL\)/\1/' /etc/sudoers
 
       - name: Creating a .ssh directory in the home directory of the centos user on the third Kubernetes node.
-        shell: lxc-attach -n {{ k8s_node2_id }} -- mkdir /home/centos/.ssh
+        shell: lxc-attach -n {{ k8s_node3_id }} -- mkdir /home/centos/.ssh
 
       - name: Adding the ssh key to the centos user's authorized_keys file on the third Kubernetes node.
-        shell: lxc-attach -n {{ k8s_node2_id }} -- cp /home/centos/.ssh/authorized_keys /home/test/.ssh/authorized_keys
+        shell: lxc-attach -n {{ k8s_node3_id }} -- cp /root/.ssh/authorized_keys /home/centos/.ssh/authorized_keys
 
       - name: Setting the correct permissions of the authorized_keys file for the centos user on the third Kubernetes node.
-        shell: lxc-attach -n {{ k8s_node2_id }} -- chown -R test /home/test/.ssh/
+        shell: lxc-attach -n {{ k8s_node3_id }} -- chown -R centos /home/centos/.ssh/
