@@ -49,23 +49,28 @@
 - hosts: k8s_master:k8s_nodes
   tasks:
       - name: Enabling the systemd module for rc-local.
+        become: yes
         systemd:
             state: started
             name: rc-local
             enabled: yes
 
       - name: Setting the execution bit for rc.local.
+        become: yes
         file:
           path: /etc/rc.local
           mode: a+x
 
       - name: Enabling the shared mount.
+        become: yes
         shell: |
           echo "#!/bin/sh -e
           mount --make-rshared /" > /etc/rc.local
 
       - name: Copying the docker.service for override.
+        become: yes
         shell:  cp /{lib,etc}/systemd/system/docker.service
 
       - name: Rebooting the containers.
+        become: yes
         reboot:

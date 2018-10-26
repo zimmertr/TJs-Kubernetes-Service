@@ -1,13 +1,13 @@
 ## Bootstrap Kubernetes with Ansible
 
 # Summary
-This project leverages Ansible and Proxmox to build a four node cluster with LXC instances or VMs.
+Build a 4 node Kubernetes cluster on a Proxmox cluster using Ansible and either Linux Containers (LXC) or Virtual Machines.
 
 # Requirements
 1) A clustered Proxmox server. Don't worry, a single host can be a `cluster`
 2) Ability to provision DNS records
 3) Ansible 2.7.0+. Known incompatibility with a previous build. 
-4) https://pypi.org/project/proxmoxer/
+4) Proxmoxer should be installed on the Proxmox server(s) in order to use some Ansible modules. Only required when using Virtual Machines as your deployment model. https://pypi.org/project/proxmoxer/
 ```
 apt-get install python-pip
 pip install proxmoxer
@@ -15,25 +15,31 @@ pip install proxmoxer
 
 # Instructions
 
-1) Modify the vars files with values specific to your environment.
-2) Provision internal DNS A records for the IP Addresses & hostnames you defined for your nodes.
-3) Update the inventory file to reflect your DNS records and LXC/qcow2 deployment strategy.
-3) Deploy environment: `ansible-playbook -e @Vars/vars.yml -i Inventories/inventory.ini site.yml`
-4) ???
-5) Profit
+1) Modify the vars files with values specific to your environment and desires. Only the `LXC Options` or `qcow2 Options` section needs to be modified, as per your deployment model. 
+2) Provision DNS A records for the IP Addresses & Hostnames you defined for your nodes in the `vars.yml` file.
+3) Modify the inventory file to reflect your chosen DNS records.
+4) Comment|Uncomment the required playbooks in the `site.yml` file.
+5) Deploy Kubernetes: `ansible-playbook -e @Vars/vars.yml -i Inventories/inventory.ini site.yml`
+
 
 # Tips
 
-1) If the playbook fails when trying to install openssh-server and throws a weird `yum` error, it's likely your resources don't have network connectivity.
-2) Delete environment: `ansible-playbook -e @Vars/vars.yml -i Inventories/inventory.ini Playbooks/delete_all_resources.yml`
-3) The `delete_all_resources.yml` is a catch all playbook to delete all possible resources deployed. Therefore, many errors are expected to occur. It's possible that the playbook will also fail to unload the overlay module if it is currently in use by another kernel module.
+1) If your LXC instances fail to install `openssh-server` and throw a long `yum` related error, it's likely that they do not have a properly configured network. You can troubleshoot this by using the `lxc-attach` command to connect to them from Promxox without SSH. 
+2) You can rollback the deployment and all modifications made to your Proxmox server by executing the `delete_all_resources.yml` playbook. For example: `ansible-playbook -e @Vars/vars.yml -i Inventories/inventory.ini Playbooks/delete_all_resources.yml`
+3) The `delete_all_resources.yml` playbook is expected to throw errors, so do not panic. It is a catch all solution to delete all containers or virtual machines in one go. So, since you will only ever be using one deployment model, it will consistently fail to delete the resources from the other deployment model. This will not cause the playbook to fail. However, it is possible that the playbook will fail to unload the overlay module if it is currently in use by another kernel module. This is unavoidable. 
+
 
 # TODO
 
-1) Rewrite resource deployment playbooks to have better proxmox cluster support & support vlan tags/ids. 
+1) Expand the `deploy_lxc_containers.yml` and `deploy_qcow2_vms.yml` playbooks to have better support for multi-node Proxmox clusters.
+2) Expand the `deploy_lxc_containers.yml` and `deploy_qcow2_vms.yml` playbooks to have better support for vLAN Tags & IDs.
 2) Fix issues affecting qcow2 deployment including insanely long SSH connectivity duration & privilege escalation prompt.
 3) Fix linked clone volume assignment issue & remove commented out lines.
+4) Rewrite `deploy_lxc_containers` to deploy one instance and clone rather than four separate instances to reduce duration.
+5) Perform security enhancements. Like disabling `root` user from SSHing in on LXC container instances.
+6) Consider removing the DNS record provisoning requirement by making references to IP Addresses instead. 
+7) Copy `.kube` information to each of the Agents as well as the Proxmox server. Somehow copy to local machine for user?
 
 # Problems
 
-1) There is a bug in either the `4.15.18` Linux kernel or in the `br_netfilter` module. Preventing the LXC strategy from being a viable solution due to pod networking never being able to work. :( 
+1) There is a bug in either the `4.15.18` Linux kernel or in the `br_netfilter` module. Preventing the LXC strategy from being a viable solution due to pod networking never being able to work. More information can be found here: https://github.com/lxc/lxd/issues/5193#issuecomment-431872713
