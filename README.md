@@ -4,14 +4,9 @@
 Build a 4 node Kubernetes cluster on a Proxmox cluster using Ansible and either Linux Containers (LXC) or Virtual Machines.
 
 # Requirements
-1) A clustered Proxmox server. Don't worry, a single host can be a `cluster`
+1) A Proxmox server.
 2) Ability to provision DNS records
 3) Ansible 2.7.0+. Known incompatibility with a previous build. 
-4) Proxmoxer should be installed on the Proxmox server(s) in order to use some Ansible modules. Only required when using Virtual Machines as your deployment model. https://pypi.org/project/proxmoxer/
-```
-apt-get install python-pip
-pip install proxmoxer
-```
 
 # Instructions
 
@@ -42,4 +37,6 @@ pip install proxmoxer
 
 # Problems
 
-1) There is a bug in either the `4.15.18` Linux kernel or in the `br_netfilter` module. Preventing the LXC strategy from being a viable solution due to pod networking never being able to work. More information can be found here: https://github.com/lxc/lxd/issues/5193#issuecomment-431872713A A cluster can still be provisioned without pod networking, for what it is worth. 
+1) The command `qm` in Proxmox does not support provisoning a network interface when performing a clone from a template. This means that qemu will automatically configure a NAT and inject network configuration on the 10.0.2.0/24 address space. Causing DNS problems on the VM that will prevent Ansible from successfully connecting before the timeout while `UseDNS no` is not set in your `sshd_config` on the VMs. Which, unfortunately, would require Ansible to undo. This catch 22 situation means that templates are NOT able to be used for the `qcow2` solution effectively tripling the deployment duration. More information can be found here: https://serverfault.com/questions/937465/ansible-fails-at-gathering-hosts-presumably-because-ssh-is-slow-to-connect-se
+2) The `proxmox_kvm` module is out of date and does not support cloudinit related api calls. Meaning shell commands must be used instead to perform `qm create` tasks. 
+3) There is a bug in either the `4.15.18` Linux kernel or in the `br_netfilter` module. Preventing the LXC strategy from being a viable solution due to pod networking never being able to work. More information can be found here: https://github.com/lxc/lxd/issues/5193#issuecomment-431872713A A cluster can still be provisioned without pod networking, for what it is worth. 

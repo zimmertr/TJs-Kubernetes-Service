@@ -11,8 +11,6 @@ lxc_template: 'centos-7-default_20171212_amd64.tar.xz'
 # The Proxmox storage volume where your template will be stored.
 template_storage: 'Hub'
 
-proxmox_template_id: '999'
-
 
 ###############################################################################################
 #                                       -qcow2 Options-                                       #

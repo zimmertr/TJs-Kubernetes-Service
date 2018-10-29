@@ -1,22 +1,5 @@
 ---
 - hosts: proxmox_server
-  vars_prompt:
-      - name: apihost
-        prompt: "Please enter the Proxmox cluster that you will be deploying to (ex: saturn.sol.milkyway)"
-        private: no
-
-      - name: apinode
-        prompt: "Please enter the node within the Proxmox cluster that you will be deploying to (ex: saturn)"
-        private: no
-
-      - name: apiuser
-        prompt: "Please enter the API User for your Proxmox server (ex: root@pam)"
-        private: no
-
-      - name: apipassword
-        prompt: "Please enter the password for your API User"
-        private: yes
-
   tasks:
       - name: Creating a resource pool for the compute resources.
         shell: pvesh create /pools -poolid "{{ k8s_resource_pool }}" --Comment "Kubernetes Cluster"
@@ -27,107 +10,129 @@
           url: "{{ qcow2_image }}"
           dest: "{{ qcow2_download_location }}CentOS7.qcow2c"
 
-      - name: Provisioning a virtual machine to become a Kubernetes Template.
-        proxmox_kvm:
-          api_user: "{{ apiuser }}"
-          api_password: "{{ apipassword }}"
-          api_host: "{{ apihost }}"
-          node: "{{ apinode }}"
-          vmid: "{{ proxmox_template_id }}"
-          ostype: "l26"
-          name: "{{ k8s_master_hn }}"
-          description: "Kubernetes Master"
-          agent: yes
-          cores: "{{ k8s_master_cpu }}"
-          memory: "{{ k8s_master_mem }}"
-          net:  '{"net0":"virtio,bridge=vmbr0"}'
-
-      - name: Importing the qemu image as a disk for the template.
-        shell: qm importdisk {{ proxmox_template_id }} {{ qcow2_download_location }}CentOS7.qcow2c {{ k8s_master_stg }}
-
-      - name: Setting the imported disk as scsi0 for the template.
-        shell: qm set {{ proxmox_template_id }} --scsihw virtio-scsi-pci --scsi0 {{ k8s_master_stg }}:vm-{{ proxmox_template_id }}-disk-0
-
-      - name: Resizing the imported disk for the template. 
-        shell: qm resize {{ proxmox_template_id }} scsi0 {{ k8s_master_size }}
-
-      - name: Adding a CD-ROM drive to be used with Cloud-init for the template.
-        shell: qm set {{ proxmox_template_id }} --ide2 {{ k8s_master_stg }}:cloudinit
-
-      - name: Setting the boot disk for the template to scsi0 and restricting BIOS to boot from disk only.
-        shell: qm set {{ proxmox_template_id }} --boot c --bootdisk scsi0
-
-      - name: Creating the Kubernetes master from the template.
+      - name: Creating the Kubernetes master.
         shell: >
-            qm clone {{ proxmox_template_id }} {{ k8s_master_id }} 
-            --name {{ k8s_master_hn }} 
+            qm create {{ k8s_master_id }}
             --pool {{ k8s_resource_pool }}
-            --storage {{k8s_master_stg }}
-
-      - name: Creating the first Kubernetes node from the template.
-        shell: >
-            qm clone {{ proxmox_template_id }} {{ k8s_node1_id }} 
-            --name {{ k8s_node1_hn }} 
-            --pool {{ k8s_resource_pool }}
-            --storage {{k8s_node1_stg }}
-
-      - name: Creating the second Kubernetes node from the template.
-        shell: >
-            qm clone {{ proxmox_template_id }} {{ k8s_node2_id }} 
-            --name {{ k8s_node2_hn }} 
-            --pool {{ k8s_resource_pool }}
-            --storage {{k8s_node2_stg }}
-
-      - name: Creating the third Kubernetes node from the template.
-        shell: >
-            qm clone {{ proxmox_template_id }} {{ k8s_node3_id }} 
-            --name {{ k8s_node3_hn }} 
-            --pool {{ k8s_resource_pool }}
-            --storage {{k8s_node3_stg }}
-
-      - name: Configuring the Kubernetes master.
-        shell: >
-            qm set {{ k8s_master_id }} 
+            --ostype "l26"
+            --name {{ k8s_master_hn }}
             --description "Kubernetes Master"
+            --agent 1
             --cores {{ k8s_master_cpu }}
-            --memory {{ k8s_master_mem }}
-            --sshkey {{ k8s_ssh_key }} 
-            --ipconfig0 gw={{ k8s_master_gw }},ip={{ k8s_master_ip }}{{ k8s_master_sn }} 
-            --nameserver {{ k8s_master_ns }} 
+            --memory {{ k8s_master_mem }} 
+            --net0 "virtio,bridge=vmbr0"
+            --ipconfig0 "gw={{ k8s_master_gw }},ip={{ k8s_master_ip }}{{ k8s_master_sn }}"
+            --nameserver {{ k8s_master_ns }}
             --searchdomain {{ k8s_master_sd }}
+            --sshkeys {{ k8s_ssh_key }}
 
-      - name: Configuring the first Kubernetes node. 
+      - name: Importing the qemu image as a disk for the Kubernetes master.
+        shell: qm importdisk {{ k8s_master_id }} {{ qcow2_download_location }}CentOS7.qcow2c {{ k8s_master_stg }}
+
+      - name: Configuring the Kubernetes master to use the imported disk as scsi0.
+        shell: qm set {{ k8s_master_id }} --scsihw virtio-scsi-pci --scsi0 {{ k8s_master_stg }}:vm-{{ k8s_master_id }}-disk-0
+
+      - name: Resizing scsi0 on the Kubernetes master. 
+        shell: qm resize {{ k8s_master_id }} scsi0 {{ k8s_master_size }}
+
+      - name: Adding a CD-ROM drive to the Kubernetes master to be used with Cloud-init.
+        shell: qm set {{ k8s_master_id }} --ide2 {{ k8s_master_stg }}:cloudinit
+
+      - name: Setting the boot disk for the Kubernetes master to scsi0 and restricting BIOS to boot from disk only.
+        shell: qm set {{ k8s_master_id }} --boot c --bootdisk scsi0
+
+      - name: Creating the first Kubernetes node.
         shell: >
-            qm set {{ k8s_node1_id }} 
+            qm create {{ k8s_node1_id }}
+            --pool {{ k8s_resource_pool }}
+            --ostype "l26"
+            --name {{ k8s_node1_hn }}
             --description "Kubernetes Node 1"
+            --agent 1
             --cores {{ k8s_node1_cpu }}
-            --memory {{ k8s_node1_mem }}
-            --sshkey {{ k8s_ssh_key }}
-            --ipconfig0 gw={{ k8s_node1_gw }},ip={{ k8s_node1_ip }}{{ k8s_node1_sn }} 
-            --nameserver {{ k8s_node1_ns }} 
-            --searchdomain {{ k8s_node1_sd }} 
+            --memory {{ k8s_node1_mem }} 
+            --net0 "virtio,bridge=vmbr0"
+            --ipconfig0 "gw={{ k8s_node1_gw }},ip={{ k8s_node1_ip }}{{ k8s_node1_sn }}"
+            --nameserver {{ k8s_node1_ns }}
+            --searchdomain {{ k8s_node1_sd }}
+            --sshkeys {{ k8s_ssh_key }}
 
-      - name: Configuring the second Kubernetes node. 
+      - name: Importing the qemu image as a disk for the first Kubernetes node.
+        shell: qm importdisk {{ k8s_node1_id }} {{ qcow2_download_location }}CentOS7.qcow2c {{ k8s_node1_stg }}
+
+      - name: Configuring the first Kubernetes node to use the imported disk as scsi0.
+        shell: qm set {{ k8s_node1_id }} --scsihw virtio-scsi-pci --scsi0 {{ k8s_node1_stg }}:vm-{{ k8s_node1_id }}-disk-0
+
+      - name: Resizing scsi0 on the first Kubernetes node. 
+        shell: qm resize {{ k8s_node1_id }} scsi0 {{ k8s_node1_size }}
+
+      - name: Adding a CD-ROM drive to the first Kubernetes node to be used with Cloud-init.
+        shell: qm set {{ k8s_node1_id }} --ide2 {{ k8s_node1_stg }}:cloudinit
+
+      - name: Setting the boot disk for the first Kubernetes node to scsi0 and restricting BIOS to boot from disk only.
+        shell: qm set {{ k8s_node1_id }} --boot c --bootdisk scsi0  
+
+      - name: Creating the second Kubernetes node.
         shell: >
-            qm set {{ k8s_node2_id }} 
+            qm create {{ k8s_node2_id }}
+            --pool {{ k8s_resource_pool }}
+            --ostype "l26"
+            --name {{ k8s_node2_hn }}
             --description "Kubernetes Node 2"
-            --cores {{ k8s_node1_cpu }}
-            --memory {{ k8s_node1_mem }}
-            --sshkey {{ k8s_ssh_key }}
-            --ipconfig0 gw={{ k8s_node2_gw }},ip={{ k8s_node2_ip }}{{ k8s_node2_sn }} 
-            --nameserver {{ k8s_node2_ns }} 
-            --searchdomain {{ k8s_node2_sd }} 
-      
-      - name: Configuring the third Kubernetes node. 
+            --agent 1
+            --cores {{ k8s_node2_cpu }}
+            --memory {{ k8s_node2_mem }} 
+            --net0 "virtio,bridge=vmbr0"
+            --ipconfig0 "gw={{ k8s_node2_gw }},ip={{ k8s_node2_ip }}{{ k8s_node2_sn }}"
+            --nameserver {{ k8s_node2_ns }}
+            --searchdomain {{ k8s_node2_sd }}
+            --sshkeys {{ k8s_ssh_key }}
+
+      - name: Importing the qemu image as a disk for the second Kubernetes node.
+        shell: qm importdisk {{ k8s_node2_id }} {{ qcow2_download_location }}CentOS7.qcow2c {{ k8s_node2_stg }}
+
+      - name: Configuring the second Kubernetes node to use the imported disk as scsi0.
+        shell: qm set {{ k8s_node2_id }} --scsihw virtio-scsi-pci --scsi0 {{ k8s_node2_stg }}:vm-{{ k8s_node2_id }}-disk-0
+
+      - name: Resizing scsi0 on the second Kubernetes node. 
+        shell: qm resize {{ k8s_node2_id }} scsi0 {{ k8s_node2_size }}
+
+      - name: Adding a CD-ROM drive to the second Kubernetes node to be used with Cloud-init.
+        shell: qm set {{ k8s_node2_id }} --ide2 {{ k8s_node2_stg }}:cloudinit
+
+      - name: Setting the boot disk for the second Kubernetes node to scsi0 and restricting BIOS to boot from disk only.
+        shell: qm set {{ k8s_node2_id }} --boot c --bootdisk scsi0 
+
+      - name: Creating the third Kubernetes node.
         shell: >
-            qm set {{ k8s_node3_id }} 
+            qm create {{ k8s_node3_id }}
+            --pool {{ k8s_resource_pool }}
+            --ostype "l26"
+            --name {{ k8s_node3_hn }}
             --description "Kubernetes Node 3"
-            --cores {{ k8s_node1_cpu }}
-            --memory {{ k8s_node1_mem }}
-            --sshkey {{ k8s_ssh_key }}
-            --ipconfig0 gw={{ k8s_node3_gw }},ip={{ k8s_node3_ip }}{{ k8s_node3_sn }} 
-            --nameserver {{ k8s_node3_ns }} 
+            --agent 1
+            --cores {{ k8s_node3_cpu }}
+            --memory {{ k8s_node3_mem }} 
+            --net0 "virtio,bridge=vmbr0"
+            --ipconfig0 "gw={{ k8s_node3_gw }},ip={{ k8s_node3_ip }}{{ k8s_node3_sn }}"
+            --nameserver {{ k8s_node3_ns }}
             --searchdomain {{ k8s_node3_sd }}
+            --sshkeys {{ k8s_ssh_key }}
+
+      - name: Importing the qemu image as a disk for the third Kubernetes node.
+        shell: qm importdisk {{ k8s_node3_id }} {{ qcow2_download_location }}CentOS7.qcow2c {{ k8s_node3_stg }}
+
+      - name: Configuring the third Kubernetes node to use the imported disk as scsi0.
+        shell: qm set {{ k8s_node3_id }} --scsihw virtio-scsi-pci --scsi0 {{ k8s_node3_stg }}:vm-{{ k8s_node3_id }}-disk-0
+
+      - name: Resizing scsi0 on the third Kubernetes node. 
+        shell: qm resize {{ k8s_node3_id }} scsi0 {{ k8s_node3_size }}
+
+      - name: Adding a CD-ROM drive to the third Kubernetes node to be used with Cloud-init.
+        shell: qm set {{ k8s_node3_id }} --ide2 {{ k8s_node3_stg }}:cloudinit
+
+      - name: Setting the boot disk for the third Kubernetes node to scsi0 and restricting BIOS to boot from disk only.
+        shell: qm set {{ k8s_node3_id }} --boot c --bootdisk scsi0 
 
       - name: Starting the Kubernetes Master.
         shell: qm start {{ k8s_master_id }}
@@ -140,3 +145,7 @@
 
       - name: Starting the third Kubernetes Node.
         shell: qm start {{ k8s_node3_id }}
+
+      - name: Pausing for 1 minute to allow the Kubernetes VMs to start.
+        pause:
+          minutes: 1
