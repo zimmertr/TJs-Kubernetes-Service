@@ -25,9 +25,10 @@ Build a 4 node Kubernetes cluster on a Proxmox cluster using Ansible and QEMU.
 1. You can rollback the entire deployment with: `ansible-playbook -e @vars.yml -i inventory.ini delete_all_resources.yml`
 
 # TODO
-1. Add better support for multi-node Proxmox clusters.
-2. Add support for VLAN Tags & IDs.
-3. Perform security audit and enhance if necessary.
+1. Add a default storage class and support for NFS.
+2. Add better support for multi-node Proxmox clusters.
+3. Add support for VLAN Tags & IDs.
+4. Perform security audit and enhance if necessary.
 
 # Problems
 1. The `proxmox_kvm` module is out of date and does not support cloudinit related api calls. Meaning shell commands must be used instead to perform `qm create` tasks. 
