@@ -1,0 +1,51 @@
+---
+- hosts: proxmox_server
+  tasks: 
+      - name: Stopping the K8s master VM.
+        shell: qm stop {{ k8s_master_id }}
+        ignore_errors: yes
+
+      - name: Stopping the first K8s node VM.
+        shell: qm stop {{ k8s_node1_id }}
+        ignore_errors: yes
+
+      - name: Stopping the second K8s node VM.
+        shell: qm stop {{ k8s_node2_id }}
+        ignore_errors: yes
+
+      - name: Stopping the third K8s node VM.
+        shell: qm stop {{ k8s_node3_id }}
+        ignore_errors: yes
+
+      - name: Destroying the K8s master VM.
+        shell: qm destroy {{ k8s_master_id }}
+        ignore_errors: yes
+
+      - name: Destroying the first K8s node VM.
+        shell: qm destroy {{ k8s_node1_id }}
+        ignore_errors: yes
+
+      - name: Destroying the second K8s node VM.
+        shell: qm destroy {{ k8s_node2_id }}
+        ignore_errors: yes
+
+      - name: Destroying the third K8s node VM.
+        shell: qm destroy {{ k8s_node3_id }}
+        ignore_errors: yes
+
+      - name: Destroying the K8s Resource Pool.
+        shell: pvesh delete /pools/{{ k8s_resource_pool }}
+        ignore_errors: yes
+
+      - name: Deleting the Debian qcow2 image.
+        file:
+          path: "/tmp/image.qcow2"
+          state: absent
+        ignore_errors: yes
+
+      - name: Deleting the ~/.kube directory.
+        local_action:
+          module: file
+          path: ~/.kube
+          state: absent
+        ignore_errors: yes
