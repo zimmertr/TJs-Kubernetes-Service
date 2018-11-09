@@ -5,6 +5,10 @@ Build a 4 node Kubernetes cluster on a Proxmox cluster using Ansible and QEMU.
 
 **Approximate deployment time:** 20 minutes
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/zimmertr/Bootstrap-Kubernetes-with-QEMU/master/screenshot.png" height="600">
+</p>
+
 # Requirements
 1. Proxmox server
 2. DNS Server
@@ -33,3 +37,4 @@ Build a 4 node Kubernetes cluster on a Proxmox cluster using Ansible and QEMU.
     * The CentOS `qcow2` image cannot be used due to [this bug] (https://bugs.centos.org/view.php?id=15426). 
     * The `CoreOS` qcow2 image does not have working networking after cloud-init does it's magic. 
     * A friend told me that the Ubuntu `qcow2` image also encounters a kernel panic on boot.
+
