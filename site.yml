@@ -1,26 +1,4 @@
 ---
-###############################################################################################
-#                                -Deploy the Compute Resources-                               #
-###############################################################################################
-# Only one of these playbooks should be used at a time depending on your deployment model.    #
-###############################################################################################
-- import_playbook: Playbooks/deploy_qcow2_vms.yml
-#- import_playbook: Playbooks/deploy_lxc_containers.yml
-
-
-
-###############################################################################################
-#                            -Prepare the instances for Kubernetes-                           #
-###############################################################################################
-# The `privelege_lxc_instances.yml` playbook should only be used if you are using LXC as your #
-# deployment model above. The `install_base_packages.yml` playbook should always be used.     #
-###############################################################################################
-- import_playbook: Playbooks/install_base_packages.yml
-#- import_playbook: Playbooks/privelege_lxc_instances.yml
-
-
-
-###############################################################################################
-#                              -Bootstrap the Kubernetes Cluster-                             #
-###############################################################################################
-- import_playbook: Playbooks/bootstrap_kubernetes.yml
+- import_playbook: playbooks/deploy_qcow2_vms.yml
+- import_playbook: playbooks/install_base_packages.yml
+- import_playbook: playbooks/bootstrap_kubernetes.yml
