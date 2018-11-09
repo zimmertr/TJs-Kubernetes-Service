@@ -82,7 +82,7 @@ k8s_node1_stg: "SaturnPool"
 k8s_node2_stg: "SaturnPool"
 k8s_node3_stg: "SaturnPool"
 
-# CIDR for the Calico Pod Network - MUST be different from any other CIDR on your network to avoid IP collision
+# CIDR for the Calico Pod Network - MUST be different from any other CIDR on your network to avoid IP collision. Subnet size will automatically be set to /16.
 calico_cidr: '172.16.0.0'
 
 # URL for the RBAC Policy for the Calico Network Policy: https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/#tabs-pod-install-1
