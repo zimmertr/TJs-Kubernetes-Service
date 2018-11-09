@@ -1,13 +1,13 @@
 ## Bootstrap Kubernetes with QEMU
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/zimmertr/Bootstrap-Kubernetes-with-QEMU/master/screenshot.png" width="800">
+</p>
+
 # Summary
 Build a 4 node Kubernetes cluster on a Proxmox cluster using Ansible and QEMU. 
 
 **Approximate deployment time:** 20 minutes
-
-<p align="center">
-  <img src="https://raw.githubusercontent.com/zimmertr/Bootstrap-Kubernetes-with-QEMU/master/screenshot.png" width="600">
-</p>
 
 # Requirements
 1. Proxmox server
