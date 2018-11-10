@@ -1,6 +1,12 @@
 ---
 - hosts: k8s_master:k8s_nodes
   tasks:
+      - name: Waiting for apt to give up the database lock before continuing.
+        wait_for:
+          path: /var/lib/dpkg/lock
+          state: absent
+          msg: Apt has not given up the lock in 5 minutes. Exiting now.
+
       - name: Performing a Package Upgrade.
         become: yes
         apt:
