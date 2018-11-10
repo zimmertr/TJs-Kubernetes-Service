@@ -1,7 +1,7 @@
 ## Bootstrap Kubernetes with QEMU
 
 # Summary
-Build a 4 node Kubernetes cluster on a Proxmox cluster using Ansible and QEMU. 
+Build a 4 node Kubernetes cluster on a Proxmox cluster using Ansible and QEMU.
 
 **Approximate deployment time:** 20 minutes
 
@@ -23,6 +23,11 @@ Build a 4 node Kubernetes cluster on a Proxmox cluster using Ansible and QEMU.
 
 # Tips
 1. You can rollback the entire deployment with: `ansible-playbook -e @vars.yml -i inventory.ini delete_all_resources.yml`
+2. See [this repository](https://github.com/zimmertr/Bootstrap-Kubernetes-with-LXC) to do this with LXC instead.  Benefits of using LXC include:
+```
+* No virtualization overhead means better performance
+* Ability to directly mount volumes from your server into your containers.
+```
 
 # TODO
 1. Add a default storage class and support for NFS.
