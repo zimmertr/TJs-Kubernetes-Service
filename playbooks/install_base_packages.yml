@@ -2,7 +2,7 @@
 - hosts: k8s_master:k8s_nodes
   tasks:
       - name: Waiting for Debian to finish performing automatic updates before continuing.
-        shell: ../files/bash_scripts/monitor_apt.sh
+        script: ../files/bash_scripts/monitor_automatic_updates_status.sh
 
       - name: Performing a Package Upgrade.
         become: yes
