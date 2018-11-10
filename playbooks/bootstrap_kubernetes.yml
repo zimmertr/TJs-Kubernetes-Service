@@ -48,13 +48,13 @@
       become: yes
       k8s:
         state: present
-        definition: "{{ lookup('template', './files/templates/create_user.yml.j2') | from_yaml }}"
+        definition: "{{ lookup('template', '../files/templates/create_user.yml.j2') | from_yaml }}"
 
     - name: Creating an a role binding for the admin user for Kubernetes.
       become: yes
       k8s:
         state: present
-        definition: "{{ lookup('template', './files/templates/create_role_binding.yml.j2') | from_yaml }}"
+        definition: "{{ lookup('template', '../files/templates/create_role_binding.yml.j2') | from_yaml }}"
 
     - name: Retreiving the master discovery token.
       become: yes
