@@ -84,6 +84,10 @@
         shell: qm start {{ item }}
         with_items: "{{ id_list }}"
 
-      - name: Pausing for 1 minute to allow the VMs to start back up.
-        pause:
-          minutes: 1
+      - name: Waiting for the VMs to become available.
+        wait_for:
+          host: "{{ item }}"
+          port: 22
+          msg: "VMs did not become available after 5 minutes. Network error?"
+        with_items: "{{ id_list }}"
+
