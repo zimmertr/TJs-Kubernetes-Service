@@ -56,11 +56,6 @@
         state: present
         definition: "{{ lookup('template', '../files/templates/create_role_binding.yml.j2') | from_yaml }}"
 
-    - name: Retreiving the kubeadm join command.
-      become: yes
-      shell: kubeadm token create --print-join-command
-      register: k8s_join_command
-
     - name: Retrieving the authentication token for your service user.
       become: yes
       shell: kubectl -n kube-system describe secret $(kubectl -n kube-system get secret | grep {{ k8s_user_name }} | awk '{print $1}') | grep 'token:' | awk '{print $2}'
@@ -83,6 +78,11 @@
     - name: Copying ~/.kube/config to your workstation.
       local_action: copy content={{ k8s_config.stdout }} dest=~/.kube/config
 
+    - name: Retreiving the kubeadm join command.
+      become: yes
+      shell: kubeadm token create --print-join-command
+      when: k8s_join_command is undefined
+      register: k8s_join_command
 
 - hosts: k8s_nodes
   tasks:
