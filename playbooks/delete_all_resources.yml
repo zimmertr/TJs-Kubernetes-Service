@@ -1,40 +1,20 @@
 ---
 - hosts: proxmox_server
+  vars:
+    id_list:
+      - "{{ k8s_master_id }}"
+      - "{{ k8s_node1_id }}"
+      - "{{ k8s_node2_id }}"
+      - "{{ k8s_node3_id }}"
   tasks: 
-      - name: Stopping the K8s master VM.
-        shell: qm stop {{ k8s_master_id }}
+      - name: Stopping the VMs.
+        shell: qm stop {{ item }}
+        with_items: "{{ id_list }}"
         ignore_errors: yes
 
-      - name: Stopping the first K8s node VM.
-        shell: qm stop {{ k8s_node1_id }}
-        ignore_errors: yes
-
-      - name: Stopping the second K8s node VM.
-        shell: qm stop {{ k8s_node2_id }}
-        ignore_errors: yes
-
-      - name: Stopping the third K8s node VM.
-        shell: qm stop {{ k8s_node3_id }}
-        ignore_errors: yes
-
-      - name: Destroying the K8s master VM.
-        shell: qm destroy {{ k8s_master_id }}
-        ignore_errors: yes
-
-      - name: Destroying the first K8s node VM.
-        shell: qm destroy {{ k8s_node1_id }}
-        ignore_errors: yes
-
-      - name: Destroying the second K8s node VM.
-        shell: qm destroy {{ k8s_node2_id }}
-        ignore_errors: yes
-
-      - name: Destroying the third K8s node VM.
-        shell: qm destroy {{ k8s_node3_id }}
-        ignore_errors: yes
-
-      - name: Destroying the K8s Resource Pool.
-        shell: pvesh delete /pools/{{ k8s_resource_pool }}
+      - name: Destroying the VMs.
+        shell: qm destroy {{ item }}
+        with_items: "{{ id_list }}"
         ignore_errors: yes
 
       - name: Deleting the Debian qcow2 image.
