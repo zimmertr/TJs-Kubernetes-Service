@@ -1,13 +1,14 @@
-# qcow2 image to use for your Virtual Machines: https://cdimage.debian.org/cdimage/openstack/current/?C=M;O=A 
+# qcow2 image to use for your Virtual Machines: 
+# Can be found here: https://cdimage.debian.org/cdimage/openstack/current/?C=M;O=A 
 qcow2_image: 'https://cdimage.debian.org/cdimage/openstack/current/debian-9.6.0-openstack-amd64.qcow2'
 
-# Location to use for storing the qcow2 image. Be sure to end the directory with a '/'
+# Location to use for storing the qcow2 image. Be sure to end the directory with a '/'.
 qcow2_download_location: '/tmp/'
 
-# Pool for your compute resources to be placed in
+# Resource Pool for your virtual machines.
 k8s_resource_pool: "Kubernetes"
 
-# Path to the SSH Public Key on your Proxmox Server to be used with your compute resources
+# Path to the SSH Public Key on your Proxmox Server.
 k8s_ssh_key: "/root/.ssh/sol.milkyway.kubernetes.pub"
 
 # VM IDs
@@ -82,14 +83,16 @@ k8s_node1_stg: "SaturnPool"
 k8s_node2_stg: "SaturnPool"
 k8s_node3_stg: "SaturnPool"
 
-# CIDR for the Calico Pod Network - MUST be different from any other CIDR on your network to avoid IP collision. Subnet size will automatically be set to /16.
+# CIDR for the Calico Pod Network - MUST be different from your Kubernetes CIDR to avoid an IP conflict. Subnet size will automatically be set to /16.
 calico_cidr: '172.16.0.0'
 
-# URL for the RBAC Policy for the Calico Network Policy: https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/#tabs-pod-install-1
+# URL for the RBAC Policy for the Calico Network Policy: 
+# Can be found here: https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/#tabs-pod-install-1
 calico_rbac_url: "https://docs.projectcalico.org/v3.3/getting-started/kubernetes/installation/hosted/rbac-kdd.yaml"
 
-# URL for the Calico Network Policy: https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/#tabs-pod-install-1
+# URL for the Calico Network Policy: 
+# Can be found here: https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/#tabs-pod-install-1
 calico_policy_url: 'https://docs.projectcalico.org/v3.3/getting-started/kubernetes/installation/hosted/kubernetes-datastore/calico-networking/1.7/calico.yaml'
 
-# Administrator user that is created for Kubernetes
+# Service user created for the dashboard.
 k8s_user_name: 'tj'
