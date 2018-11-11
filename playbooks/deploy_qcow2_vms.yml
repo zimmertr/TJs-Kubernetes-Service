@@ -10,169 +10,94 @@
           url: "{{ qcow2_image }}"
           dest: "{{ qcow2_download_location }}image.qcow2"
 
-      - name: Creating the Kubernetes master.
+      - name: Creating the Kubernetes VMs.
         shell: >
-            qm create {{ k8s_master_id }}
+            qm create {{ item.id }}
             --pool {{ k8s_resource_pool }}
             --ostype "l26"
-            --name {{ k8s_master_hn }}
-            --description "Kubernetes Master"
+            --name {{ item.hn }}
+            --description "Kubernetes"
             --agent 1
-            --cores {{ k8s_master_cpu }}
-            --memory {{ k8s_master_mem }} 
+            --cores {{ item.cpu }}
+            --memory {{ item.mem }} 
             --net0 "virtio,bridge=vmbr0"
-            --ipconfig0 "gw={{ k8s_master_gw }},ip={{ k8s_master_ip }}{{ k8s_master_sn }}"
-            --nameserver {{ k8s_master_ns }}
-            --searchdomain {{ k8s_master_sd }}
+            --ipconfig0 "gw={{ item.gw }},ip={{ item.ip }}{{ item.sn }}"
+            --nameserver {{ item.ns }}
+            --searchdomain {{ item.sd }}
             --sshkeys {{ k8s_ssh_key }}
+        with_items: 
+          - { id: "{{ k8s_master_id }}", hn: "{{ k8s_master_hn }}", cpu: "{{ k8s_master_cpu }}", mem: "{{ k8s_master_mem }}", gw: "{{ k8s_master_gw }}", ip: "{{ k8s_master_ip }}", sn: "{{ k8s_master_sn }}", ns: "{{ k8s_master_ns }}", sd: "{{ k8s_master_sd }}" }
+          - { id: "{{ k8s_node1_id }}", hn: "{{ k8s_node1_hn }}", cpu: "{{ k8s_node1_cpu }}", mem: "{{ k8s_node1_mem }}", gw: "{{ k8s_node1_gw }}", ip: "{{ k8s_node1_ip }}", sn: "{{ k8s_node1_sn }}", ns: "{{ k8s_node1_ns }}", sd: "{{ k8s_node1_sd }}" }
+          - { id: "{{ k8s_node2_id }}", hn: "{{ k8s_node2_hn }}", cpu: "{{ k8s_node2_cpu }}", mem: "{{ k8s_node2_mem }}", gw: "{{ k8s_node2_gw }}", ip: "{{ k8s_node2_ip }}", sn: "{{ k8s_node2_sn }}", ns: "{{ k8s_node2_ns }}", sd: "{{ k8s_node2_sd }}" }
+          - { id: "{{ k8s_node3_id }}", hn: "{{ k8s_node3_hn }}", cpu: "{{ k8s_node3_cpu }}", mem: "{{ k8s_node3_mem }}", gw: "{{ k8s_node3_gw }}", ip: "{{ k8s_node3_ip }}", sn: "{{ k8s_node3_sn }}", ns: "{{ k8s_node3_ns }}", sd: "{{ k8s_node3_sd }}" }
+            
+      - name: Importing the qemu image as a disk.
+        shell: qm importdisk {{ item.id }} {{ qcow2_download_location }}image.qcow2 {{ item.stg }}
+        with_items: 
+          - { id: "{{ k8s_master_id }}", stg: "{{ k8s_master_stg }}" }
+          - { id: "{{ k8s_node1_id }}", stg: "{{ k8s_node1_stg }}" }
+          - { id: "{{ k8s_node2_id }}", stg: "{{ k8s_node2_stg }}" }
+          - { id: "{{ k8s_node3_id }}", stg: "{{ k8s_node3_stg }}" }
 
-      - name: Importing the qemu image as a disk for the Kubernetes master.
-        shell: qm importdisk {{ k8s_master_id }} {{ qcow2_download_location }}image.qcow2 {{ k8s_master_stg }}
+      - name: Configuring the disk as scsi0.
+        shell: qm set {{ item.id }} --scsihw virtio-scsi-pci --scsi0 {{ item.stg }}:vm-{{ item.id }}-disk-0
+        with_items: 
+          - { id: "{{ k8s_master_id }}", stg: "{{ k8s_master_stg }}" }
+          - { id: "{{ k8s_node1_id }}", stg: "{{ k8s_node1_stg }}" }
+          - { id: "{{ k8s_node2_id }}", stg: "{{ k8s_node2_stg }}" }
+          - { id: "{{ k8s_node3_id }}", stg: "{{ k8s_node3_stg }}" }
 
-      - name: Configuring the Kubernetes master to use the imported disk as scsi0.
-        shell: qm set {{ k8s_master_id }} --scsihw virtio-scsi-pci --scsi0 {{ k8s_master_stg }}:vm-{{ k8s_master_id }}-disk-0
+      - name: Resizing the disk. 
+        shell: qm resize {{ item.id }} scsi0 {{ item.size }}
+        with_items: 
+          - { id: "{{ k8s_master_id }}", size: "{{ k8s_master_size }}" }
+          - { id: "{{ k8s_node1_id }}", size: "{{ k8s_node1_size }}" }
+          - { id: "{{ k8s_node2_id }}", size: "{{ k8s_node2_size }}" }
+          - { id: "{{ k8s_node3_id }}", size: "{{ k8s_node3_size }}" }
 
-      - name: Resizing scsi0 on the Kubernetes master. 
-        shell: qm resize {{ k8s_master_id }} scsi0 {{ k8s_master_size }}
+      - name: Adding a CD-ROM drive to be used with Cloud-init.
+        shell: qm set {{ item.id }} --ide2 {{ item.stg }}:cloudinit
+        with_items: 
+          - { id: "{{ k8s_master_id }}", stg: "{{ k8s_master_stg }}" }
+          - { id: "{{ k8s_node1_id }}", stg: "{{ k8s_node1_stg }}" }
+          - { id: "{{ k8s_node2_id }}", stg: "{{ k8s_node2_stg }}" }
+          - { id: "{{ k8s_node3_id }}", stg: "{{ k8s_node3_stg }}" }
 
-      - name: Adding a CD-ROM drive to the Kubernetes master to be used with Cloud-init.
-        shell: qm set {{ k8s_master_id }} --ide2 {{ k8s_master_stg }}:cloudinit
+      - name: Setting the boot disk to scsi0 and restricting BIOS to boot from disk only.
+        shell: qm set {{ item }} --boot c --bootdisk scsi0
+        with_items: 
+          - "{{ k8s_master_id }}"
+          - "{{ k8s_node1_id }}"
+          - "{{ k8s_node2_id }}"
+          - "{{ k8s_node3_id }}"
 
-      - name: Setting the boot disk for the Kubernetes master to scsi0 and restricting BIOS to boot from disk only.
-        shell: qm set {{ k8s_master_id }} --boot c --bootdisk scsi0
-
-      - name: Creating the first Kubernetes node.
-        shell: >
-            qm create {{ k8s_node1_id }}
-            --pool {{ k8s_resource_pool }}
-            --ostype "l26"
-            --name {{ k8s_node1_hn }}
-            --description "Kubernetes Node 1"
-            --agent 1
-            --cores {{ k8s_node1_cpu }}
-            --memory {{ k8s_node1_mem }} 
-            --net0 "virtio,bridge=vmbr0"
-            --ipconfig0 "gw={{ k8s_node1_gw }},ip={{ k8s_node1_ip }}{{ k8s_node1_sn }}"
-            --nameserver {{ k8s_node1_ns }}
-            --searchdomain {{ k8s_node1_sd }}
-            --sshkeys {{ k8s_ssh_key }}
-
-      - name: Importing the qemu image as a disk for the first Kubernetes node.
-        shell: qm importdisk {{ k8s_node1_id }} {{ qcow2_download_location }}image.qcow2 {{ k8s_node1_stg }}
-
-      - name: Configuring the first Kubernetes node to use the imported disk as scsi0.
-        shell: qm set {{ k8s_node1_id }} --scsihw virtio-scsi-pci --scsi0 {{ k8s_node1_stg }}:vm-{{ k8s_node1_id }}-disk-0
-
-      - name: Resizing scsi0 on the first Kubernetes node. 
-        shell: qm resize {{ k8s_node1_id }} scsi0 {{ k8s_node1_size }}
-
-      - name: Adding a CD-ROM drive to the first Kubernetes node to be used with Cloud-init.
-        shell: qm set {{ k8s_node1_id }} --ide2 {{ k8s_node1_stg }}:cloudinit
-
-      - name: Setting the boot disk for the first Kubernetes node to scsi0 and restricting BIOS to boot from disk only.
-        shell: qm set {{ k8s_node1_id }} --boot c --bootdisk scsi0  
-
-      - name: Creating the second Kubernetes node.
-        shell: >
-            qm create {{ k8s_node2_id }}
-            --pool {{ k8s_resource_pool }}
-            --ostype "l26"
-            --name {{ k8s_node2_hn }}
-            --description "Kubernetes Node 2"
-            --agent 1
-            --cores {{ k8s_node2_cpu }}
-            --memory {{ k8s_node2_mem }} 
-            --net0 "virtio,bridge=vmbr0"
-            --ipconfig0 "gw={{ k8s_node2_gw }},ip={{ k8s_node2_ip }}{{ k8s_node2_sn }}"
-            --nameserver {{ k8s_node2_ns }}
-            --searchdomain {{ k8s_node2_sd }}
-            --sshkeys {{ k8s_ssh_key }}
-
-      - name: Importing the qemu image as a disk for the second Kubernetes node.
-        shell: qm importdisk {{ k8s_node2_id }} {{ qcow2_download_location }}image.qcow2 {{ k8s_node2_stg }}
-
-      - name: Configuring the second Kubernetes node to use the imported disk as scsi0.
-        shell: qm set {{ k8s_node2_id }} --scsihw virtio-scsi-pci --scsi0 {{ k8s_node2_stg }}:vm-{{ k8s_node2_id }}-disk-0
-
-      - name: Resizing scsi0 on the second Kubernetes node. 
-        shell: qm resize {{ k8s_node2_id }} scsi0 {{ k8s_node2_size }}
-
-      - name: Adding a CD-ROM drive to the second Kubernetes node to be used with Cloud-init.
-        shell: qm set {{ k8s_node2_id }} --ide2 {{ k8s_node2_stg }}:cloudinit
-
-      - name: Setting the boot disk for the second Kubernetes node to scsi0 and restricting BIOS to boot from disk only.
-        shell: qm set {{ k8s_node2_id }} --boot c --bootdisk scsi0 
-
-      - name: Creating the third Kubernetes node.
-        shell: >
-            qm create {{ k8s_node3_id }}
-            --pool {{ k8s_resource_pool }}
-            --ostype "l26"
-            --name {{ k8s_node3_hn }}
-            --description "Kubernetes Node 3"
-            --agent 1
-            --cores {{ k8s_node3_cpu }}
-            --memory {{ k8s_node3_mem }} 
-            --net0 "virtio,bridge=vmbr0"
-            --ipconfig0 "gw={{ k8s_node3_gw }},ip={{ k8s_node3_ip }}{{ k8s_node3_sn }}"
-            --nameserver {{ k8s_node3_ns }}
-            --searchdomain {{ k8s_node3_sd }}
-            --sshkeys {{ k8s_ssh_key }}
-
-      - name: Importing the qemu image as a disk for the third Kubernetes node.
-        shell: qm importdisk {{ k8s_node3_id }} {{ qcow2_download_location }}image.qcow2 {{ k8s_node3_stg }}
-
-      - name: Configuring the third Kubernetes node to use the imported disk as scsi0.
-        shell: qm set {{ k8s_node3_id }} --scsihw virtio-scsi-pci --scsi0 {{ k8s_node3_stg }}:vm-{{ k8s_node3_id }}-disk-0
-
-      - name: Resizing scsi0 on the third Kubernetes node. 
-        shell: qm resize {{ k8s_node3_id }} scsi0 {{ k8s_node3_size }}
-
-      - name: Adding a CD-ROM drive to the third Kubernetes node to be used with Cloud-init.
-        shell: qm set {{ k8s_node3_id }} --ide2 {{ k8s_node3_stg }}:cloudinit
-
-      - name: Setting the boot disk for the third Kubernetes node to scsi0 and restricting BIOS to boot from disk only.
-        shell: qm set {{ k8s_node3_id }} --boot c --bootdisk scsi0 
-
-      - name: Starting the Kubernetes Master.
-        shell: qm start {{ k8s_master_id }}
-
-      - name: Starting the first Kubernetes Node.
-        shell: qm start {{ k8s_node1_id }}
-
-      - name: Starting the second Kubernetes Node.
-        shell: qm start {{ k8s_node2_id }}
-
-      - name: Starting the third Kubernetes Node.
-        shell: qm start {{ k8s_node3_id }}
+      - name: Starting the Kubernetes VMs.
+        shell: qm start {{ item }}
+        with_items: 
+          - "{{ k8s_master_id }}"
+          - "{{ k8s_node1_id }}"
+          - "{{ k8s_node2_id }}"
+          - "{{ k8s_node3_id }}"
 
       - name: Pausing for 30 seconds to allow the Kubernetes VMs to kernel panic. -_-
         pause:
           seconds: 30
 
-      - name: Stopping the Kubernetes Master.
-        shell: qm stop {{ k8s_master_id }}
+      - name: Stopping the Kubernetes VMs.
+        shell: qm stop {{ item }}
+        with_items: 
+          - "{{ k8s_master_id }}"
+          - "{{ k8s_node1_id }}"
+          - "{{ k8s_node2_id }}"
+          - "{{ k8s_node3_id }}"
 
-      - name: Stopping the first Kubernetes Node.
-        shell: qm stop {{ k8s_node1_id }}
-
-      - name: Stopping the second Kubernetes Node.
-        shell: qm stop {{ k8s_node2_id }}
-
-      - name: Stopping the third Kubernetes Node.
-        shell: qm stop {{ k8s_node3_id }}
-
-      - name: Starting the Kubernetes Master.
-        shell: qm start {{ k8s_master_id }}
-
-      - name: Starting the first Kubernetes Node.
-        shell: qm start {{ k8s_node1_id }}
-
-      - name: Starting the second Kubernetes Node.
-        shell: qm start {{ k8s_node2_id }}
-
-      - name: Starting the third Kubernetes Node.
-        shell: qm start {{ k8s_node3_id }}
+      - name: Starting the Kubernetes VMs.
+        shell: qm start {{ item }}
+        with_items: 
+          - "{{ k8s_master_id }}"
+          - "{{ k8s_node1_id }}"
+          - "{{ k8s_node2_id }}"
+          - "{{ k8s_node3_id }}"
 
       - name: Pausing for 1 minute to allow the Kubernetes VMs to start back up.
         pause:
