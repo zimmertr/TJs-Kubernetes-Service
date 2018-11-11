@@ -17,6 +17,9 @@
         with_items: "{{ id_list }}"
         ignore_errors: yes
 
+      - name: Deleting the Resource Pool.
+        shell: pvesh delete /pools/{{ k8s_resource_pool }}
+
       - name: Deleting the Debian qcow2 image.
         file:
           path: "/tmp/image.qcow2"
