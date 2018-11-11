@@ -15,7 +15,7 @@
       become: yes
       shell: cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 
-    - name: Downloading the Calico Pod Network deployment yaml.
+    - name: Downloading the Calico Pod Network manifest.
       get_url: 
         url: "{{ calico_policy_url }}"
         dest: /tmp/calico.yml
@@ -35,7 +35,7 @@
       k8s:
         src: /tmp/calico.yml
 
-    - name: Deleting the Calico Pod Network deployment yaml from disk.
+    - name: Deleting the Calico Pod Network manifest from disk.
       file: 
         path: /tmp/calico.yml
         state: absent
@@ -44,13 +44,13 @@
       become: yes
       shell: kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/master/src/deploy/recommended/kubernetes-dashboard.yaml
 
-    - name: Creating an admin user for Kubernetes.
+    - name: Creating an service user for the Dashboard.
       become: yes
       k8s:
         state: present
         definition: "{{ lookup('template', '../files/templates/create_user.yml.j2') | from_yaml }}"
 
-    - name: Creating an a role binding for the admin user for Kubernetes.
+    - name: Creating an a role binding for the service user.
       become: yes
       k8s:
         state: present
@@ -66,12 +66,12 @@
       shell: openssl x509 -pubkey -in /etc/kubernetes/pki/ca.crt | openssl rsa -pubin -outform der 2>/dev/null |    openssl dgst -sha256 -hex | sed 's/^.* //'
       register: k8s_discovery_token_hash
 
-    - name: Retrieving the authentication token for your Kubernetes User.
+    - name: Retrieving the authentication token for your service user.
       become: yes
       shell: kubectl -n kube-system describe secret $(kubectl -n kube-system get secret | grep {{ k8s_user_name }} | awk '{print $1}') | grep 'token:' | awk '{print $2}'
       register: k8s_user_token 
 
-    - name: Retreiving the kube config for your cluster.
+    - name: Retreiving the kube config.
       become: yes
       shell: cat ~/.kube/config
       register: k8s_config
@@ -94,7 +94,7 @@
       become: yes
       shell: kubeadm join --token {{ hostvars['pluto.sol.milkyway']['k8s_discovery_token']['stdout'] }} {{ k8s_master_ip }}:6443 --discovery-token-ca-cert-hash sha256:{{ hostvars['pluto.sol.milkyway']['k8s_discovery_token_hash']['stdout'] }} --ignore-preflight-errors=all
 
-    - name: Pausing for 1 minute to allow the Kubernetes nodes to join the cluster and the pods to become READY.
+    - name: Pausing for 1 minute to allow the nodes to join the cluster and the pods to become READY.
       pause:
         minutes: 1
 
