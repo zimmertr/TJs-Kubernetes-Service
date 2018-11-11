@@ -7,7 +7,7 @@
 # Summary
 Build a 4 node Kubernetes cluster on a Proxmox cluster using Ansible and QEMU.
 
-**Approximate deployment time:** 20 minutes
+**Approximate deployment time:** 25 minutes
 
 # Requirements
 1. Proxmox server
