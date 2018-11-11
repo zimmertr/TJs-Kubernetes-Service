@@ -1,10 +1,6 @@
 ---
 - hosts: k8s_master:k8s_nodes
   tasks:
-      - name: Waiting for Debian to finish booting.
-        pause:
-          seconds: 30
-
       - name: Waiting for Debian to finish performing automatic updates before continuing.
         script: ../files/bash_scripts/monitor_automatic_updates_status.sh
 
