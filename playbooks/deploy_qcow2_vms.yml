@@ -1,5 +1,17 @@
 ---
 - hosts: proxmox_server
+  vars:
+    id_list:
+      - "{{ k8s_master_id }}"
+      - "{{ k8s_node1_id }}"
+      - "{{ k8s_node2_id }}"
+      - "{{ k8s_node3_id }}"
+    id_sg_list:
+      - { id: "{{ k8s_master_id }}", stg: "{{ k8s_master_stg }}" }
+      - { id: "{{ k8s_node1_id }}", stg: "{{ k8s_node1_stg }}" }
+      - { id: "{{ k8s_node2_id }}", stg: "{{ k8s_node2_stg }}" }
+      - { id: "{{ k8s_node3_id }}", stg: "{{ k8s_node3_stg }}" }      
+  
   tasks:
       - name: Creating a pool for the compute resources.
         shell: pvesh create /pools -poolid "{{ k8s_resource_pool }}" --Comment "Kubernetes Cluster"
@@ -33,19 +45,11 @@
             
       - name: Importing the qemu image as a disk.
         shell: qm importdisk {{ item.id }} {{ qcow2_download_location }}image.qcow2 {{ item.stg }}
-        with_items: 
-          - { id: "{{ k8s_master_id }}", stg: "{{ k8s_master_stg }}" }
-          - { id: "{{ k8s_node1_id }}", stg: "{{ k8s_node1_stg }}" }
-          - { id: "{{ k8s_node2_id }}", stg: "{{ k8s_node2_stg }}" }
-          - { id: "{{ k8s_node3_id }}", stg: "{{ k8s_node3_stg }}" }
+        with_items: "{{ id_sg_list }}"
 
       - name: Configuring the disk as scsi0.
         shell: qm set {{ item.id }} --scsihw virtio-scsi-pci --scsi0 {{ item.stg }}:vm-{{ item.id }}-disk-0
-        with_items: 
-          - { id: "{{ k8s_master_id }}", stg: "{{ k8s_master_stg }}" }
-          - { id: "{{ k8s_node1_id }}", stg: "{{ k8s_node1_stg }}" }
-          - { id: "{{ k8s_node2_id }}", stg: "{{ k8s_node2_stg }}" }
-          - { id: "{{ k8s_node3_id }}", stg: "{{ k8s_node3_stg }}" }
+        with_items: "{{ id_sg_list }}"
 
       - name: Resizing the disk. 
         shell: qm resize {{ item.id }} scsi0 {{ item.size }}
@@ -57,27 +61,15 @@
 
       - name: Adding a CD-ROM drive to be used with Cloud-init.
         shell: qm set {{ item.id }} --ide2 {{ item.stg }}:cloudinit
-        with_items: 
-          - { id: "{{ k8s_master_id }}", stg: "{{ k8s_master_stg }}" }
-          - { id: "{{ k8s_node1_id }}", stg: "{{ k8s_node1_stg }}" }
-          - { id: "{{ k8s_node2_id }}", stg: "{{ k8s_node2_stg }}" }
-          - { id: "{{ k8s_node3_id }}", stg: "{{ k8s_node3_stg }}" }
+        with_items: "{{ id_sg_list }}"
 
       - name: Setting the boot disk to scsi0 and restricting BIOS to boot from disk only.
         shell: qm set {{ item }} --boot c --bootdisk scsi0
-        with_items: 
-          - "{{ k8s_master_id }}"
-          - "{{ k8s_node1_id }}"
-          - "{{ k8s_node2_id }}"
-          - "{{ k8s_node3_id }}"
+        with_items: "{{ id_list }}"
 
       - name: Starting the Kubernetes VMs.
         shell: qm start {{ item }}
-        with_items: 
-          - "{{ k8s_master_id }}"
-          - "{{ k8s_node1_id }}"
-          - "{{ k8s_node2_id }}"
-          - "{{ k8s_node3_id }}"
+        with_items: "{{ id_list }}"
 
       - name: Pausing for 30 seconds to allow the Kubernetes VMs to kernel panic. -_-
         pause:
@@ -85,19 +77,11 @@
 
       - name: Stopping the Kubernetes VMs.
         shell: qm stop {{ item }}
-        with_items: 
-          - "{{ k8s_master_id }}"
-          - "{{ k8s_node1_id }}"
-          - "{{ k8s_node2_id }}"
-          - "{{ k8s_node3_id }}"
+        with_items: "{{ id_list }}"
 
       - name: Starting the Kubernetes VMs.
         shell: qm start {{ item }}
-        with_items: 
-          - "{{ k8s_master_id }}"
-          - "{{ k8s_node1_id }}"
-          - "{{ k8s_node2_id }}"
-          - "{{ k8s_node3_id }}"
+        with_items: "{{ id_list }}"
 
       - name: Pausing for 1 minute to allow the Kubernetes VMs to start back up.
         pause:
