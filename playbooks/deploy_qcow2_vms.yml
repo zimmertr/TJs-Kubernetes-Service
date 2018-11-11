@@ -6,6 +6,11 @@
       - "{{ k8s_node1_id }}"
       - "{{ k8s_node2_id }}"
       - "{{ k8s_node3_id }}"
+    hn_list:
+      - "{{ k8s_master_hn }}"
+      - "{{ k8s_node1_hn }}"
+      - "{{ k8s_node2_hn }}"
+      - "{{ k8s_node3_hn }}"      
     id_stg_list:
       - { id: "{{ k8s_master_id }}", stg: "{{ k8s_master_stg }}" }
       - { id: "{{ k8s_node1_id }}", stg: "{{ k8s_node1_stg }}" }
@@ -89,5 +94,5 @@
           host: "{{ item }}"
           port: 22
           msg: "VMs did not become available after 5 minutes. Network error?"
-        with_items: "{{ id_list }}"
+        with_items: "{{ hn_list }}"
 
