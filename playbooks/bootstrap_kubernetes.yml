@@ -56,15 +56,10 @@
         state: present
         definition: "{{ lookup('template', '../files/templates/create_role_binding.yml.j2') | from_yaml }}"
 
-    - name: Retreiving the master discovery token.
+    - name: Retreiving the kubeadm join command.
       become: yes
-      shell: kubeadm token list | awk '{print $1}' | sed -n 2p
-      register: k8s_discovery_token
-
-    - name: Retrieving the SHA256 hash for the discovery token.
-      become: yes
-      shell: openssl x509 -pubkey -in /etc/kubernetes/pki/ca.crt | openssl rsa -pubin -outform der 2>/dev/null |    openssl dgst -sha256 -hex | sed 's/^.* //'
-      register: k8s_discovery_token_hash
+      shell: kubeadm token create --print-join-command
+      register: k8s_join_command_raw
 
     - name: Retrieving the authentication token for your service user.
       become: yes
@@ -88,12 +83,11 @@
     - name: Copying ~/.kube/config to your workstation.
       local_action: copy content={{ k8s_config.stdout }} dest=~/.kube/config
 
-
 - hosts: k8s_nodes
   tasks:
     - name: Joining the nodes to the master.
       become: yes
-      shell: kubeadm join --token {{ hostvars['pluto.sol.milkyway']['k8s_discovery_token']['stdout'] }} {{ k8s_master_ip }}:6443 --discovery-token-ca-cert-hash sha256:{{ hostvars['pluto.sol.milkyway']['k8s_discovery_token_hash']['stdout'] }} --ignore-preflight-errors=all
+      shell: "{{ hostvars[groups['k8s_master'][0]]['k8s_join_command_raw']['stdout'] }} --ignore-preflight-errors=all"
 
     - name: Pausing for 1 minute to allow the nodes to join the cluster and the pods to become READY.
       pause:
