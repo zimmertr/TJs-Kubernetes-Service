@@ -59,7 +59,7 @@
     - name: Retreiving the kubeadm join command.
       become: yes
       shell: kubeadm token create --print-join-command
-      register: k8s_join_command_raw
+      register: k8s_join_command
 
     - name: Retrieving the authentication token for your service user.
       become: yes
@@ -87,7 +87,7 @@
   tasks:
     - name: Joining the nodes to the master.
       become: yes
-      shell: "{{ hostvars[groups['k8s_master'][0]]['k8s_join_command_raw']['stdout'] }} --ignore-preflight-errors=all"
+      shell: "{{ hostvars[groups['k8s_master'][0]]['k8s_join_command']['stdout'] }} --ignore-preflight-errors=all"
 
     - name: Pausing for 1 minute to allow the nodes to join the cluster and the pods to become READY.
       pause:
