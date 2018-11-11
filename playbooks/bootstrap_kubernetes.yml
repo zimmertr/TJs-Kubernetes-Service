@@ -83,6 +83,7 @@
     - name: Copying ~/.kube/config to your workstation.
       local_action: copy content={{ k8s_config.stdout }} dest=~/.kube/config
 
+
 - hosts: k8s_nodes
   tasks:
     - name: Joining the nodes to the master.
