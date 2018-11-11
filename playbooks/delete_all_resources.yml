@@ -6,6 +6,8 @@
       - "{{ k8s_node1_id }}"
       - "{{ k8s_node2_id }}"
       - "{{ k8s_node3_id }}"
+
+      
   tasks: 
       - name: Stopping the VMs.
         shell: qm stop {{ item }}

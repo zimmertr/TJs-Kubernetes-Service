@@ -6,11 +6,12 @@
       - "{{ k8s_node1_id }}"
       - "{{ k8s_node2_id }}"
       - "{{ k8s_node3_id }}"
-    id_sg_list:
+    id_stg_list:
       - { id: "{{ k8s_master_id }}", stg: "{{ k8s_master_stg }}" }
       - { id: "{{ k8s_node1_id }}", stg: "{{ k8s_node1_stg }}" }
       - { id: "{{ k8s_node2_id }}", stg: "{{ k8s_node2_stg }}" }
       - { id: "{{ k8s_node3_id }}", stg: "{{ k8s_node3_stg }}" }      
+  
   
   tasks:
       - name: Creating a resource pool.
@@ -28,7 +29,7 @@
             --pool {{ k8s_resource_pool }}
             --ostype "l26"
             --name {{ item.hn }}
-            --description "Kubernetes"
+            --description "Kubernetes VM"
             --agent 1
             --cores {{ item.cpu }}
             --memory {{ item.mem }} 
@@ -45,11 +46,11 @@
             
       - name: Importing the qcow2 image as a disk.
         shell: qm importdisk {{ item.id }} {{ qcow2_download_location }}image.qcow2 {{ item.stg }}
-        with_items: "{{ id_sg_list }}"
+        with_items: "{{ id_stg_list }}"
 
       - name: Configuring the disk as scsi0.
         shell: qm set {{ item.id }} --scsihw virtio-scsi-pci --scsi0 {{ item.stg }}:vm-{{ item.id }}-disk-0
-        with_items: "{{ id_sg_list }}"
+        with_items: "{{ id_stg_list }}"
 
       - name: Resizing the disk. 
         shell: qm resize {{ item.id }} scsi0 {{ item.size }}
@@ -61,7 +62,7 @@
 
       - name: Adding a CD-ROM drive to be used with Cloud-init.
         shell: qm set {{ item.id }} --ide2 {{ item.stg }}:cloudinit
-        with_items: "{{ id_sg_list }}"
+        with_items: "{{ id_stg_list }}"
 
       - name: Setting the boot disk to scsi0 and restricting BIOS to boot from disk only.
         shell: qm set {{ item }} --boot c --bootdisk scsi0

@@ -77,7 +77,7 @@ k8s_node2_bridge: "vmbr0"
 k8s_node3_bridge: "vmbr0"
 
 # Storage volumes
-k8s_master_stg: "Proxmox_lvm-thin"
+k8s_master_stg: "SaturnPool"
 k8s_node1_stg: "SaturnPool"
 k8s_node2_stg: "SaturnPool"
 k8s_node3_stg: "SaturnPool"
