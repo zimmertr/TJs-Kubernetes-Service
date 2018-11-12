@@ -47,14 +47,12 @@
     - name: Creating an service user for the Dashboard.
       become: yes
       k8s:
-        state: present
-        definition: "{{ lookup('template', '../files/templates/create_user.yml.j2') | from_yaml }}"
+        definition: "{{ lookup('template', '../files/templates/dashboard_service_user.yml.j2') | from_yaml }}"
 
     - name: Creating an a role binding for the service user.
       become: yes
       k8s:
-        state: present
-        definition: "{{ lookup('template', '../files/templates/create_role_binding.yml.j2') | from_yaml }}"
+        definition: "{{ lookup('template', '../files/templates/dashboard_role_binding.yml.j2') | from_yaml }}"
 
     - name: Retrieving the authentication token for your service user.
       become: yes
