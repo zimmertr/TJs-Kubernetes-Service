@@ -95,6 +95,6 @@
           - "{{ k8s_node2_hn }}"
           - "{{ k8s_node3_hn }}"
 
-      - name: Waiting one minute for for Debian to finish booting.
+      - name: Waiting 90 seconds for for Debian to finish booting.
         pause:
-          minutes: 1
+          seconds: 90
