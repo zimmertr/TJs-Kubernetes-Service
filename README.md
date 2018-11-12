@@ -15,11 +15,17 @@ Build a 4 node Kubernetes cluster on a Proxmox cluster using Ansible and QEMU.
 3. Ansible 2.7.0+. Known incompatibility with a previous build. 
 
 # Instructions
+**Required:**
+
 1. Modify the `vars.yml` file with values specific to your environment.
 2. Provision DNS A records for the IP Addresses & Hostnames you defined for your nodes in the `vars.yml` file.
 3. Modify the `inventory.ini` file to reflect your chosen DNS records and the location of the SSH keys used to connect to the nodes.
 4. Run the deployment: `ansible-playbook -e @vars.yml -i inventory.ini site.yml`
 5. After deployment, a `~/.kube` directory will be created on your workstation. Within your `config` and an `authentication_token` file can be be found. This token is used to authenticate against the Kubernetes API and Dashboard using your account. To connect to the dashboard, install `kubectl` on your workstation and run `kubectl proxy` then navigate to the [Dashboard Endpoint](http://localhost:8001/api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy/) in your browser.
+
+**Optional:**
+
+1. If you have an NFS server you can enable optional support for dynamic provisioning of Persistent Storage volumes for your pods by filling in the additional parameters in `vars.yml` and running this playbook: `ansible-playbook -e @vars.yml -i inventory.ini playbooks/deploy_nfs.yml`
 
 # Tips
 1. You can rollback the entire deployment with: `ansible-playbook -e @vars.yml -i inventory.ini delete_all_resources.yml`
