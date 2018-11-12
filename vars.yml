@@ -1,7 +1,7 @@
 ###############################################################################################
 #                                      -General Options-                                      # 
 ###############################################################################################
-# These parameters must be filled out.                                                        #
+# These parameters are required.                                                              #
 ###############################################################################################
 
 # qcow2 image to use for your Virtual Machines: 
@@ -106,7 +106,8 @@ k8s_user_name: 'tj'
 ###############################################################################################
 #                                        -NFS Options-                                        # 
 ###############################################################################################
-# These parameters must only be filled out if you also intend to deploy an NFS Storage Class. #
+# These parameters are only required if you have an NFS server and would like to enable the   #
+# optional support for dynamic provisioning of Persistent Storage volumes for your pods.
 ###############################################################################################
 
 # NFS server
