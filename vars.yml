@@ -1,3 +1,9 @@
+###############################################################################################
+#                                      -General Options-                                      # 
+###############################################################################################
+# These parameters must be filled out.                                                        #
+###############################################################################################
+
 # qcow2 image to use for your Virtual Machines: 
 # Can be found here: https://cdimage.debian.org/cdimage/openstack/current/?C=M;O=A 
 qcow2_image: 'https://cdimage.debian.org/cdimage/openstack/current/debian-9.6.0-openstack-amd64.qcow2'
@@ -96,3 +102,21 @@ calico_policy_url: 'https://docs.projectcalico.org/v3.3/getting-started/kubernet
 
 # Service user created for the dashboard.
 k8s_user_name: 'tj'
+
+###############################################################################################
+#                                        -NFS Options-                                        # 
+###############################################################################################
+# These parameters must only be filled out if you also intend to deploy an NFS Storage Class. #
+###############################################################################################
+
+# NFS server
+nfs_hostname: 'saturn.sol.milkyway'
+
+# NFS Mount Point
+nfs_mount_point: '/SaturnPool/Kubernetes'
+
+# NFS Provisioner Name
+nfs_provisioner: 'saturnpool'
+
+# Namespace to deploy dynamic NFS support to
+nfs_namespace: 'default'
