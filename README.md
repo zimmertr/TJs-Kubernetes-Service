@@ -43,6 +43,7 @@ Build a 4 node Kubernetes cluster on a Proxmox cluster using Ansible and QEMU.
 2. Add support for VLAN Tags & IDs.
 3. Perform security audit and enhance if necessary.
 4. Add info to README about updating inventory file and how to handle SSH key generation and propegation.
+5. Add playbook to integrate k8s with a log server.
 
 # Problems
 1. The `proxmox_kvm` module is out of date and does not support cloudinit related api calls. Meaning shell commands must be used instead to perform `qm create` tasks. 
