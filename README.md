@@ -9,10 +9,12 @@ Declaratively build a 4 node Kubernetes cluster on Proxmox using Ansible and QEM
 
 **Approximate deployment time:** 25 minutes
 
+
 # Requirements
 1. Proxmox server
 2. DNS Server
 3. Ansible 2.7.0+. Known incompatibility with a previous build.
+
 
 # Instructions
 **Required:**
@@ -25,9 +27,14 @@ Declaratively build a 4 node Kubernetes cluster on Proxmox using Ansible and QEM
 
 **Optional:**
 
-1. If you have an NFS server you can enable optional support for dynamic provisioning of Persistent Storage volumes for your pods by filling in the additional parameters in `vars.yml` and running this playbook: `ansible-playbook -e @vars.yml -i inventory.ini playbooks/optional/deploy_nfs.yml`
-2. If you want to be able to connect to your deployments without enabling NodePorts you can enable MetalLB load balancing by filling in the additional parameters in `vars.yml` and running this playbook: `ansible-playbook -e @vars.yml -i inventory.ini playbooks/optional/deploy_metallb.yml`
-3. If you want to deploy Datadog agents to your cluster and enable cluster-level metrics collection, you can do so by filling in the additional parameters in `vars.yml` and running this playbook: `ansible-playbook -e @vars.yml -i inventory.ini playbooks/optional/deploy_datadog.yml`
+To enable an optional feature, fill in the additional parameters in `vars.yml` and execute a playbook listed below.
+
+| Purpose | Command |
+| ------- | ------- |
+| Enable [NFS backed persistent storage](https://github.com/kubernetes-incubator/external-storage/tree/master/nfs-client) | `ansible-playbook -e @vars.yml -i inventory.ini playbooks/optional/deploy_nfs.yml` |
+| Enable [bare metal load balancing](https://metallb.universe.tf) for services | `ansible-playbook -e @vars.yml -i inventory.ini playbooks/optional/deploy_metallb.yml` |
+| Enable [DataDog agents](https://docs.datadoghq.com/integrations/kubernetes/) | `ansible-playbook -e @vars.yml -i inventory.ini playbooks/optional/deploy_datadog.yml`
+
 
 # Tips
 1. You can rollback the entire deployment with: `ansible-playbook -e @vars.yml -i inventory.ini playbooks/optional/delete_all_resources.yml`
@@ -37,6 +44,7 @@ Declaratively build a 4 node Kubernetes cluster on Proxmox using Ansible and QEM
 * No virtualization overhead means better performance
 * Ability to directly mount volumes from your server into your containers.
 ```
+
 
 # TODO
 1. Add better support for multi-node Proxmox clusters.
