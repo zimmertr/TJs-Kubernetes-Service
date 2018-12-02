@@ -1,0 +1,146 @@
+###############################################################################################
+#                                      -General Options-                                      # 
+###############################################################################################
+# These parameters are required.                                                              #
+###############################################################################################
+
+# qcow2 image to use for your Virtual Machines: 
+# Can be found here: https://cdimage.debian.org/cdimage/openstack/current/?C=M;O=A 
+qcow2_image: 'https://cdimage.debian.org/cdimage/openstack/current/debian-9.6.0-openstack-amd64.qcow2'
+
+# Location to use for storing the qcow2 image. Be sure to end the directory with a '/'.
+qcow2_download_location: '/tmp/'
+
+# Resource Pool for your virtual machines.
+k8s_resource_pool: "Kubernetes"
+
+# Path to the SSH Public Key on your Proxmox Server.
+k8s_ssh_key: "/root/.ssh/sol.milkyway.kubernetes.pub"
+
+# VM IDs
+k8s_master_id: '170'
+k8s_node1_id: '180'
+k8s_node2_id: '181'
+k8s_node3_id: '182'
+
+# Hostnames
+k8s_master_hn: "Pluto"
+k8s_node1_hn: "Ceres"
+k8s_node2_hn: "Eris"
+k8s_node3_hn: "Haumea"
+
+# Number of CPUs
+k8s_master_cpu: "2"
+k8s_node1_cpu: "4"
+k8s_node2_cpu: "4"
+k8s_node3_cpu: "4"
+
+# Amount of memory expressed in megabytes
+k8s_master_mem: "4096"
+k8s_node1_mem: "8192"
+k8s_node2_mem: "8192"
+k8s_node3_mem: "8192"
+
+# Disk Sizes
+k8s_master_size: "50G"
+k8s_node1_size: "50G"
+k8s_node2_size: "50G"
+k8s_node3_size: "50G"
+
+# IP Addresses
+k8s_master_ip: "192.168.1.170"
+k8s_node1_ip: "192.168.1.180"
+k8s_node2_ip: "192.168.1.181"
+k8s_node3_ip: "192.168.1.182"
+
+# Subnet Sizes
+k8s_master_sn: "/24"
+k8s_node1_sn: "/24"
+k8s_node2_sn: "/24"
+k8s_node3_sn: "/24"
+
+# Network Gateway
+k8s_master_gw: "192.168.1.1"
+k8s_node1_gw: "192.168.1.1"
+k8s_node2_gw: "192.168.1.1"
+k8s_node3_gw: "192.168.1.1"
+
+# DNS Servers
+k8s_master_ns: "192.168.1.10"
+k8s_node1_ns: "192.168.1.10"
+k8s_node2_ns: "192.168.1.10"
+k8s_node3_ns: "192.168.1.10"
+
+# Search Domains
+k8s_master_sd: "sol.milkyway"
+k8s_node1_sd: "sol.milkyway"
+k8s_node2_sd: "sol.milkyway"
+k8s_node3_sd: "sol.milkyway"
+
+# Network Bridges
+k8s_master_bridge: "vmbr0"
+k8s_node1_bridge: "vmbr0"
+k8s_node2_bridge: "vmbr0"
+k8s_node3_bridge: "vmbr0"
+
+# Storage volumes
+k8s_master_stg: "SaturnPool"
+k8s_node1_stg: "SaturnPool"
+k8s_node2_stg: "SaturnPool"
+k8s_node3_stg: "SaturnPool"
+
+# CIDR for the Calico Pod Network - MUST be different from your Kubernetes CIDR to avoid an IP conflict. Subnet size will automatically be set to /16.
+calico_cidr: '172.16.0.0'
+
+# URL for the RBAC Policy for the Calico Network Policy: 
+# Can be found here: https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/#tabs-pod-install-1
+calico_rbac_url: "https://docs.projectcalico.org/v3.3/getting-started/kubernetes/installation/hosted/rbac-kdd.yaml"
+
+# URL for the Calico Network Policy: 
+# Can be found here: https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/#tabs-pod-install-1
+calico_policy_url: 'https://docs.projectcalico.org/v3.3/getting-started/kubernetes/installation/hosted/kubernetes-datastore/calico-networking/1.7/calico.yaml'
+
+# Service user created for the dashboard.
+k8s_user_name: 'tj'
+
+
+###############################################################################################
+#                                        -NFS Options-                                        # 
+###############################################################################################
+# These parameters are only required if you have an NFS server and would like to enable the   #
+# optional support for dynamic provisioning of Persistent Storage volumes for your pods.
+###############################################################################################
+
+# NFS server
+nfs_hostname: 'saturn.sol.milkyway'
+
+# NFS Mount Point
+nfs_mount_point: '/SaturnPool/Kubernetes'
+
+# NFS Provisioner Name
+nfs_provisioner: 'saturnpool'
+
+# Namespace to deploy dynamic NFS support to
+nfs_namespace: 'default'
+
+
+###############################################################################################
+#                                      -DataDog Options-                                      # 
+###############################################################################################
+# These parameters are only required if you have an account with DataDog and would like to    #
+# enable metrics collection for your cluster.                                                 #
+###############################################################################################
+
+# Your DataDog API Key
+dd_api_key: 'APIKEY'
+
+
+###############################################################################################
+#                                      -DataDog Options-                                      # 
+###############################################################################################
+# These parameters are only required if you want to enable on-prem load balancing with MetalLB#
+###############################################################################################
+
+# The IP Range for your loadbalancing with MetalLB.
+metallb_ip_range: '192.168.0.1-192.168.0.255'
+
