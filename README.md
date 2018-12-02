@@ -53,5 +53,5 @@ Build a 4 node Kubernetes cluster on a Proxmox cluster using Ansible and QEMU.
 3. Miscellaneous `qcow2` image issues:
     * The Debian `qcow2` image encounters a Kernel Panic on the first boot for some reason. A hack has been put in place to get around this by stopping and     restarting them after 30 seconds. 
     * The CentOS `qcow2` image cannot be used due to [this bug](https://bugs.centos.org/view.php?id=15426). 
-    * The `CoreOS` qcow2 image does not have working networking after cloud-init does it's magic. 
+    * The CoreOS `qcow2` image does not have working networking after cloud-init does it's magic. 
     * A friend told me that the Ubuntu `qcow2` image also encounters a kernel panic on boot.
