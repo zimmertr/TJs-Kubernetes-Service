@@ -1,0 +1,47 @@
+---
+- hosts: localhost
+  gather_facts: no
+  tasks:
+    - name: Cloning the kube-state-metrics repository.
+      git:
+        repo: 'https://github.com/kubernetes/kube-state-metrics.git'
+        dest: ~/kube-state-metrics
+
+    - name: Building a list of manifests in the repository.
+      find:
+        paths: ~/kube-state-metrics/kubernetes
+        pattern: '*.yaml'
+      register: manifest_list
+
+    - set_fact:
+        list_length: "{{ manifest_list | length }}"
+
+    - name: test1
+      debug: msg="{{ item }}"
+      with_sequence: start=0 end={{ list_length|int -1 }}
+
+    - name: test2
+      debug: msg="{{manifest_list.files[3].path }}"
+
+    - name: test3
+      debug:
+        msg: "{{ manifest_list.files[item].path }}"
+      with_sequence: start=0 end={{ list_length|int -1 }}
+
+    - name: Enabling cluster level metrics collection.
+      k8s:
+        definition: "{{ lookup('template', manifest_list.files[item].path) | from_yaml_all | list }}"
+      with_items: 
+        - 1
+        - 2
+        - 3
+        - 4
+        - 5
+        - 6
+        - 7
+        - 8
+        - 9
+
+    - name: Deploying the datadog agent.
+      k8s:
+        definition: "{{ lookup('template', ./files/templates/Datadog/datadog_integration.yml.j2 | from_yaml }}"
