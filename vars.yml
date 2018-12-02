@@ -123,6 +123,19 @@ nfs_provisioner: 'saturnpool'
 # Namespace to deploy dynamic NFS support to
 nfs_namespace: 'default'
 
+# Default reclaim policy. https://kubernetes.io/docs/concepts/storage/storage-classes/#reclaim-policy
+nfs_reclaim_policy: 'Retain'
+
+
+###############################################################################################
+#                                      -MetalLB Options-                                      # 
+###############################################################################################
+# These parameters are only required if you want to enable on-prem load balancing with MetalLB#
+###############################################################################################
+
+# The IP Range for your loadbalancing with MetalLB.
+metallb_ip_range: '192.168.0.1-192.168.0.255'
+
 
 ###############################################################################################
 #                                      -DataDog Options-                                      # 
@@ -133,14 +146,3 @@ nfs_namespace: 'default'
 
 # Your DataDog API Key
 dd_api_key: 'APIKEY'
-
-
-###############################################################################################
-#                                      -DataDog Options-                                      # 
-###############################################################################################
-# These parameters are only required if you want to enable on-prem load balancing with MetalLB#
-###############################################################################################
-
-# The IP Range for your loadbalancing with MetalLB.
-metallb_ip_range: '192.168.0.1-192.168.0.255'
-
