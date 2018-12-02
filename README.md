@@ -52,6 +52,6 @@ Build a 4 node Kubernetes cluster on a Proxmox cluster using Ansible and QEMU.
 2. The `k8s` module does not support applying Kubernetes Deployments from URL. Instead of using `get_url` to download them first, and then apply them with `k8s`, I just use `shell` to run a `kubectl apply -f`. [Feature Request here](https://github.com/ansible/ansible/issues/48402).
 3. Miscellaneous `qcow2` image issues:
     * The Debian `qcow2` image encounters a Kernel Panic on the first boot for some reason. A hack has been put in place to get around this by stopping and     restarting them after 30 seconds. 
-    * The CentOS `qcow2` image cannot be used due to [this bug] (https://bugs.centos.org/view.php?id=15426). 
+    * The CentOS `qcow2` image cannot be used due to [this bug](https://bugs.centos.org/view.php?id=15426). 
     * The `CoreOS` qcow2 image does not have working networking after cloud-init does it's magic. 
     * A friend told me that the Ubuntu `qcow2` image also encounters a kernel panic on boot.
