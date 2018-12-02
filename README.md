@@ -27,6 +27,7 @@ Declaratively build a 4 node Kubernetes cluster on Proxmox using Ansible and QEM
 
 1. If you have an NFS server you can enable optional support for dynamic provisioning of Persistent Storage volumes for your pods by filling in the additional parameters in `vars.yml` and running this playbook: `ansible-playbook -e @vars.yml -i inventory.ini playbooks/optional/deploy_nfs.yml`
 2. If you want to be able to connect to your deployments without enabling NodePorts you can enable MetalLB load balancing by filling in the additional parameters in `vars.yml` and running this playbook: `ansible-playbook -e @vars.yml -i inventory.ini playbooks/optional/deploy_metallb.yml`
+3. If you want to deploy Datadog agents to your cluster and enable cluster-level metrics collection, you can do so by filling in the additional parameters in `vars.yml` and running this playbook: `ansible-playbook -e @vars.yml -i inventory.ini playbooks/optional/deploy_datadog.yml`
 
 # Tips
 1. You can rollback the entire deployment with: `ansible-playbook -e @vars.yml -i inventory.ini playbooks/optional/delete_all_resources.yml`
