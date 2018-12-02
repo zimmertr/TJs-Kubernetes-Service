@@ -22,7 +22,7 @@ Declaratively build a 4 node Kubernetes cluster on Proxmox using Ansible and QEM
 1. Modify the `vars.yml` file with values specific to your environment.
 2. Provision DNS A records for the IP Addresses & Hostnames you defined for your nodes in the `vars.yml` file.
 3. Modify the `inventory.ini` file to reflect your chosen DNS records and the location of the SSH keys used to connect to the nodes.
-4. Run the deployment: `ansible-playbook -e @vars.yml -i inventory.ini site.yml`
+4. Run the deployment: `ansible-playbook -i inventory.ini site.yml`
 5. After deployment, a `~/.kube` directory will be created on your workstation. Within your `config` and an `authentication_token` file can be be found. This token is used to authenticate against the Kubernetes API and Dashboard using your account. To connect to the dashboard, install `kubectl` on your workstation and run `kubectl proxy` then navigate to the [Dashboard Endpoint](http://localhost:8001/api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy/) in your browser.
 
 **Optional:**
@@ -31,13 +31,13 @@ Declaratively build a 4 node Kubernetes cluster on Proxmox using Ansible and QEM
 
 | Purpose | Command |
 | ------- | ------- |
-| Enable [NFS backed persistent storage](https://github.com/kubernetes-incubator/external-storage/tree/master/nfs-client) | `ansible-playbook -e @vars.yml -i inventory.ini playbooks/optional/deploy_nfs.yml` |
-| Enable [bare metal load balancing](https://metallb.universe.tf) | `ansible-playbook -e @vars.yml -i inventory.ini playbooks/optional/deploy_metallb.yml` |
-| Enable [DataDog agents](https://docs.datadoghq.com/integrations/kubernetes/) | `ansible-playbook -e @vars.yml -i inventory.ini playbooks/optional/deploy_datadog.yml`
+| Enable [NFS backed persistent storage](https://github.com/kubernetes-incubator/external-storage/tree/master/nfs-client) | `ansible-playbook -i inventory.ini playbooks/optional/deploy_nfs.yml` |
+| Enable [bare metal load balancing](https://metallb.universe.tf) | `ansible-playbook -i inventory.ini playbooks/optional/deploy_metallb.yml` |
+| Enable [DataDog agents](https://docs.datadoghq.com/integrations/kubernetes/) | `ansible-playbook -i inventory.ini playbooks/optional/deploy_datadog.yml`
 
 
 # Tips
-1. You can rollback the entire deployment with: `ansible-playbook -e @vars.yml -i inventory.ini playbooks/optional/delete_all_resources.yml`
+1. You can rollback the entire deployment with: `ansible-playbook -i inventory.ini playbooks/optional/delete_all_resources.yml`
 2. If Calico isn't deploying correctly it's likely the CIDR you assigned to it in `vars.yml` conflicts with your network. 
 3. See [this repository](https://github.com/zimmertr/Bootstrap-Kubernetes-with-LXC) to do this with LXC instead.  Benefits of using LXC include:
 ```
