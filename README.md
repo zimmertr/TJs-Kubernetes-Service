@@ -13,8 +13,6 @@ Build a 4 node Kubernetes cluster on a Proxmox cluster using Ansible and QEMU.
 1. Proxmox server
 2. DNS Server
 3. Ansible 2.7.0+. Known incompatibility with a previous build.
-5. Fix `*.raw` disk issue
-6. Implement identification of different types of storage mounts
 
 # Instructions
 **Required:**
@@ -45,6 +43,9 @@ Build a 4 node Kubernetes cluster on a Proxmox cluster using Ansible and QEMU.
 3. Perform security audit and enhance if necessary.
 4. Add info to README about updating inventory file and how to handle SSH key generation and propegation.
 5. Add playbook to integrate k8s with a log server.
+6. Fix `*.raw` disk issue.
+7. Implement identification of different types of storage mounts.
+8. Finish datadog integration.
 
 # Problems
 1. The `proxmox_kvm` module is out of date and does not support cloudinit related api calls. Meaning shell commands must be used instead to perform `qm create` tasks. 
