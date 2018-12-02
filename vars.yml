@@ -146,3 +146,6 @@ metallb_ip_range: '192.168.0.1-192.168.0.255'
 
 # Your DataDog API Key
 dd_api_key: 'APIKEY'
+
+# Namespace to deploy DataDog to
+dd_namespace: 'default'
