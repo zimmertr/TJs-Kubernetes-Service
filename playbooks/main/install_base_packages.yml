@@ -18,7 +18,8 @@
       - name: Installing the base packages.
         become: yes
         apt:
-            name: ['apt-transport-https', 'bmon', 'ca-certificates', 'curl', 'gnupg2', 'htop', 'iotop', 'openssl', 'python-pip', 'qemu-guest-agent', 'software-properties-common', 'vim']
+            name: ['apt-transport-https', 'ca-certificates', 'curl', 'gnupg2', 'openssl', 'python-pip', 'qemu-guest-agent', 'software-properties-common']
+            
       - name: Adding Docker's official GPG key.
         become: yes
         apt_key: 
