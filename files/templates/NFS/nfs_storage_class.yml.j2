@@ -1,8 +1,11 @@
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
-  name: managed-nfs-storage
-  namespace: {{ nfs_namespace }}
+    name: nfs
+    namespace: {{ nfs_namespace }}
+    annotations:
+        storageclass.kubernetes.io/is-default-class: "true"
 provisioner: {{ nfs_provisioner }}
 parameters:
-  archiveOnDelete: "false"
+    archiveOnDelete: "false"
+reclaimPolicy: {{ nfs_reclaim_policy }}
