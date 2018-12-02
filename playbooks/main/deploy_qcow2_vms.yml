@@ -65,7 +65,7 @@
             - { id: "{{ k8s_node2_id }}", size: "{{ k8s_node2_size }}" }
             - { id: "{{ k8s_node3_id }}", size: "{{ k8s_node3_size }}" }
 
-      - name: Adding a CD-ROM drive to be used with Cloud-init.
+      - name: Adding a Cloud-init hardware device.
         shell: qm set {{ item.id }} --ide2 {{ item.stg }}:cloudinit
         with_items: "{{ id_stg_list }}"
 
@@ -79,7 +79,7 @@
 
       - name: Pausing for 30 seconds to allow the VMs to kernel panic. -_-
         pause:
-          seconds: 30
+            seconds: 30
 
       - name: Stopping the VMs.
         shell: qm stop {{ item }}
@@ -91,15 +91,15 @@
 
       - name: Waiting for the VMs to become available.
         wait_for:
-          host: "{{ item }}"
-          port: 22
-          msg: "VMs did not become available after 5 minutes. Network error?"
+            host: "{{ item }}"
+            port: 22
+            msg: "VMs did not become available after 5 minutes. Network error?"
         with_items: 
-          - "{{ k8s_master_hn }}"
-          - "{{ k8s_node1_hn }}"
-          - "{{ k8s_node2_hn }}"
-          - "{{ k8s_node3_hn }}"
+            - "{{ k8s_master_hn }}"
+            - "{{ k8s_node1_hn }}"
+            - "{{ k8s_node2_hn }}"
+            - "{{ k8s_node3_hn }}"
 
       - name: Waiting 90 seconds for for Debian to finish booting.
         pause:
-          seconds: 90
+            seconds: 90
