@@ -1,6 +1,11 @@
 ---
 - hosts: k8s_master:k8s_nodes
+  gather_facts: False
   tasks:
+      - name: Including the variables.
+        include_vars:
+            file: ../../vars.yml
+
       - name: Waiting for Debian to finish performing automatic updates before continuing.
         script: ../../files/bash_scripts/monitor_automatic_updates_status.sh
 
@@ -17,27 +22,27 @@
       - name: Adding Docker's official GPG key.
         become: yes
         apt_key: 
-          url: https://download.docker.com/linux/debian/gpg
+            url: https://download.docker.com/linux/debian/gpg
 
       - name: Adding Kubernetes' official GPG key.
         become: yes
         apt_key: 
-          url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+            url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
 
       - name: Adding the Docker repository.
         become: yes
         apt_repository:
-          repo: deb [arch=amd64] https://download.docker.com/linux/debian stretch stable
+            repo: deb [arch=amd64] https://download.docker.com/linux/debian stretch stable
 
       - name: Adding the Kubernetes repository.
         become: yes
         apt_repository:
-          repo: deb https://apt.kubernetes.io/ kubernetes-xenial main
+            repo: deb https://apt.kubernetes.io/ kubernetes-xenial main
 
       - name: Updating the package repositories.
         become: yes
         apt: 
-          update_cache: yes
+            update_cache: yes
 
       - name: Installing the required packages to bootstrap a kubernetes cluster.
         become: yes
@@ -47,7 +52,7 @@
       - name: Installing the necessary Python library dependencies to use the `k8s` Ansible module.
         become: yes
         pip:
-          name: ['openshift', 'kubernetes', 'pyyaml']
+            name: ['openshift', 'kubernetes', 'pyyaml']
 
       - name: Enabling the systemd module for docker-ce.
         become: yes

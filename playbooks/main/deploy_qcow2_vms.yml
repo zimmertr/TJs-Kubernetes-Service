@@ -1,27 +1,32 @@
 ---
 - hosts: proxmox_server
+  gather_facts: False
   vars:
     id_list:
-      - "{{ k8s_master_id }}"
-      - "{{ k8s_node1_id }}"
-      - "{{ k8s_node2_id }}"
-      - "{{ k8s_node3_id }}"      
+        - "{{ k8s_master_id }}"
+        - "{{ k8s_node1_id }}"
+        - "{{ k8s_node2_id }}"
+        - "{{ k8s_node3_id }}"      
     id_stg_list:
-      - { id: "{{ k8s_master_id }}", stg: "{{ k8s_master_stg }}" }
-      - { id: "{{ k8s_node1_id }}", stg: "{{ k8s_node1_stg }}" }
-      - { id: "{{ k8s_node2_id }}", stg: "{{ k8s_node2_stg }}" }
-      - { id: "{{ k8s_node3_id }}", stg: "{{ k8s_node3_stg }}" }      
+        - { id: "{{ k8s_master_id }}", stg: "{{ k8s_master_stg }}" }
+        - { id: "{{ k8s_node1_id }}", stg: "{{ k8s_node1_stg }}" }
+        - { id: "{{ k8s_node2_id }}", stg: "{{ k8s_node2_stg }}" }
+        - { id: "{{ k8s_node3_id }}", stg: "{{ k8s_node3_stg }}" }      
   
   
   tasks:
+      - name: Including the variables.
+        include_vars:
+            file: ../../vars.yml
+
       - name: Creating a resource pool.
         shell: pvesh create /pools -poolid "{{ k8s_resource_pool }}" --Comment "Kubernetes Cluster"
         ignore_errors: yes
 
       - name: Downloading the Debian qcow2 image.
         get_url:
-          url: "{{ qcow2_image }}"
-          dest: "{{ qcow2_download_location }}image.qcow2"
+            url: "{{ qcow2_image }}"
+            dest: "{{ qcow2_download_location }}image.qcow2"
 
       - name: Creating the VMs.
         shell: >
@@ -39,10 +44,10 @@
             --searchdomain {{ item.sd }}
             --sshkeys {{ k8s_ssh_key }}
         with_items: 
-          - { id: "{{ k8s_master_id }}", hn: "{{ k8s_master_hn }}", cpu: "{{ k8s_master_cpu }}", mem: "{{ k8s_master_mem }}", gw: "{{ k8s_master_gw }}", ip: "{{ k8s_master_ip }}", sn: "{{ k8s_master_sn }}", ns: "{{ k8s_master_ns }}", sd: "{{ k8s_master_sd }}" }
-          - { id: "{{ k8s_node1_id }}", hn: "{{ k8s_node1_hn }}", cpu: "{{ k8s_node1_cpu }}", mem: "{{ k8s_node1_mem }}", gw: "{{ k8s_node1_gw }}", ip: "{{ k8s_node1_ip }}", sn: "{{ k8s_node1_sn }}", ns: "{{ k8s_node1_ns }}", sd: "{{ k8s_node1_sd }}" }
-          - { id: "{{ k8s_node2_id }}", hn: "{{ k8s_node2_hn }}", cpu: "{{ k8s_node2_cpu }}", mem: "{{ k8s_node2_mem }}", gw: "{{ k8s_node2_gw }}", ip: "{{ k8s_node2_ip }}", sn: "{{ k8s_node2_sn }}", ns: "{{ k8s_node2_ns }}", sd: "{{ k8s_node2_sd }}" }
-          - { id: "{{ k8s_node3_id }}", hn: "{{ k8s_node3_hn }}", cpu: "{{ k8s_node3_cpu }}", mem: "{{ k8s_node3_mem }}", gw: "{{ k8s_node3_gw }}", ip: "{{ k8s_node3_ip }}", sn: "{{ k8s_node3_sn }}", ns: "{{ k8s_node3_ns }}", sd: "{{ k8s_node3_sd }}" }
+            - { id: "{{ k8s_master_id }}", hn: "{{ k8s_master_hn }}", cpu: "{{ k8s_master_cpu }}", mem: "{{ k8s_master_mem }}", gw: "{{ k8s_master_gw }}", ip: "{{ k8s_master_ip }}", sn: "{{ k8s_master_sn }}", ns: "{{ k8s_master_ns }}", sd: "{{ k8s_master_sd }}" }
+            - { id: "{{ k8s_node1_id }}", hn: "{{ k8s_node1_hn }}", cpu: "{{ k8s_node1_cpu }}", mem: "{{ k8s_node1_mem }}", gw: "{{ k8s_node1_gw }}", ip: "{{ k8s_node1_ip }}", sn: "{{ k8s_node1_sn }}", ns: "{{ k8s_node1_ns }}", sd: "{{ k8s_node1_sd }}" }
+            - { id: "{{ k8s_node2_id }}", hn: "{{ k8s_node2_hn }}", cpu: "{{ k8s_node2_cpu }}", mem: "{{ k8s_node2_mem }}", gw: "{{ k8s_node2_gw }}", ip: "{{ k8s_node2_ip }}", sn: "{{ k8s_node2_sn }}", ns: "{{ k8s_node2_ns }}", sd: "{{ k8s_node2_sd }}" }
+            - { id: "{{ k8s_node3_id }}", hn: "{{ k8s_node3_hn }}", cpu: "{{ k8s_node3_cpu }}", mem: "{{ k8s_node3_mem }}", gw: "{{ k8s_node3_gw }}", ip: "{{ k8s_node3_ip }}", sn: "{{ k8s_node3_sn }}", ns: "{{ k8s_node3_ns }}", sd: "{{ k8s_node3_sd }}" }
             
       - name: Importing the qcow2 image as a disk.
         shell: qm importdisk {{ item.id }} {{ qcow2_download_location }}image.qcow2 {{ item.stg }}
@@ -55,10 +60,10 @@
       - name: Resizing the disk. 
         shell: qm resize {{ item.id }} scsi0 {{ item.size }}
         with_items: 
-          - { id: "{{ k8s_master_id }}", size: "{{ k8s_master_size }}" }
-          - { id: "{{ k8s_node1_id }}", size: "{{ k8s_node1_size }}" }
-          - { id: "{{ k8s_node2_id }}", size: "{{ k8s_node2_size }}" }
-          - { id: "{{ k8s_node3_id }}", size: "{{ k8s_node3_size }}" }
+            - { id: "{{ k8s_master_id }}", size: "{{ k8s_master_size }}" }
+            - { id: "{{ k8s_node1_id }}", size: "{{ k8s_node1_size }}" }
+            - { id: "{{ k8s_node2_id }}", size: "{{ k8s_node2_size }}" }
+            - { id: "{{ k8s_node3_id }}", size: "{{ k8s_node3_size }}" }
 
       - name: Adding a CD-ROM drive to be used with Cloud-init.
         shell: qm set {{ item.id }} --ide2 {{ item.stg }}:cloudinit
