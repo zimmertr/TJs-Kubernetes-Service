@@ -27,7 +27,7 @@ Declaratively build a 4 node Kubernetes cluster on Proxmox using Ansible and QEM
 
 **Optional:**
 
-To enable an optional feature, fill in the additional parameters in `vars.yml` and execute a playbook listed below.
+*To enable an optional feature, fill in the additional parameters in `vars.yml` and execute a playbook listed below.*
 
 | Purpose | Command |
 | ------- | ------- |
