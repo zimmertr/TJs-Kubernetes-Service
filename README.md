@@ -27,10 +27,11 @@ Build a 4 node Kubernetes cluster on a Proxmox cluster using Ansible and QEMU.
 
 **Optional:**
 
-1. If you have an NFS server you can enable optional support for dynamic provisioning of Persistent Storage volumes for your pods by filling in the additional parameters in `vars.yml` and running this playbook: `ansible-playbook -e @vars.yml -i inventory.ini playbooks/deploy_nfs.yml`
+1. If you have an NFS server you can enable optional support for dynamic provisioning of Persistent Storage volumes for your pods by filling in the additional parameters in `vars.yml` and running this playbook: `ansible-playbook -e @vars.yml -i inventory.ini playbooks/optional/deploy_nfs.yml`
+2. If you want to be able to connect to your deployments without enabling NodePorts you can enable MetalLB load balancing by filling in the additional parameters in `vars.yml` and running this playbook: `ansible-playbook -e @vars.yml -i inventory.ini playbooks/optional/deploy_metallb.yml`
 
 # Tips
-1. You can rollback the entire deployment with: `ansible-playbook -e @vars.yml -i inventory.ini delete_all_resources.yml`
+1. You can rollback the entire deployment with: `ansible-playbook -e @vars.yml -i inventory.ini playbooks/optional/delete_all_resources.yml`
 2. If Calico isn't deploying correctly it's likely the CIDR you assigned to it in `vars.yml` conflicts with your network. 
 3. See [this repository](https://github.com/zimmertr/Bootstrap-Kubernetes-with-LXC) to do this with LXC instead.  Benefits of using LXC include:
 ```
