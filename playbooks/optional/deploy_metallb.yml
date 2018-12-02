@@ -9,4 +9,4 @@
     - name: Configuring MetalLB.
       become: yes
       k8s:
-        definition: "{{ lookup('template', ../files/templates/MetalLB/metallb_config.yml.j2) | from_yaml_all | list }}"
+        definition: "{{ lookup('template', '../files/templates/MetalLB/metallb_config.yml.j2') | from_yaml_all | list }}"
