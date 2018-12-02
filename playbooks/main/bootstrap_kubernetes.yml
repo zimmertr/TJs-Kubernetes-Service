@@ -49,7 +49,7 @@
       k8s:
         definition: "{{ lookup('template', '../../files/templates/Dashboard/dashboard_service_user.yml.j2') | from_yaml }}"
 
-    - name: Creating an a role binding for the service user.
+    - name: Creating a role binding for the service user.
       become: yes
       k8s:
         definition: "{{ lookup('template', '../../files/templates/Dashboard/dashboard_role_binding.yml.j2') | from_yaml }}"
@@ -87,11 +87,6 @@
     - name: Joining the nodes to the master.
       become: yes
       shell: "{{ hostvars[groups['k8s_master'][0]]['k8s_join_command']['stdout'] }} --ignore-preflight-errors=all"
-
-    - name: Pausing for 1 minute to allow the nodes to join the cluster and the pods to become READY.
-      pause:
-        minutes: 1
-
 
 - hosts: localhost
   gather_facts: no

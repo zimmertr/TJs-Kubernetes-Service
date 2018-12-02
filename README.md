@@ -5,7 +5,7 @@
 </p>
 
 # Summary
-Build a 4 node Kubernetes cluster on a Proxmox cluster using Ansible and QEMU.
+Declaratively build a 4 node Kubernetes cluster on Proxmox using Ansible and QEMU. Optionally enable NFS & bare metal load balancing.
 
 **Approximate deployment time:** 25 minutes
 
@@ -13,8 +13,6 @@ Build a 4 node Kubernetes cluster on a Proxmox cluster using Ansible and QEMU.
 1. Proxmox server
 2. DNS Server
 3. Ansible 2.7.0+. Known incompatibility with a previous build.
-5. Fix `*.raw` disk issue
-6. Implement identification of different types of storage mounts
 
 # Instructions
 **Required:**
@@ -45,12 +43,15 @@ Build a 4 node Kubernetes cluster on a Proxmox cluster using Ansible and QEMU.
 3. Perform security audit and enhance if necessary.
 4. Add info to README about updating inventory file and how to handle SSH key generation and propegation.
 5. Add playbook to integrate k8s with a log server.
+6. Fix `*.raw` disk issue.
+7. Implement identification of different types of storage mounts.
+8. Finish datadog integration.
 
 # Problems
 1. The `proxmox_kvm` module is out of date and does not support cloudinit related api calls. Meaning shell commands must be used instead to perform `qm create` tasks. 
 2. The `k8s` module does not support applying Kubernetes Deployments from URL. Instead of using `get_url` to download them first, and then apply them with `k8s`, I just use `shell` to run a `kubectl apply -f`. [Feature Request here](https://github.com/ansible/ansible/issues/48402).
 3. Miscellaneous `qcow2` image issues:
     * The Debian `qcow2` image encounters a Kernel Panic on the first boot for some reason. A hack has been put in place to get around this by stopping and     restarting them after 30 seconds. 
-    * The CentOS `qcow2` image cannot be used due to [this bug] (https://bugs.centos.org/view.php?id=15426). 
-    * The `CoreOS` qcow2 image does not have working networking after cloud-init does it's magic. 
+    * The CentOS `qcow2` image cannot be used due to [this bug](https://bugs.centos.org/view.php?id=15426). 
+    * The CoreOS `qcow2` image does not have working networking after cloud-init does it's magic. 
     * A friend told me that the Ubuntu `qcow2` image also encounters a kernel panic on boot.
