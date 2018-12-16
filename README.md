@@ -56,6 +56,10 @@ Declaratively build a 4 node Kubernetes cluster on Proxmox using Ansible and QEM
 6. Fix `*.raw` disk issue.
 7. Implement identification of different types of storage mounts.
 8. Automatically include `inventory.ini` somehow so one can simply run `ansible-playbook site.yml` to deploy.
+9. Create playbook to upgrade kubernetes version for kubeadm cluster.
+10. Create playbook to install OS updates on nodes.
+11. Move dashboard deployment to optional features.
+
 
 # Problems
 1. The `proxmox_kvm` module is out of date and does not support cloudinit related api calls. Meaning shell commands must be used instead to perform `qm create` tasks. 
