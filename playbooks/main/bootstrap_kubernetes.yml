@@ -58,6 +58,21 @@
         become: yes
         k8s:
             definition: "{{ lookup('template', '../../files/templates/Dashboard/dashboard_role_binding.yml.j2') | from_yaml }}"
+
+      - name: Deploying heapster for the Dashboard.
+        become: yes
+        k8s:
+            definition: "{{ lookup('template', '../../files/templates/Dashboard/heapster.yml') | from_yaml_all | list }}"
+
+      - name: Deploying InfluxDB as a backend for Heapster.
+        become: yes
+        k8s:
+            definition: "{{ lookup('template', '../../files/templates/Dashboard/influxdb.yml') | from_yaml_all | list }}"
+
+      - name: Creating a role binding for Heapster.
+        become: yes
+        k8s: 
+            definition: "{{ lookup('template', '../../files/templates/Dashboard/heapster_role_binding.yml') | from_yaml }}"
   
       - name: Retrieving the authentication token for your service user.
         become: yes
