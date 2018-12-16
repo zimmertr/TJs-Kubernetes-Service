@@ -138,6 +138,17 @@ metallb_ip_range: '192.168.0.1-192.168.0.255'
 
 
 ###############################################################################################
+#                              -NGINX Ingress Controller Options-                             # 
+###############################################################################################
+# These parameters are only required if you want to enable the NGINX ingress controller.      #
+# NGINX Ingress controller integration requires MetalLB. Unless you hack it to use NodePort.  #
+###############################################################################################
+
+# The IP Address to use 
+nginx_load_balancer_ip: '192.168.0.100'
+
+
+###############################################################################################
 #                                      -DataDog Options-                                      # 
 ###############################################################################################
 # These parameters are only required if you have an account with DataDog and would like to    #
