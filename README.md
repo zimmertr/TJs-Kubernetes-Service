@@ -1,22 +1,22 @@
-## Bootstrap Kubernetes with QEMU (AKA: TKS)
+# TKS 
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/zimmertr/Bootstrap-Kubernetes-with-QEMU/master/screenshot.png" width="800">
 </p>
 
-# Summary
+## Summary
 Declaratively build a 4 node Kubernetes cluster on Proxmox using Ansible and QEMU. Optionally enable NFS & bare metal load balancing.
 
 **Approximate deployment time:** 25 minutes
 
 
-# Requirements
+## Requirements
 1. Proxmox server
 2. DNS Server
 3. Ansible 2.7.0+. Known incompatibility with a previous build.
 
 
-# Instructions
+## Instructions
 **Required:**
 
 1. Modify the `vars.yml` file with values specific to your environment.
@@ -37,7 +37,7 @@ Declaratively build a 4 node Kubernetes cluster on Proxmox using Ansible and QEM
 | [DataDog agents](https://docs.datadoghq.com/integrations/kubernetes/) | `ansible-playbook -i inventory.ini playbooks/optional/deploy_datadog.yml` | |
 
 
-# Tips
+## Tips
 1. You can rollback the entire deployment with: `ansible-playbook -i inventory.ini playbooks/optional/delete_all_resources.yml`
 2. If Calico isn't deploying correctly it's likely the CIDR you assigned to it in `vars.yml` conflicts with your network. 
 3. See [this repository](https://github.com/zimmertr/Bootstrap-Kubernetes-with-LXC) to do this with LXC instead.  Benefits of using LXC include:
@@ -47,7 +47,7 @@ Declaratively build a 4 node Kubernetes cluster on Proxmox using Ansible and QEM
 ```
 
 
-# TODO
+## TODO
 1. Add better support for multi-node Proxmox clusters.
 2. Add support for VLAN Tags & IDs.
 3. Perform security audit and enhance if necessary.
@@ -61,7 +61,7 @@ Declaratively build a 4 node Kubernetes cluster on Proxmox using Ansible and QEM
 11. Move dashboard deployment to optional features.
 
 
-# Problems
+## Problems
 1. The `proxmox_kvm` module is out of date and does not support cloudinit related api calls. Meaning shell commands must be used instead to perform `qm create` tasks. 
 2. The `k8s` module does not support applying Kubernetes Deployments from URL. Instead of using `get_url` to download them first, and then apply them with `k8s`, I just use `shell` to run a `kubectl apply -f`. [Feature Request here](https://github.com/ansible/ansible/issues/48402).
 3. Miscellaneous `qcow2` image issues:
