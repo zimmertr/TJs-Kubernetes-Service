@@ -1,0 +1,16 @@
+---
+- hosts: k8s_master
+  gather_facts: False
+  tasks:
+      - name: Including the variables.
+        include_vars:
+            file: ../../vars.yml
+            
+      - name: Deploying the ingress controller.
+        become: yes
+        shell: kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/mandatory.yaml
+
+      - name: Configuring the ingress controller.
+        become: yes
+        k8s:
+            definition: "{{ lookup('template', '../../files/templates/NGINX-Ingress/nginx-ingress_service.yml.j2') | from_yaml }}"

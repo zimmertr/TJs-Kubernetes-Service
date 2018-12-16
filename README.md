@@ -32,7 +32,8 @@ Declaratively build a 4 node Kubernetes cluster on Proxmox using Ansible and QEM
 | Purpose | Command |
 | ------- | ------- |
 | Enable [NFS backed persistent storage](https://github.com/kubernetes-incubator/external-storage/tree/master/nfs-client) | `ansible-playbook -i inventory.ini playbooks/optional/deploy_nfs.yml` |
-| Enable [bare metal load balancing](https://metallb.universe.tf) | `ansible-playbook -i inventory.ini playbooks/optional/deploy_metallb.yml` |
+| Enable [MetalLB Load Balancer](https://metallb.universe.tf) | `ansible-playbook -i inventory.ini playbooks/optional/deploy_metallb.yml` |
+| Enable [NGINX Ingress Controller](https://github.com/kubernetes/ingress-nginx) (Requires MetalLB)| `ansible-playbook -i inventory.ini playbooks/optional/deploy_ingress-nginx.yml`
 | Enable [DataDog agents](https://docs.datadoghq.com/integrations/kubernetes/) | `ansible-playbook -i inventory.ini playbooks/optional/deploy_datadog.yml`
 
 
