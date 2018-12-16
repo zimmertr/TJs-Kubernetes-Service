@@ -141,7 +141,7 @@ metallb_ip_range: '192.168.0.1-192.168.0.255'
 #                              -NGINX Ingress Controller Options-                             # 
 ###############################################################################################
 # These parameters are only required if you want to enable the NGINX ingress controller.      #
-# NGINX Ingress controller integration requires MetalLB. Unless you hack it to use NodePort.  #
+# REQUIREMENT: The NGINX Ingress controller integration requires a Load Balancer integration. #
 ###############################################################################################
 
 # The IP Address to use 
