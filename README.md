@@ -5,7 +5,7 @@
 </p>
 
 ## Summary
-Declaratively build a 4 node Kubernetes cluster on Proxmox using Ansible and QEMU. Optionally enable NFS & bare metal load balancing.
+Declaratively build a 4 node Kubernetes cluster on Proxmox using Ansible and QEMU. Optionally enable advanced features including ingress, load balancing, etc.
 
 **Approximate deployment time:** 25 minutes
 
