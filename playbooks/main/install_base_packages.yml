@@ -20,25 +20,21 @@
         apt:
             name: ['apt-transport-https', 'ca-certificates', 'curl', 'gnupg2', 'openssl', 'python-pip', 'qemu-guest-agent', 'software-properties-common']
             
-      - name: Adding Docker's official GPG key.
+      - name: Adding the necessary GPG keys.
         become: yes
         apt_key: 
-            url: https://download.docker.com/linux/debian/gpg
+            url: "{{ item }}"
+        with_items:
+            - "https://download.docker.com/linux/debian/gpg"
+            - "https://packages.cloud.google.com/apt/doc/apt-key.gpg"
 
-      - name: Adding Kubernetes' official GPG key.
-        become: yes
-        apt_key: 
-            url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
-
-      - name: Adding the Docker repository.
+      - name: Adding the necessary Apt repositories.
         become: yes
         apt_repository:
-            repo: deb [arch=amd64] https://download.docker.com/linux/debian stretch stable
-
-      - name: Adding the Kubernetes repository.
-        become: yes
-        apt_repository:
-            repo: deb https://apt.kubernetes.io/ kubernetes-xenial main
+            repo: "{{ item }}"
+        with_items:
+            - "deb [arch=amd64] https://download.docker.com/linux/debian stretch stable"
+            - "deb https://apt.kubernetes.io/ kubernetes-xenial main"
 
       - name: Updating the package repositories.
         become: yes
@@ -53,25 +49,16 @@
       - name: Installing the necessary Python library dependencies to use the `k8s` Ansible module.
         become: yes
         pip:
-            name: ['openshift', 'kubernetes', 'pyyaml']
+            name: ['openshift', 'kubernetes', 'pyyaml', 'requests']
+            extra_args: --upgrade
 
-      - name: Enabling the systemd module for docker-ce.
+      - name: Enabling the necessary Systemd modules.
         become: yes
         systemd: 
             state: started
-            name: docker
+            name: "{{ item }}"
             enabled: yes
-
-      - name: Enabling the systemd module for the kubelet.
-        become: yes
-        systemd:
-            state: started
-            name: kubelet
-            enabled: yes
-
-      - name: Enabling the systemd module for the qemu-guest-agent.
-        become: yes
-        systemd:
-            state: started
-            name: qemu-guest-agent
-            enabled: yes
+        with_items:
+            - "docker"
+            - "kubelet"
+            - "qemu-guest-agent"
