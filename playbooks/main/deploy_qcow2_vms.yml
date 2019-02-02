@@ -12,8 +12,6 @@
         - { id: "{{ k8s_node1_id }}", stg: "{{ k8s_node1_stg }}" }
         - { id: "{{ k8s_node2_id }}", stg: "{{ k8s_node2_stg }}" }
         - { id: "{{ k8s_node3_id }}", stg: "{{ k8s_node3_stg }}" }      
-  
-  
   tasks:
       - name: Including the variables.
         include_vars:
