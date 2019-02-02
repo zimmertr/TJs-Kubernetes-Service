@@ -59,6 +59,7 @@ Declaratively build a 4 node Kubernetes cluster on Proxmox using Ansible and QEM
 9. Create playbook to upgrade kubernetes version for kubeadm cluster.
 10. Create playbook to install OS updates on nodes.
 11. Move dashboard deployment to optional features.
+12. Refactor lazy sleep tasks for more intelligent `wait_for` tasks.
 
 
 ## Problems
