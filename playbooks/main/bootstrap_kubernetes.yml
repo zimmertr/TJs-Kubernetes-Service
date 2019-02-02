@@ -47,32 +47,27 @@
   
       - name: Deploying the Dashboard to Kubernetes.
         become: yes
-        shell: kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/master/src/deploy/recommended/kubernetes-dashboard.yaml
+        shell: kubectl apply -f {{ k8s_dasboard_url }}
   
-      - name: Creating an service user for the Dashboard.
+      - name: Cnfiguring RBAC for the Dashboard service account.
         become: yes
         k8s:
-            definition: "{{ lookup('template', '../../files/templates/Dashboard/dashboard_service_user.yml.j2') | from_yaml }}"
-  
-      - name: Creating a role binding for the service user.
-        become: yes
-        k8s:
-            definition: "{{ lookup('template', '../../files/templates/Dashboard/dashboard_role_binding.yml.j2') | from_yaml }}"
+            definition: "{{ lookup('template', '../../files/templates/Dashboard/{{ item }}') | from_yaml }}"
+        with_items: 
+            - "sa_dashboard.yml.j2"
+            - "rb_dashboard.yml.j2" 
 
-      - name: Deploying heapster for the Dashboard.
+      - name: Deploying Heapster, InfluxDB, and configuring RBAC for the Dashboard stack.
         become: yes
         k8s:
-            definition: "{{ lookup('template', '../../files/manifests/Dashboard/heapster.yml') | from_yaml_all | list }}"
-
-      - name: Deploying InfluxDB as a backend for Heapster.
-        become: yes
-        k8s:
-            definition: "{{ lookup('template', '../../files/manifests/Dashboard/influxdb.yml') | from_yaml_all | list }}"
-
-      - name: Creating a role binding for Heapster.
-        become: yes
-        k8s: 
-            definition: "{{ lookup('template', '../../files/manifests/Dashboard/heapster_role_binding.yml') | from_yaml }}"
+            definition: "{{ lookup('template', '../../files/manifests/Dashboard/{{ item }}') | from_yaml }}"
+        with_items:         
+            - "sa_heapster.yml"
+            - "rb_heapster.yml"
+            - "svc_heapster.yml"
+            - "svc_influxdb.yml"
+            - "dep_heapster.yml"
+            - "dep_influxdb.yml"
   
       - name: Retrieving the authentication token for your service user.
         become: yes
@@ -102,6 +97,7 @@
         when: k8s_join_command is undefined
         register: k8s_join_command
 
+
 - hosts: k8s_nodes
   gather_facts: False
   tasks:
@@ -112,6 +108,7 @@
       - name: Joining the nodes to the master.
         become: yes
         shell: "{{ hostvars[groups['k8s_master'][0]]['k8s_join_command']['stdout'] }} --ignore-preflight-errors=all"
+
 
 - hosts: localhost
   gather_facts: False
