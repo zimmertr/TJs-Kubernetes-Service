@@ -28,7 +28,7 @@
       - name: Deploying the datadog agent.
         become: yes
         k8s:
-            definition: "{{ lookup('template', '../../files/templates/Datadog/datadog_integration.yml.j2') | from_yaml }}"
+            definition: "{{ lookup('template', '../../files/templates/Datadog/ds_datadog.yml.j2') | from_yaml }}"
   
       - name: Cleaning up the kube-state-metrics repository.
         file:
