@@ -20,6 +20,7 @@
         k8s:
             definition: "{{ lookup('template', '../../files/templates/NFS/{{ item }}') | from_yaml }}"        
         with_items:
+            - "ns_nfs_provisioner.yml.j2"
             - "cr_nfs_provisioner.yml.j2"
             - "crb_nfs_provisioner.yml.j2"
             - "sa_nfs_provisioner.yml.j2"
