@@ -124,8 +124,8 @@ nfs_mount_point: '/SaturnPool/Kubernetes'
 # NFS Provisioner Name
 nfs_provisioner: 'saturnpool'
 
-# Namespace to deploy dynamic NFS support to
-nfs_namespace: 'default'
+# Namespace to deploy the NFS Provisioner to.
+nfs_namespace: 'nfs-provisioner'
 
 # Default reclaim policy. https://kubernetes.io/docs/concepts/storage/storage-classes/#reclaim-policy
 nfs_reclaim_policy: 'Retain'
