@@ -6,7 +6,11 @@ metadata:
 data:
     config: |
         address-pools:
-        - name: default
+        - name: DMZ
           protocol: layer2
           addresses:
-          - {{ metallb_ip_range }}
+          - {{ metallb_dmz_ip_range }}
+        - name: LAN
+          protocol: layer2
+          addresses:
+          - {{ metallb_lan_ip_range }}

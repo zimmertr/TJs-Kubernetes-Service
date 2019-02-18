@@ -6,7 +6,7 @@
 
 # qcow2 image to use for your Virtual Machines: 
 # Can be found here: https://cdimage.debian.org/cdimage/openstack/current/?C=M;O=A 
-qcow2_image: 'https://cdimage.debian.org/cdimage/openstack/current/debian-9.7.0-openstack-amd64.qcow2'
+qcow2_image: 'https://cdimage.debian.org/cdimage/openstack/current/debian-9.8.0-openstack-amd64.qcow2'
 
 # Location to use for storing the qcow2 image. Be sure to end the directory with a '/'.
 qcow2_download_location: '/tmp/'
@@ -137,8 +137,9 @@ nfs_reclaim_policy: 'Retain'
 # These parameters are only required if you want to enable on-prem load balancing with MetalLB#
 ###############################################################################################
 
-# The IP Range for your loadbalancing with MetalLB.
-metallb_ip_range: '192.168.0.1-192.168.0.255'
+# The IP Ranges for loadbalancing with MetalLB.
+metallb_dmz_ip_range: '192.168.0.2-192.168.0.199'
+metallb_lan_ip_range: '192.168.1.150-192.168.1.199'
 
 
 ###############################################################################################
