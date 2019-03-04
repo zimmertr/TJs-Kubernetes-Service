@@ -6,7 +6,7 @@
 
 # qcow2 image to use for your Virtual Machines: 
 # Can be found here: https://cdimage.debian.org/cdimage/openstack/current/?C=M;O=A 
-qcow2_image: 'https://cdimage.debian.org/cdimage/openstack/current/debian-9.8.0-openstack-amd64.qcow2'
+qcow2_image: 'https://cdimage.debian.org/cdimage/openstack/current/debian-9.8.2-20190303-openstack-amd64.qcow2'
 
 # Location to use for storing the qcow2 image. Be sure to end the directory with a '/'.
 qcow2_download_location: '/tmp/'
@@ -18,10 +18,10 @@ k8s_resource_pool: "Kubernetes"
 k8s_ssh_key: "/root/.ssh/sol.milkyway.kubernetes.pub"
 
 # VM IDs
-k8s_master_id: '170'
-k8s_node1_id: '180'
-k8s_node2_id: '181'
-k8s_node3_id: '182'
+k8s_master_id: '4010'
+k8s_node1_id: '40100'
+k8s_node2_id: '40101'
+k8s_node3_id: '40102'
 
 # Hostnames
 k8s_master_hn: "Pluto"
@@ -47,11 +47,18 @@ k8s_node1_size: "50G"
 k8s_node2_size: "50G"
 k8s_node3_size: "50G"
 
+# VLAN Tags
+# Comment these four directives out if you are not using VLANs.
+k8s_master_vlan: "40"
+k8s_node1_vlan: "40"
+k8s_node2_vlan: "40"
+k8s_node3_vlan: "40"
+
 # IP Addresses
-k8s_master_ip: "192.168.1.170"
-k8s_node1_ip: "192.168.1.180"
-k8s_node2_ip: "192.168.1.181"
-k8s_node3_ip: "192.168.1.182"
+k8s_master_ip: "192.168.40.10"
+k8s_node1_ip: "192.168.40.100"
+k8s_node2_ip: "192.168.40.101"
+k8s_node3_ip: "192.168.40.102"
 
 # Subnet Sizes
 k8s_master_sn: "/24"
@@ -60,16 +67,16 @@ k8s_node2_sn: "/24"
 k8s_node3_sn: "/24"
 
 # Network Gateway
-k8s_master_gw: "192.168.1.1"
-k8s_node1_gw: "192.168.1.1"
-k8s_node2_gw: "192.168.1.1"
-k8s_node3_gw: "192.168.1.1"
+k8s_master_gw: "192.168.40.1"
+k8s_node1_gw: "192.168.40.1"
+k8s_node2_gw: "192.168.40.1"
+k8s_node3_gw: "192.168.40.1"
 
 # DNS Servers
-k8s_master_ns: "192.168.1.10"
-k8s_node1_ns: "192.168.1.10"
-k8s_node2_ns: "192.168.1.10"
-k8s_node3_ns: "192.168.1.10"
+k8s_master_ns: "192.168.1.100"
+k8s_node1_ns: "192.168.1.100"
+k8s_node2_ns: "192.168.1.100"
+k8s_node3_ns: "192.168.1.100"
 
 # Search Domains
 k8s_master_sd: "sol.milkyway"
