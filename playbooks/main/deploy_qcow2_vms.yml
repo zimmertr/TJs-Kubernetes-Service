@@ -46,7 +46,18 @@
             - { id: "{{ k8s_node1_id }}", hn: "{{ k8s_node1_hn }}", cpu: "{{ k8s_node1_cpu }}", mem: "{{ k8s_node1_mem }}", gw: "{{ k8s_node1_gw }}", ip: "{{ k8s_node1_ip }}", sn: "{{ k8s_node1_sn }}", ns: "{{ k8s_node1_ns }}", sd: "{{ k8s_node1_sd }}" }
             - { id: "{{ k8s_node2_id }}", hn: "{{ k8s_node2_hn }}", cpu: "{{ k8s_node2_cpu }}", mem: "{{ k8s_node2_mem }}", gw: "{{ k8s_node2_gw }}", ip: "{{ k8s_node2_ip }}", sn: "{{ k8s_node2_sn }}", ns: "{{ k8s_node2_ns }}", sd: "{{ k8s_node2_sd }}" }
             - { id: "{{ k8s_node3_id }}", hn: "{{ k8s_node3_hn }}", cpu: "{{ k8s_node3_cpu }}", mem: "{{ k8s_node3_mem }}", gw: "{{ k8s_node3_gw }}", ip: "{{ k8s_node3_ip }}", sn: "{{ k8s_node3_sn }}", ns: "{{ k8s_node3_ns }}", sd: "{{ k8s_node3_sd }}" }
-            
+
+      - name: Setting the VLAN Tags.
+        shell: >
+            qm set {{ item.id }}
+            --net0 "virtio,bridge=vmbr0,tag={{ item.vlan }}"
+        with_items:
+            - { id: "{{ k8s_master_id }}", vlan: "{{ k8s_master_vlan }}" }
+            - { id: "{{ k8s_node1_id }}", vlan: "{{ k8s_node1_vlan }}" }
+            - { id: "{{ k8s_node2_id }}", vlan: "{{ k8s_node2_vlan }}" }
+            - { id: "{{ k8s_node3_id }}", vlan: "{{ k8s_node3_vlan }}" }
+        when: k8s_master_vlan is defined and k8s_node1_vlan is defined and k8s_node2_vlan is defined and k8s_node3_vlan is defined
+
       - name: Importing the qcow2 image as a disk.
         shell: qm importdisk {{ item.id }} {{ qcow2_download_location }}image.qcow2 {{ item.stg }}
         with_items: "{{ id_stg_list }}"
