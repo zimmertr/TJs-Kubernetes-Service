@@ -149,6 +149,12 @@ nfs_reclaim_policy: 'Retain'
 ###############################################################################################
 #                                      -MetalLB Options-                                      # 
 ###############################################################################################
+#                                                                                             #
+# WARNING: MetalLB is currently supported, however dynamic provisioning is NOT currently      #
+# supported despite the explanation below. This will come in a later release, however, if you #
+# are interested in using this feature you will need to modify the configmap located in the   #
+# MetalLB files directory yourself to match the variables you declare here.                   #
+#                                                                                             #
 # These parameters are only required if you want to enable on-prem load balancing with        #
 # MetalLB. The MetalLB configuration file will be dynamically provisioned based on how many   #
 # variable sets you declare below. This is intended to allow you to provision a single or     #
