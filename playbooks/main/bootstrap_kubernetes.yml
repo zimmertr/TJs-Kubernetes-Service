@@ -49,7 +49,7 @@
         become: yes
         shell: kubectl apply -f {{ k8s_dasboard_url }}
   
-      - name: Cnfiguring RBAC for the Dashboard service account.
+      - name: Configuring RBAC for the Dashboard service account.
         become: yes
         k8s:
             definition: "{{ lookup('template', '../../files/templates/Dashboard/{{ item }}') | from_yaml }}"
