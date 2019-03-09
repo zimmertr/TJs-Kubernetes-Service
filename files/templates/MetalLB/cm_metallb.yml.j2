@@ -5,12 +5,24 @@ metadata:
     name: config
 data:
     config: |
+        peers:
+        - peer-address: {{ metallb_peer_router }}
+          peer-asn: {{ metallb_peer_asn }}
+          my-asn: {{ metallb_peer_asn }}
         address-pools:
-        - name: DMZ
-          protocol: layer2
+        - name: {{ metallb_ap1_name }}
+          protocol: {{ metallb_ap1_protocol }}
           addresses:
-          - {{ metallb_dmz_ip_range }}
-        - name: LAN
-          protocol: layer2
+          - {{ metallb_ap1_cidr }}    
+        - name: {{ metallb_ap2_name }}
+          protocol: {{ metallb_ap2_protocol }}
           addresses:
-          - {{ metallb_lan_ip_range }}
+          - {{ metallb_ap2_cidr }}  
+        - name: {{ metallb_ap3_name }}
+          protocol: {{ metallb_ap3_protocol }}
+          addresses:
+          - {{ metallb_ap3_cidr }}  
+        - name: {{ metallb_ap4_name }}
+          protocol: {{ metallb_ap4_protocol }}
+          addresses:
+          - {{ metallb_ap4_cidr }}  

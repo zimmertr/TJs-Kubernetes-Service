@@ -56,7 +56,15 @@
             - { id: "{{ k8s_node1_id }}", vlan: "{{ k8s_node1_vlan }}" }
             - { id: "{{ k8s_node2_id }}", vlan: "{{ k8s_node2_vlan }}" }
             - { id: "{{ k8s_node3_id }}", vlan: "{{ k8s_node3_vlan }}" }
-        when: k8s_master_vlan is defined and k8s_node1_vlan is defined and k8s_node2_vlan is defined and k8s_node3_vlan is defined
+        when: 
+            - k8s_master_vlan is defined 
+            - k8s_master_vlan|length != 0
+            - k8s_node1_vlan is defined 
+            - k8s_node1_vlan|length != 0
+            - k8s_node2_vlan is defined 
+            - k8s_node2_vlan|length != 0
+            - k8s_node3_vlan is defined
+            - k8s_node3_vlan|length != 0
 
       - name: Importing the qcow2 image as a disk.
         shell: qm importdisk {{ item.id }} {{ qcow2_download_location }}image.qcow2 {{ item.stg }}
