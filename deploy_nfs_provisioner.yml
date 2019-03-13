@@ -1,0 +1,27 @@
+---
+- name: Setting up NFS on nodes
+  hosts: k8s_master,k8s_nodes
+  tasks:
+  
+    - name: Installing nfs-common.
+      apt:
+        name: nfs-common
+        state: latest
+
+- name: Setup NFS provisioner on master
+  hosts: k8s_master
+  vars_files: vars/nfs.yml
+  tasks:
+
+    - name: Deploying NFS Provisioner manifests to Kubernetes
+      k8s:
+          definition: "{{ lookup('template', 'files/templates/NFS/{{ item }}') | from_yaml }}"        
+      with_items:
+          - "ns_nfs_provisioner.yml.j2"
+          - "cr_nfs_provisioner.yml.j2"
+          - "crb_nfs_provisioner.yml.j2"
+          - "sa_nfs_provisioner.yml.j2"
+          - "rb_nfs_provisioner.yml.j2"
+          - "role_nfs_provisioner.yml.j2"
+          - "dep_nfs_provisioner.yml.j2"
+          - "sc_nfs_provisioner.yml.j2"

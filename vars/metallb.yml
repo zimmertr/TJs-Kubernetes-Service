@@ -1,0 +1,58 @@
+---
+###############################################################################################
+#                                      -MetalLB Options-                                      #
+###############################################################################################
+#                                                                                             #
+# WARNING: MetalLB is currently supported, however dynamic provisioning is NOT currently      #
+# supported despite the explanation below. This will come in a later release, however, if you #
+# are interested in using this feature you will need to modify the configmap located in the   #
+# MetalLB files directory yourself to match the variables you declare here.                   #
+#                                                                                             #
+# These parameters are only required if you want to enable on-prem load balancing with        #
+# MetalLB. The MetalLB configuration file will be dynamically provisioned based on how many   #
+# variable sets you declare below. This is intended to allow you to provision a single or     #
+# multiple address pools depending on your personal network configuration. The configuration  #
+# is dynamically generated based on how many sets of variables you list below. For example:   #
+#                                                                                             #
+# If you wish to deploy a single address pool, you would declare these three variables.       #
+#                                                                                             #
+# metallb_ap1_name: NAME                                                                      #
+# metallb_ap1_protocol: PROTOCOL                                                              #
+# metallb_ap1_cidr: CIDR                                                                      #
+#                                                                                             #
+#                                                                                             #
+# However, if you wished to declare two address pools, you would include a second set of      #
+# variables where the `ap1` portion of the variable name is incremeneted by one.              #
+#                                                                                             #
+# metallb_ap1_name: NAME                                                                      #
+# metallb_ap2_name: NAME                                                                      #
+# metallb_ap1_protocol: PROTOCOL                                                              #
+# metallb_ap2_protocol: PROTOCOL                                                              #
+# metallb_ap1_cidr: CIDR                                                                      #
+# metallb_ap2_cidr: CIDR                                                                      #
+###############################################################################################
+
+# The IP Address of the router you wish to peer with.
+metallb_peer_router: '192.168.1.1'
+
+# The AS Number of the router you wish to peer with.
+metallb_peer_asn: '64512'
+
+# The names of your address pools.
+metallb_ap1_name: 'VLAN20'
+metallb_ap2_name: 'VLAN50'
+metallb_ap3_name: 'VLAN60'
+metallb_ap4_name: 'VLAN70'
+
+# The protocols of your address pools. (bgp|layer2)
+metallb_ap1_protocol: 'bgp'
+metallb_ap2_protocol: 'bgp'
+metallb_ap3_protocol: 'bgp'
+metallb_ap4_protocol: 'bgp'
+
+# The CIDRs of your address pools.
+metallb_ap1_cidr: '192.168.20.1/24'
+metallb_ap2_cidr: '192.168.50.1/24'
+metallb_ap3_cidr: '192.168.60.1/24'
+metallb_ap4_cidr: '192.168.70.1/24'
+

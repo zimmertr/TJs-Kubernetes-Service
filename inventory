@@ -1,0 +1,15 @@
+[proxmox_server]
+saturn.sol.milkyway
+
+[k8s_master]
+pluto.sol.milkyway
+
+[k8s_nodes]
+ceres.sol.milkyway 
+eris.sol.milkyway 
+haumea.sol.milkyway 
+
+[instances:children]
+proxmox_server
+k8s_master
+k8s_nodes

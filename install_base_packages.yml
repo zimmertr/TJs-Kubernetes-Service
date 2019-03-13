@@ -1,0 +1,63 @@
+---
+- name: Install and enable necessary services
+  hosts: k8s_master,k8s_nodes
+  gather_facts: False
+  tasks:
+    - name: Waiting for Debian to finish performing automatic updates before continuing.
+      script: ../../files/bash_scripts/monitor_automatic_updates_status.sh
+
+    
+    - name: Adding the necessary GPG keys.
+      apt_key:
+        url: "{{ item }}"
+        state: present
+      with_items:
+        - "https://download.docker.com/linux/debian/gpg"
+        - "https://packages.cloud.google.com/apt/doc/apt-key.gpg"
+
+    - name: Adding the necessary Apt repositories.
+      apt_repository:
+        repo: "{{ item }}"
+        state: present
+      with_items:
+        - "deb [arch=amd64] https://download.docker.com/linux/debian stretch stable"
+        - "deb https://apt.kubernetes.io/ kubernetes-xenial main"
+
+    - name: Install necessary packages
+      apt:
+        upate_cache: true
+        upgrade: dist
+        state: latest
+        name: "{{ item }}"
+        with_items:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - gnupg2
+          - openssl
+          - python-pip
+          - qemu-guest-agent
+          - software-properties-common
+          - docker-ce
+          - kubelet
+          - kubeadm
+          - kubectl
+
+    - name: Installing the necessary Python library dependencies to use the `k8s` Ansible module.
+      pip:
+        name:
+          - openshift
+          - kubernetes
+          - pyyaml
+          - requests
+        extra_args: --upgrade
+
+    - name: Start and enable necessary services
+      service:
+        name: "{{ item }}"
+        state: started
+        enabled: true
+        with_items:
+          - docker
+          - kubelet
+          - quemu-guest-agent

@@ -1,0 +1,10 @@
+---
+###############################################################################################
+#                              -NGINX Ingress Controller Options-                             # 
+###############################################################################################
+# These parameters are only required if you want to enable the NGINX ingress controller.      #
+# REQUIREMENT: The NGINX Ingress controller integration requires a Load Balancer integration. #
+###############################################################################################
+
+# The IP Address to use 
+nginx_load_balancer_ip: '192.168.0.100'

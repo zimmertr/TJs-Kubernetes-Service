@@ -1,0 +1,121 @@
+---
+###############################################################################################
+#                                      -General Options-                                      # 
+###############################################################################################
+# These parameters are required.                                                              #
+###############################################################################################
+
+# qcow2 image to use for your Virtual Machines: 
+# Can be found here: https://cdimage.debian.org/cdimage/openstack/current/?C=M;O=A 
+qcow2_image: 'https://cdimage.debian.org/cdimage/openstack/current/debian-9.8.2-20190303-openstack-amd64.qcow2'
+
+# Location to use for storing the qcow2 image. Be sure to end the directory with a '/'.
+qcow2_download_location: '/tmp/'
+
+# Resource Pool for your virtual machines.
+k8s_resource_pool: "Kubernetes"
+
+# Path to the SSH Public Key on your Proxmox Server.
+k8s_ssh_key: "/root/.ssh/sol.milkyway.kubernetes.pub"
+
+# Storage volumes
+k8s_master_stg: "SaturnPool"
+
+# Default values for worker node definitions, can be overridden per node
+node_cpu_default: "4"
+node_mem_default: "8192"
+node_disk_default: "50G"
+node_subnet_default: "/24"
+node_gw_default: "192.168.40.1"
+node_ns_default: "192.168.1.100"
+node_sd_default: "sol.milkyway"
+node_bridge_default: "vmbr0"
+node_stg_default: "{{ k8s_master_stg }}"
+
+###############################################################################################
+#                                        -VLAN Options-                                       # 
+###############################################################################################
+# These parameters are only required if your network is configured with VLANs and you wish to #
+# specify which VLAN each of your Kubernetes nodes is allocated to. Leave these variables     #
+# blank if you do not intend to use VLANs for your cluster.                                   #
+###############################################################################################
+node_vlan_default: ""
+
+# Dictionary defining node variables
+k8s_vars:
+  master:
+    id: "4010"
+    hn: "Pluto"
+    cpu: "2"
+    mem: "4096"
+    size: "50G"
+    ip: "192.168.40.10"
+    sn: "{{ node_subnet_default }}"
+    gw: "{{ node_gw_default }}"
+    ns: "{{ node_ns_default }}"
+    sd: "{{ node_sd_default }}"
+    bridge: "{{ node_bridge_default }}"
+    stg: "{{ k8_master_stg }}"
+    vlan: "{{ node_vlan_default }}"
+  node1:
+    id: "40100"
+    hn: "Ceres"
+    cpu: "{{ node_cpu_default }}"
+    mem: "{{ node_mem_default }}"
+    size: "{{ node_disk_default }}"
+    ip: "192.168.40.100"
+    sn: "{{ node_subnet_default }}"
+    gw: "{{ node_gw_default }}"
+    ns: "{{ node_ns_default }}"
+    sd: "{{ node_sd_default }}"
+    bridge: "{{ node_bridge_default }}"
+    stg: "{{ node_stg_default }}"
+    vlan: "{{ node_vlan_default }}"
+  node2:
+    id: "40101"
+    hn: "Eris"
+    cpu: "{{ node_cpu_default }}"
+    mem: "{{ node_mem_default }}"
+    size: "{{ node_disk_default }}"
+    ip: "192.168.40.101"
+    sn: "{{ node_subnet_default }}"
+    gw: "{{ node_gw_default }}"
+    ns: "{{ node_ns_default }}"
+    sd: "{{ node_sd_default }}"
+    bridge: "{{ node_bridge_default }}"
+    stg: "{{ node_stg_default }}"
+    vlan: "{{ node_vlan_default }}"
+  node3:
+    id: "40102"
+    hn: "Haumea"
+    cpu: "{{ node_cpu_default }}"
+    mem: "{{ node_mem_default }}"
+    size: "{{ node_disk_default }}"
+    ip: "192.168.40.102"
+    sn: "{{ node_subnet_default }}"
+    gw: "{{ node_gw_default }}"
+    ns: "{{ node_ns_default }}"
+    sd: "{{ node_sd_default }}"
+    bridge: "{{ node_bridge_default }}"
+    stg: "{{ node_stg_default }}"
+    vlan: "{{ node_vlan_default }}"
+
+
+
+# CIDR for the Calico Pod Network - MUST be different from your Kubernetes CIDR to avoid an IP conflict. Subnet size will automatically be set to /16.
+calico_cidr: "172.16.0.0"
+
+# URL for the RBAC Policy for the Calico Network Policy: 
+# Can be found here: https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/#tabs-pod-install-1
+calico_rbac_url: "https://docs.projectcalico.org/v3.3/getting-started/kubernetes/installation/hosted/rbac-kdd.yaml"
+
+# URL for the Calico Network Policy: 
+# Can be found here: https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/#tabs-pod-install-1
+calico_policy_url: 'https://docs.projectcalico.org/v3.3/getting-started/kubernetes/installation/hosted/kubernetes-datastore/calico-networking/1.7/calico.yaml'
+
+# The URL for the Kubernetes Dashboard Manifest. Not locally hosted as it changes frequently.
+# Can be found in the `Getting Started` section of this page: https://github.com/kubernetes/dashboard/blob/master/README.md
+k8s_dasboard_url: 'https://raw.githubusercontent.com/kubernetes/dashboard/v1.10.1/src/deploy/recommended/kubernetes-dashboard.yaml'
+
+# Service user created for the dashboard.
+k8s_user_name: 'tj'

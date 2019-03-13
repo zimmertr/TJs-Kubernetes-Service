@@ -1,4 +1,4 @@
 ---
-- import_playbook: playbooks/main/deploy_qcow2_vms.yml
-- import_playbook: playbooks/main/install_base_packages.yml
-- import_playbook: playbooks/main/bootstrap_kubernetes.yml
+- import_playbook: deploy_qcow2_vms.yml
+- import_playbook: install_base_packages.yml
+- import_playbook: bootstrap_kubernetes.yml

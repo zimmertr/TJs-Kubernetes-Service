@@ -1,0 +1,97 @@
+---
+- name: Deploying the qcow images
+  hosts: proxmox_server
+  remote_user: root
+  become: false
+  vars_files: vars/general.yml
+
+  tasks:
+
+    - name: Creating a resource pool.
+      shell: pvesh create /pools -poolid "{{ k8s_resource_pool }}" --Comment "Kubernetes Cluster"
+      ignore_errors: yes
+
+    - name: Downloading the Debian qcow2 image.
+      get_url:
+        url: "{{ qcow2_image }}"
+        dest: "{{ qcow2_download_location }}image.qcow2"
+
+    - name: Creating the VMs.
+      shell: >
+          qm create {{ item.value.id }}
+          --pool {{ k8s_resource_pool }}
+          --ostype "l26"
+          --name {{ item.value.hn }}
+          --description "Kubernetes VM"
+          --agent 1
+          --cores {{ item.value.cpu }}
+          --memory {{ item.value.mem }} 
+          --net0 "virtio,bridge={{ item.value.bridge }}"
+          --ipconfig0 "gw={{ item..value.gw }},ip={{ item.value.ip }}{{ item.value.sn }}"
+          --nameserver {{ item.value.ns }}
+          --searchdomain {{ item.value.sd }}
+          --sshkeys {{ k8s_ssh_key }}
+      loop: "{{ lookup('dict', k8s_vars) }}"
+
+    - name: Setting the VLAN Tags.
+      shell: >
+          qm set {{ item..value.id }}
+          --net0 "virtio,bridge=vmbr0,tag={{ item.value.vlan }}"
+      loop: "{{ lookup('dict', k8s_vars) }}"
+      when: 
+          - k8s_vars.master.vlan is defined 
+          - k8s_vars.master.vlan|length != 0
+          - k8s_vars.node1.vlan is defined 
+          - k8s_vars.node1.vlan|length != 0
+          - k8s_vars.node2.vlan is defined
+          - k8s_vars.node2.vlan|length != 0
+          - k8s_vars.node3.vlan is defined
+          - k8s_vars.node3.vlan|length != 0
+
+    - name: Importing the qcow2 image as a disk.
+      shell: qm importdisk {{ item.value.id }} {{ qcow2_download_location }}image.qcow2 {{ item.value.stg }}
+      loop: "{{ lookup('dict', k8s_vars) }}"
+
+
+    - name: Configuring the disk as scsi0.
+      shell: qm set {{ item.value.id }} --scsihw virtio-scsi-pci --scsi0 {{ item.value.stg }}:vm-{{ item.value.id }}-disk-0
+      loop: "{{ lookup('dict', k8s_vars) }}"
+
+    - name: Resizing the disk. 
+      shell: qm resize {{ item.value.id }} scsi0 {{ item.value.size }}
+      loop: "{{ lookup('dict', k8s_vars) }}"
+
+    - name: Adding a Cloud-init hardware device.
+      shell: qm set {{ item.value.id }} --ide2 {{ item.value.stg }}:cloudinit
+      loop: "{{ lookup('dict', k8s_vars) }}"
+
+    - name: Setting the boot disk to scsi0 and restricting BIOS to boot from disk only.
+      shell: qm set {{ item.value.id }} --boot c --bootdisk scsi0
+      loop: "{{ lookup('dict', k8s_vars) }}"
+
+    - name: Starting the VMs.
+      shell: qm start {{ item.value.id }}
+      loop: "{{ lookup('dict', k8s_vars) }}"
+
+    - name: Pausing for 30 seconds to allow the VMs to kernel panic. -_-
+      pause:
+          seconds: 30
+
+    - name: Stopping the VMs.
+      shell: qm stop {{ item.value.id }}
+      loop: "{{ lookup('dict', k8s_vars) }}"
+
+    - name: Starting the VMs.
+      shell: qm start {{ item.value.id }}
+      loop: "{{ lookup('dict', k8s_vars) }}"
+
+    - name: Waiting for the VMs to become available.
+      wait_for:
+          host: "{{ item.value.hn }}"
+          port: 22
+          msg: "VMs did not become available after 5 minutes. Network error?"
+      loop: "{{ lookup('dict', k8s_vars) }}"
+
+    - name: Waiting 120 seconds for for Debian to finish booting.
+      pause:
+          seconds: 120

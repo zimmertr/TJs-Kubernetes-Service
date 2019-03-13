@@ -1,0 +1,31 @@
+---
+- name: Deploy Datadog controllers
+  hosts: k8s_master
+  vars_files: vars/datadog.yml
+  tasks:
+    - name: Cloning the kube-state-metrics repository.
+      git:
+        repo: 'https://github.com/kubernetes/kube-state-metrics.git'
+        dest: /tmp/kube-state-metrics
+  
+    - name: Building a list of manifests in the repository.
+      find:
+        paths: /tmp/kube-state-metrics/kubernetes
+        pattern: '*.yaml'
+      register: manifest_list
+  
+    - name: Enabling cluster level metrics collection.
+      k8s:
+        definition: "{{ lookup('template', '{{ item.path }}' ) | from_yaml_all | list }}"
+      loop: "{{ manifest_list.files }}"
+      loop_control:
+        label: "{{ item.path }}"
+  
+    - name: Deploying the datadog agent.
+      k8s:
+        definition: "{{ lookup('template', 'files/templates/Datadog/ds_datadog.yml.j2') | from_yaml }}"
+  
+    - name: Cleaning up the kube-state-metrics repository.
+      file:
+        state: absent
+        path: /tmp/kube-state-metrics

@@ -1,0 +1,11 @@
+---
+- name: Deploy MetalLB
+  hosts: k8s_master
+  vars_files: vars/metallb.yml
+  tasks:
+    - name: Deploying MetalLB.
+      shell: kubectl apply -f https://raw.githubusercontent.com/google/metallb/v0.7.3/manifests/metallb.yaml
+  
+    - name: Configuring MetalLB.
+      k8s:
+        definition: "{{ lookup('template', 'files/templates/MetalLB/cm_metallb.yml.j2') | from_yaml }}"

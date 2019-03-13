@@ -1,0 +1,13 @@
+---
+###############################################################################################
+#                                      -DataDog Options-                                      # 
+###############################################################################################
+# These parameters are only required if you have an account with DataDog and would like to    #
+# enable metrics collection for your cluster.                                                 #
+###############################################################################################
+
+# Your DataDog API Key
+dd_api_key: 'APIKEY'
+
+# Namespace to deploy DataDog to
+dd_namespace: 'default'

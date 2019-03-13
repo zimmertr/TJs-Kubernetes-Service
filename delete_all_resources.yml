@@ -1,0 +1,33 @@
+---
+- name: Delete all resources
+  hosts: proxmox_server
+  become: false
+  remote_user: root
+  vars_files: vars/general.yml
+
+  tasks: 
+   - name: Stopping the VMs.
+     shell: qm stop {{ item.value.id }}
+     loop: "{{ lookup('dict', k8s_vars) }}"
+     ignore_errors: yes
+
+   - name: Destroying the VMs.
+     shell: qm destroy {{ item.value.id }}
+     loop: "{{ lookup('dict', k8s_vars) }}"
+     ignore_errors: yes
+
+   - name: Deleting the Resource Pool.
+     shell: pvesh delete /pools/{{ k8s_resource_pool }}
+
+   - name: Deleting the Debian qcow2 image.
+     file:
+       path: "/tmp/image.qcow2"
+       state: absent
+     ignore_errors: yes
+
+   - name: Deleting the ~/.kube directory.
+     local_action:
+       module: file
+       path: ~/.kube
+       state: absent
+     ignore_errors: yes
