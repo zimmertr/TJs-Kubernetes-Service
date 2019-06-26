@@ -66,6 +66,10 @@
             - k8s_node3_vlan is defined
             - k8s_node3_vlan|length != 0
 
+      - name: Setting Serial device
+        shell: qm set {{ item.id }} --serial0 /dev/tty0
+        with_items: "{{ id_stg_list }}"
+
       - name: Importing the qcow2 image as a disk.
         shell: qm importdisk {{ item.id }} {{ qcow2_download_location }}image.qcow2 {{ item.stg }}
         with_items: "{{ id_stg_list }}"
