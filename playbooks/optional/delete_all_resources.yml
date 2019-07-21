@@ -24,6 +24,7 @@
 
       - name: Deleting the Resource Pool.
         shell: pvesh delete /pools/{{ k8s_resource_pool }}
+        ignore_errors: yes
 
       - name: Deleting the Debian qcow2 image.
         file:

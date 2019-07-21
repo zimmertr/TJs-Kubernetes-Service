@@ -18,7 +18,7 @@
   
       - name: Copying the kube config to the kube directory.
         become: yes
-        shell: cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+        shell: cp /etc/kubernetes/admin.conf $HOME/.kube/config
   
       - name: Downloading the Calico Pod Network manifest.
         get_url: 
@@ -30,10 +30,6 @@
             path: /tmp/calico.yml
             regexp: 192.168.0.0
             replace: "{{ calico_cidr }}"
-  
-      - name: Adding the role binding for Calico to Kubernetes.
-        become: yes
-        shell: kubectl apply -f {{ calico_rbac_url }}
   
       - name: Applying the Calico Pod Network to Kubernetes.
         become: yes
