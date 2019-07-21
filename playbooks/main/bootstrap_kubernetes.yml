@@ -33,8 +33,7 @@
   
       - name: Applying the Calico Pod Network to Kubernetes.
         become: yes
-        k8s:
-            src: /tmp/calico.yml
+        shell: kubectl apply -f /tmp/calico.yml
   
       - name: Deleting the Calico Pod Network manifest from disk.
         file: 
