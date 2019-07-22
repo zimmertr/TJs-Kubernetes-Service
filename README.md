@@ -13,7 +13,7 @@ Declaratively build a 4 node Kubernetes cluster on Proxmox using Ansible and QEM
 ## Requirements
 1. Proxmox server
 2. DNS Server*
-3. Ansible 2.7.0+. Known incompatibility with a previous build.
+3. Ansible 2.7.0+. Known incompatibility with a previous build.  
 <sub>*A DNS server is not technically required, it is possible to manually add entries corresponding to your node hostnames to your Proxmox's hosts file. </sub>
 
 
