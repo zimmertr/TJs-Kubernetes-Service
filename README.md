@@ -54,11 +54,8 @@ Declaratively build a 4 node Kubernetes cluster on Proxmox using Ansible and QEM
 2. Perform security audit and enhance if necessary.
 3. Add info to README about updating inventory file and how to handle SSH key generation and propegation.
 4. Add playbook to integrate k8s with a log server.
-5. Automatically include `inventory.ini` somehow so one can simply run `ansible-playbook site.yml` to deploy.
-6. Create playbook to upgrade kubernetes version for kubeadm cluster.
-7. Create playbook to install OS updates on nodes.
-8. Move dashboard deployment to optional features.
-9. Refactor lazy sleep tasks for more intelligent `wait_for` tasks.
+5. Create playbook to upgrade kubernetes version for kubeadm cluster.
+6. Move dashboard deployment to optional features.
 
 
 ## Problems
