@@ -36,26 +36,26 @@
             --agent 1
             --cores {{ item.cpu }}
             --memory {{ item.mem }} 
-            --net0 "virtio,bridge=vmbr0"
+            --net0 "virtio,bridge={{ item.bridge }}"
             --ipconfig0 "gw={{ item.gw }},ip={{ item.ip }}{{ item.sn }}"
             --nameserver {{ item.ns }}
             --searchdomain {{ item.sd }}
             --sshkeys {{ k8s_ssh_key }}
         with_items: 
-            - { id: "{{ k8s_master_id }}", hn: "{{ k8s_master_hn }}", cpu: "{{ k8s_master_cpu }}", mem: "{{ k8s_master_mem }}", gw: "{{ k8s_master_gw }}", ip: "{{ k8s_master_ip }}", sn: "{{ k8s_master_sn }}", ns: "{{ k8s_master_ns }}", sd: "{{ k8s_master_sd }}" }
-            - { id: "{{ k8s_node1_id }}", hn: "{{ k8s_node1_hn }}", cpu: "{{ k8s_node1_cpu }}", mem: "{{ k8s_node1_mem }}", gw: "{{ k8s_node1_gw }}", ip: "{{ k8s_node1_ip }}", sn: "{{ k8s_node1_sn }}", ns: "{{ k8s_node1_ns }}", sd: "{{ k8s_node1_sd }}" }
-            - { id: "{{ k8s_node2_id }}", hn: "{{ k8s_node2_hn }}", cpu: "{{ k8s_node2_cpu }}", mem: "{{ k8s_node2_mem }}", gw: "{{ k8s_node2_gw }}", ip: "{{ k8s_node2_ip }}", sn: "{{ k8s_node2_sn }}", ns: "{{ k8s_node2_ns }}", sd: "{{ k8s_node2_sd }}" }
-            - { id: "{{ k8s_node3_id }}", hn: "{{ k8s_node3_hn }}", cpu: "{{ k8s_node3_cpu }}", mem: "{{ k8s_node3_mem }}", gw: "{{ k8s_node3_gw }}", ip: "{{ k8s_node3_ip }}", sn: "{{ k8s_node3_sn }}", ns: "{{ k8s_node3_ns }}", sd: "{{ k8s_node3_sd }}" }
+            - { id: "{{ k8s_master_id }}", hn: "{{ k8s_master_hn }}", cpu: "{{ k8s_master_cpu }}", mem: "{{ k8s_master_mem }}", bridge: "{{ k8s_master_bridge }}", gw: "{{ k8s_master_gw }}", ip: "{{ k8s_master_ip }}", sn: "{{ k8s_master_sn }}", ns: "{{ k8s_master_ns }}", sd: "{{ k8s_master_sd }}" }
+            - { id: "{{ k8s_node1_id }}", hn: "{{ k8s_node1_hn }}", cpu: "{{ k8s_node1_cpu }}", mem: "{{ k8s_node1_mem }}", bridge: "{{ k8s_node1_bridge }}", gw: "{{ k8s_node1_gw }}", ip: "{{ k8s_node1_ip }}", sn: "{{ k8s_node1_sn }}", ns: "{{ k8s_node1_ns }}", sd: "{{ k8s_node1_sd }}" }
+            - { id: "{{ k8s_node2_id }}", hn: "{{ k8s_node2_hn }}", cpu: "{{ k8s_node2_cpu }}", mem: "{{ k8s_node2_mem }}", bridge: "{{ k8s_node2_bridge }}", gw: "{{ k8s_node2_gw }}", ip: "{{ k8s_node2_ip }}", sn: "{{ k8s_node2_sn }}", ns: "{{ k8s_node2_ns }}", sd: "{{ k8s_node2_sd }}" }
+            - { id: "{{ k8s_node3_id }}", hn: "{{ k8s_node3_hn }}", cpu: "{{ k8s_node3_cpu }}", mem: "{{ k8s_node3_mem }}", bridge: "{{ k8s_node3_bridge }}", gw: "{{ k8s_node3_gw }}", ip: "{{ k8s_node3_ip }}", sn: "{{ k8s_node3_sn }}", ns: "{{ k8s_node3_ns }}", sd: "{{ k8s_node3_sd }}" }
 
-      - name: Setting the VLAN Tags.
+      - name: Setting the VLAN Tags for the VMs. 
         shell: >
             qm set {{ item.id }}
-            --net0 "virtio,bridge=vmbr0,tag={{ item.vlan }}"
+            --net0 "virtio,bridge={{ item.bridge }},tag={{ item.vlan }}"
         with_items:
-            - { id: "{{ k8s_master_id }}", vlan: "{{ k8s_master_vlan }}" }
-            - { id: "{{ k8s_node1_id }}", vlan: "{{ k8s_node1_vlan }}" }
-            - { id: "{{ k8s_node2_id }}", vlan: "{{ k8s_node2_vlan }}" }
-            - { id: "{{ k8s_node3_id }}", vlan: "{{ k8s_node3_vlan }}" }
+            - { id: "{{ k8s_master_id }}", bridge: "{{ k8s_master_bridge }}", vlan: "{{ k8s_master_vlan }}" }
+            - { id: "{{ k8s_node1_id }}", bridge: "{{ k8s_node1_bridge }}", vlan: "{{ k8s_node1_vlan }}" }
+            - { id: "{{ k8s_node2_id }}", bridge: "{{ k8s_node2_bridge }}", vlan: "{{ k8s_node2_vlan }}" }
+            - { id: "{{ k8s_node3_id }}", bridge: "{{ k8s_node3_bridge }}", vlan: "{{ k8s_node3_vlan }}" }
         when: 
             - k8s_master_vlan is defined 
             - k8s_master_vlan|length != 0
@@ -66,16 +66,17 @@
             - k8s_node3_vlan is defined
             - k8s_node3_vlan|length != 0
 
-      - name: Setting Serial device
-        shell: qm set {{ item.id }} --serial0 /dev/tty0
-        with_items: "{{ id_stg_list }}"
-
       - name: Importing the qcow2 image as a disk.
         shell: qm importdisk {{ item.id }} {{ qcow2_download_location }}image.qcow2 {{ item.stg }}
         with_items: "{{ id_stg_list }}"
 
-      - name: Configuring the disk as scsi0.
-        shell: qm set {{ item.id }} --scsihw virtio-scsi-pci --scsi0 {{ item.stg }}:vm-{{ item.id }}-disk-0
+      - name: Configuring the VM Hardware. 
+        shell: qm set {{ item.id }} 
+               --scsihw virtio-scsi-pci 
+               --scsi0 {{ item.stg }}:vm-{{ item.id }}-disk-0
+               --ide2 {{ item.stg }}:cloudinit
+               --serial0 /dev/tty0
+               --boot c --bootdisk scsi0
         with_items: "{{ id_stg_list }}"
 
       - name: Resizing the disk. 
@@ -85,26 +86,6 @@
             - { id: "{{ k8s_node1_id }}", size: "{{ k8s_node1_size }}" }
             - { id: "{{ k8s_node2_id }}", size: "{{ k8s_node2_size }}" }
             - { id: "{{ k8s_node3_id }}", size: "{{ k8s_node3_size }}" }
-
-      - name: Adding a Cloud-init hardware device.
-        shell: qm set {{ item.id }} --ide2 {{ item.stg }}:cloudinit
-        with_items: "{{ id_stg_list }}"
-
-      - name: Setting the boot disk to scsi0 and restricting BIOS to boot from disk only.
-        shell: qm set {{ item }} --boot c --bootdisk scsi0
-        with_items: "{{ id_list }}"
-
-      - name: Starting the VMs.
-        shell: qm start {{ item }}
-        with_items: "{{ id_list }}"
-
-      - name: Pausing for 30 seconds to allow the VMs to kernel panic. -_-
-        pause:
-            seconds: 30
-
-      - name: Stopping the VMs.
-        shell: qm stop {{ item }}
-        with_items: "{{ id_list }}"
 
       - name: Starting the VMs.
         shell: qm start {{ item }}
@@ -121,6 +102,6 @@
             - "{{ k8s_node2_hn }}"
             - "{{ k8s_node3_hn }}"
 
-      - name: Waiting 120 seconds for for Debian to finish booting.
+      - name: Waiting 30 seconds for for Debian to finish booting.
         pause:
-            seconds: 120
+            seconds: 30

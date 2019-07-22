@@ -6,9 +6,9 @@
 
 # qcow2 image to use for your Virtual Machines: 
 # Can be found here: https://cdimage.debian.org/cdimage/openstack/current/?C=M;O=A 
-qcow2_image: 'https://cdimage.debian.org/cdimage/openstack/current/debian-9.8.2-20190303-openstack-amd64.qcow2'
+qcow2_image: 'https://cdimage.debian.org/cdimage/openstack/current/debian-10.0.2-20190721-openstack-amd64.qcow2'
 
-# Location to use for storing the qcow2 image. Be sure to end the directory with a '/'.
+# Location to use for storing the qcow2 image. Be sure to end the absolute path with a '/'.
 qcow2_download_location: '/tmp/'
 
 # Resource Pool for your virtual machines.
@@ -36,10 +36,10 @@ k8s_node2_cpu: "4"
 k8s_node3_cpu: "4"
 
 # Amount of memory expressed in megabytes
-k8s_master_mem: "4096"
-k8s_node1_mem: "8192"
-k8s_node2_mem: "8192"
-k8s_node3_mem: "8192"
+k8s_master_mem: "5120"
+k8s_node1_mem: "10240"
+k8s_node2_mem: "10240"
+k8s_node3_mem: "10240"
 
 # Disk Sizes
 k8s_master_size: "50G"
@@ -92,13 +92,9 @@ k8s_node3_stg: "SaturnPool"
 # CIDR for the Calico Pod Network - MUST be different from your Kubernetes CIDR to avoid an IP conflict. Subnet size will automatically be set to /16.
 calico_cidr: '172.16.0.0'
 
-# URL for the RBAC Policy for the Calico Network Policy: 
-# Can be found here: https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/#tabs-pod-install-1
-calico_rbac_url: "https://docs.projectcalico.org/v3.3/getting-started/kubernetes/installation/hosted/rbac-kdd.yaml"
-
 # URL for the Calico Network Policy: 
-# Can be found here: https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/#tabs-pod-install-1
-calico_policy_url: 'https://docs.projectcalico.org/v3.3/getting-started/kubernetes/installation/hosted/kubernetes-datastore/calico-networking/1.7/calico.yaml'
+# Can be found here: https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/#tabs-pod-install-2
+calico_policy_url: 'https://docs.projectcalico.org/v3.8/manifests/calico.yaml'
 
 # The URL for the Kubernetes Dashboard Manifest. Not locally hosted as it changes frequently.
 # Can be found in the `Getting Started` section of this page: https://github.com/kubernetes/dashboard/blob/master/README.md

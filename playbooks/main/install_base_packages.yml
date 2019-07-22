@@ -18,7 +18,7 @@
       - name: Installing the base packages.
         become: yes
         apt:
-            name: ['apt-transport-https', 'ca-certificates', 'curl', 'gnupg2', 'openssl', 'python-pip', 'qemu-guest-agent', 'software-properties-common']
+            name: ['apt-transport-https', 'ca-certificates', 'curl', 'haveged', 'gnupg2', 'openssl', 'python-pip', 'qemu-guest-agent', 'software-properties-common']
             
       - name: Adding the necessary GPG keys.
         become: yes
@@ -33,7 +33,7 @@
         apt_repository:
             repo: "{{ item }}"
         with_items:
-            - "deb [arch=amd64] https://download.docker.com/linux/debian stretch stable"
+            - "deb [arch=amd64] https://download.docker.com/linux/debian buster stable"
             - "deb https://apt.kubernetes.io/ kubernetes-xenial main"
 
       - name: Updating the package repositories.
@@ -62,3 +62,4 @@
             - "docker"
             - "kubelet"
             - "qemu-guest-agent"
+            - "haveged"
