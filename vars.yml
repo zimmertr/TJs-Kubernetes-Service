@@ -6,7 +6,7 @@
 
 # qcow2 image to use for your Virtual Machines: 
 # Can be found here: https://cdimage.debian.org/cdimage/openstack/current/?C=M;O=A 
-qcow2_image: 'https://cdimage.debian.org/cdimage/openstack/current/debian-10.0.1-20190708-openstack-amd64.qcow2'
+qcow2_image: 'https://cdimage.debian.org/cdimage/openstack/current/debian-10.0.2-20190721-openstack-amd64.qcow2'
 
 # Location to use for storing the qcow2 image. Be sure to end the absolute path with a '/'.
 qcow2_download_location: '/tmp/'
