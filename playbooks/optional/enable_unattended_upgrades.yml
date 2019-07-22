@@ -1,0 +1,190 @@
+---
+- hosts: k8s_master:k8s_nodes
+  gather_facts: False
+  tasks:
+      - name: Including the variables.
+        include_vars:
+           file: ../../vars.yml
+
+      - name: Installing the required packages to enable unattended-upgrades.
+        become: yes
+        apt:
+            name: ['unattended-upgrades', 'apt-listchanges']
+
+      - name: Installing the required packages to send emails to your SMTP server.
+        become: yes
+        apt:
+            name: ['mailutils', 'msmtp']
+        when: 
+            - smtp_server is defined
+            - smtp_server|length != 0
+            - smtp_port is defined
+            - smtp_port|length !=0
+            - smtp_username is defined
+            - smtp_username|length !=0
+            - smtp_password is defined
+            - smtp_password|length !=0
+            - email_address is defined 
+            - email_address|length != 0
+
+      - name: Configuring msmtp so it is capable of sending email to your SMTP server.
+        become: yes
+        blockinfile:
+            path: /etc/msmtprc
+            create: yes
+            block: |
+                account default
+                auth on
+                host {{ smtp_server }}
+                port {{ smtp_port }}
+                tls on
+                tls_starttls on
+                user {{ smtp_username }}
+                password {{ smtp_password }}
+                from unattended-upgrades
+                maildomain {{ item.hn }}.{{ item.sd }}
+                syslog LOG_MAIL
+        with_items:
+            - { hn: "{{ k8s_master_hn }}", sd: "{{ k8s_master_sd }}" }
+            - { hn: "{{ k8s_node1_hn }}", sd: "{{ k8s_node1_sd }}" }
+            - { hn: "{{ k8s_node2_hn }}", sd: "{{ k8s_node2_sd }}" }
+            - { hn: "{{ k8s_node3_hn }}", sd: "{{ k8s_node3_sd }}" }             
+        when: 
+            - smtp_server is defined
+            - smtp_server|length != 0
+            - smtp_port is defined
+            - smtp_port|length !=0
+            - smtp_username is defined
+            - smtp_username|length !=0
+            - smtp_password is defined
+            - smtp_password|length !=0
+            - email_address is defined 
+            - email_address|length != 0
+
+      - name: Disabling TLS for msmtp. You're naughty. 
+        become: yes
+        replace:
+            path: /etc/msmtprc
+            regexp: 'tls on'
+            replace: 'tls off'
+        when: 
+            - smtp_server is defined
+            - smtp_server|length != 0
+            - smtp_port is defined
+            - smtp_port|length !=0
+            - smtp_username is defined
+            - smtp_username|length !=0
+            - smtp_password is defined
+            - smtp_password|length !=0
+            - email_address is defined 
+            - email_address|length != 0
+            - smtp_use_tls is defined
+            - smtp_use_tls == "off" 
+
+      - name: Configuring email notifications for unattended-upgrades. 
+        become: yes
+        lineinfile:
+            path: /etc/apt/apt.conf.d/50unattended-upgrades
+            regexp: '/?/?Unattended-Upgrade::Mail .*'
+            line: 'Unattended-Upgrade::Mail "{{ email_address|lower }}";'
+            backrefs: yes
+        when: 
+            - smtp_server is defined
+            - smtp_server|length != 0
+            - smtp_port is defined
+            - smtp_port|length !=0
+            - smtp_username is defined
+            - smtp_username|length !=0
+            - smtp_password is defined
+            - smtp_password|length !=0
+            - email_address is defined 
+            - email_address|length != 0
+
+      - name: Restricting email notifications to only send when errors occur.
+        become: yes
+        lineinfile:
+            path: /etc/apt/apt.conf.d/50unattended-upgrades
+            regexp: '/?/?Unattended-Upgrade::MailOnlyOnError.*'
+            line: 'Unattended-Upgrade::MailOnlyOnError "{{ mail_only_on_error|lower }}";'
+            backrefs: yes
+        when: 
+            - smtp_server is defined
+            - smtp_server|length != 0
+            - smtp_port is defined
+            - smtp_port|length !=0
+            - smtp_username is defined
+            - smtp_username|length !=0
+            - smtp_password is defined
+            - smtp_password|length !=0
+            - email_address is defined 
+            - email_address|length != 0
+            - mail_only_on_error is defined
+            - mail_only_on_error == "true" or mail_only_on_error == "false"
+
+      - name: Restricting updates to only occur when a graceful OS shutdown occurs.
+        become: yes
+        lineinfile:
+            path: /etc/apt/apt.conf.d/50unattended-upgrades
+            regexp: '/?/?Unattended-Upgrade::InstallOnShutdown.*'
+            line: 'Unattended-Upgrade::InstallOnShutdown "{{ update_only_on_shutdown|lower }}";'
+            backrefs: yes
+        when: 
+            - update_only_on_shutdown is defined
+            - update_only_on_shutdown == "true" or update_only_on_shutdown == "false"
+      
+      - name: Configuring unattended-upgrades to automatically remove unused kernel packages.
+        become: yes
+        lineinfile:
+            path: /etc/apt/apt.conf.d/50unattended-upgrades
+            regexp: '/?/?Unattended-Upgrade::Remove-Unused-Kernel-Packages.*'
+            line: 'Unattended-Upgrade::Remove-Unused-Kernel-Packages "{{ remove_unused_kernel_packages|lower }}";'
+            backrefs: yes
+        when: 
+            - remove_unused_kernel_packages is defined
+            - remove_unused_kernel_packages == "true" or remove_unused_kernel_packages == "false"
+      
+      - name: Configuring unattended-upgrades to automatically remove unused dependencies.
+        become: yes
+        lineinfile:
+            path: /etc/apt/apt.conf.d/50unattended-upgrades
+            regexp: '/?/?Unattended-Upgrade::Remove-Unused-Dependencies.*'
+            line: 'Unattended-Upgrade::Remove-Unused-Dependencies "{{ remove_unused_dependencies|lower }}";'
+            backrefs: yes
+        when: 
+            - remove_unused_dependencies is defined
+            - remove_unused_dependencies == "true" or remove_unused_dependencies == "false"
+      
+      - name: Configuring unattended-upgrades to automatically reboot the OS when necessary.
+        become: yes
+        lineinfile:
+            path: /etc/apt/apt.conf.d/50unattended-upgrades
+            regexp: '/?/?Unattended-Upgrade::Automatic-Reboot .*'
+            line: 'Unattended-Upgrade::Automatic-Reboot "{{ automatic_reboot_if_required|lower }}";'
+            backrefs: yes
+        when: 
+            - automatic_reboot_if_required is defined
+            - automatic_reboot_if_required == "true" or automatic_reboot_if_required == "false"
+      
+      - name: "Configuring unattended-upgrades to automatically reboot at {{ automatic_reboot_time }}."
+        become: yes
+        lineinfile:
+            path: /etc/apt/apt.conf.d/50unattended-upgrades
+            regexp: '/?/?Unattended-Upgrade::Automatic-Reboot-Time.*'
+            line: 'Unattended-Upgrade::Automatic-Reboot-Time "{{ automatic_reboot_time }}";'
+            backrefs: yes
+        when: 
+            - automatic_reboot_if_required is defined
+            - automatic_reboot_if_required == "true" or automatic_reboot_if_required == "false"
+            - automatic_reboot_time is defined 
+            - automatic_reboot_time|length != 0
+      
+      - name: "Configuring unattended-upgrades to enable logging to syslog."
+        become: yes
+        lineinfile:
+            path: /etc/apt/apt.conf.d/50unattended-upgrades
+            regexp: '/?/? ?Unattended-Upgrade::SyslogEnable.*'
+            line: 'Unattended-Upgrade::SyslogEnable "{{ enable_syslog_logging|lower }}";'
+            backrefs: yes
+        when: 
+            - enable_syslog_logging is defined
+            - enable_syslog_logging == "true" or enable_syslog_logging == "false"

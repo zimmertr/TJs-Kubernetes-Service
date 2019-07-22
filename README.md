@@ -5,15 +5,16 @@
 </p>
 
 ## Summary
-Declaratively build a 4 node Kubernetes cluster on Proxmox using Ansible and QEMU. Optionally enable advanced features including ingress, load balancing, etc.
+Declaratively build a 4 node Kubernetes cluster on Proxmox using Ansible and QEMU. Optionally enable advanced features including ingress, load balancing, unattended upgrades etc.
 
 **Approximate deployment time:** 25 minutes
 
 
 ## Requirements
 1. Proxmox server
-2. DNS Server
+2. DNS Server*
 3. Ansible 2.7.0+. Known incompatibility with a previous build.
+<sub>*A DNS server is not technically required, it is possible to manually add entries corresponding to your node hostnames to your Proxmox's hosts file. </sub>
 
 
 ## Instructions
@@ -35,6 +36,7 @@ Declaratively build a 4 node Kubernetes cluster on Proxmox using Ansible and QEM
 | [MetalLB Load Balancer](https://metallb.universe.tf) | `ansible-playbook -i inventory.ini playbooks/optional/deploy_metallb.yml` | | 
 | [NGINX Ingress Controller](https://github.com/kubernetes/ingress-nginx) | `ansible-playbook -i inventory.ini playbooks/optional/deploy_ingress-nginx.yml` | [MetalLB](https://metallb.universe.tf/) or other Load Balancer integration |
 | [DataDog agents](https://docs.datadoghq.com/integrations/kubernetes/) | `ansible-playbook -i inventory.ini playbooks/optional/deploy_datadog.yml` | |
+| [Unattended Upgrades](https://wiki.debian.org/UnattendedUpgrades) | `ansible-playbook -i inventory.ini playbooks/optional/enable_unattended_upgrades.yml` | |
 
 
 ## Tips
@@ -66,7 +68,5 @@ Declaratively build a 4 node Kubernetes cluster on Proxmox using Ansible and QEM
 
 | OS | Issue |
 | -- | ----- |
-| Debian | Kernel Panic on the first boot. Bypassed by stopping and starting a VM after 30 seconds. |
 | CentOS | A nameserver is baked into `/etc/resolv.conf` by default. [Bug Report here](https://bugs.centos.org/view.php?id=15426) |
 | CoreOS | Proxmix issued cloud-init does not seem to configure networking properly. |
-| Ubuntu | Kernel Panic on the first boot. Bypass hack is untested as I prefer Debian. |

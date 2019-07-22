@@ -12,10 +12,10 @@ qcow2_image: 'https://cdimage.debian.org/cdimage/openstack/current/debian-10.0.2
 qcow2_download_location: '/tmp/'
 
 # Resource Pool for your virtual machines.
-k8s_resource_pool: "Kubernetes"
+k8s_resource_pool: 'Kubernetes'
 
 # Path to the SSH Public Key on your Proxmox Server.
-k8s_ssh_key: "/root/.ssh/sol.milkyway.kubernetes.pub"
+k8s_ssh_key: '/root/.ssh/sol.milkyway.kubernetes.pub'
 
 # VM IDs
 k8s_master_id: '4010'
@@ -24,70 +24,70 @@ k8s_node2_id: '40101'
 k8s_node3_id: '40102'
 
 # Hostnames
-k8s_master_hn: "Pluto"
-k8s_node1_hn: "Ceres"
-k8s_node2_hn: "Eris"
-k8s_node3_hn: "Haumea"
+k8s_master_hn: 'Pluto'
+k8s_node1_hn: 'Ceres'
+k8s_node2_hn: 'Eris'
+k8s_node3_hn: 'Haumea'
 
 # Number of CPUs
-k8s_master_cpu: "2"
-k8s_node1_cpu: "4"
-k8s_node2_cpu: "4"
-k8s_node3_cpu: "4"
+k8s_master_cpu: '2'
+k8s_node1_cpu: '4'
+k8s_node2_cpu: '4'
+k8s_node3_cpu: '4'
 
 # Amount of memory expressed in megabytes
-k8s_master_mem: "5120"
-k8s_node1_mem: "10240"
-k8s_node2_mem: "10240"
-k8s_node3_mem: "10240"
+k8s_master_mem: '5120'
+k8s_node1_mem: '10240'
+k8s_node2_mem: '10240'
+k8s_node3_mem: '10240'
 
 # Disk Sizes
-k8s_master_size: "50G"
-k8s_node1_size: "50G"
-k8s_node2_size: "50G"
-k8s_node3_size: "50G"
+k8s_master_size: '50G'
+k8s_node1_size: '50G'
+k8s_node2_size: '50G'
+k8s_node3_size: '50G'
 
 # IP Addresses
-k8s_master_ip: "192.168.40.10"
-k8s_node1_ip: "192.168.40.100"
-k8s_node2_ip: "192.168.40.101"
-k8s_node3_ip: "192.168.40.102"
+k8s_master_ip: '192.168.40.10'
+k8s_node1_ip: '192.168.40.100'
+k8s_node2_ip: '192.168.40.101'
+k8s_node3_ip: '192.168.40.102'
 
 # Subnet Sizes
-k8s_master_sn: "/24"
-k8s_node1_sn: "/24"
-k8s_node2_sn: "/24"
-k8s_node3_sn: "/24"
+k8s_master_sn: '/24'
+k8s_node1_sn: '/24'
+k8s_node2_sn: '/24'
+k8s_node3_sn: '/24'
 
 # Network Gateway
-k8s_master_gw: "192.168.40.1"
-k8s_node1_gw: "192.168.40.1"
-k8s_node2_gw: "192.168.40.1"
-k8s_node3_gw: "192.168.40.1"
+k8s_master_gw: '192.168.40.1'
+k8s_node1_gw: '192.168.40.1'
+k8s_node2_gw: '192.168.40.1'
+k8s_node3_gw: '192.168.40.1'
 
 # DNS Servers
-k8s_master_ns: "192.168.1.100"
-k8s_node1_ns: "192.168.1.100"
-k8s_node2_ns: "192.168.1.100"
-k8s_node3_ns: "192.168.1.100"
+k8s_master_ns: '192.168.1.100'
+k8s_node1_ns: '192.168.1.100'
+k8s_node2_ns: '192.168.1.100'
+k8s_node3_ns: '192.168.1.100'
 
 # Search Domains
-k8s_master_sd: "sol.milkyway"
-k8s_node1_sd: "sol.milkyway"
-k8s_node2_sd: "sol.milkyway"
-k8s_node3_sd: "sol.milkyway"
+k8s_master_sd: 'sol.milkyway'
+k8s_node1_sd: 'sol.milkyway'
+k8s_node2_sd: 'sol.milkyway'
+k8s_node3_sd: 'sol.milkyway'
 
 # Network Bridges
-k8s_master_bridge: "vmbr0"
-k8s_node1_bridge: "vmbr0"
-k8s_node2_bridge: "vmbr0"
-k8s_node3_bridge: "vmbr0"
+k8s_master_bridge: 'vmbr0'
+k8s_node1_bridge: 'vmbr0'
+k8s_node2_bridge: 'vmbr0'
+k8s_node3_bridge: 'vmbr0'
 
 # Storage volumes
-k8s_master_stg: "SaturnPool"
-k8s_node1_stg: "SaturnPool"
-k8s_node2_stg: "SaturnPool"
-k8s_node3_stg: "SaturnPool"
+k8s_master_stg: 'SaturnPool'
+k8s_node1_stg: 'SaturnPool'
+k8s_node2_stg: 'SaturnPool'
+k8s_node3_stg: 'SaturnPool'
 
 # CIDR for the Calico Pod Network - MUST be different from your Kubernetes CIDR to avoid an IP conflict. Subnet size will automatically be set to /16.
 calico_cidr: '172.16.0.0'
@@ -113,10 +113,68 @@ k8s_user_name: 'tj'
 ###############################################################################################
 
 # VLAN Tags
-k8s_master_vlan: "40"
-k8s_node1_vlan: "40"
-k8s_node2_vlan: "40"
-k8s_node3_vlan: "40"
+k8s_master_vlan: '40'
+k8s_node1_vlan: '40'
+k8s_node2_vlan: '40'
+k8s_node3_vlan: '40'
+
+
+###############################################################################################
+#                                    -Unattended Upgrades-                                    # 
+###############################################################################################
+# These parameters are only required if you want to enable Unattended Upgrades on the         #
+# operating systems that comprise your Kubernetes master and worker nodes. None of these      #
+# variables are required to enable the feature. However, you may wish to enable email         #
+# notifications via SMTP or tweak the way in which Unattended Upgrades are applied to your    #
+# system. To do so, simply uncomment the relevant configuration setting.                      #
+#                                                                                             #
+# NOTE: If you enable any of the following variables, then you must enable the other ones as  #
+# well or SMTP will not work:                                                                 #
+#     - smtp_server                                                                           #
+#     - smtp_port                                                                             #
+#     - smtp_username                                                                         #
+#     - smtp_password                                                                         #
+#     - email_address                                                                         #
+###############################################################################################
+
+# SMTP Server
+#smtp_server: 'smtp.gmail.com'
+
+# SMTP Port 
+#smtp_port: '587'
+
+# SMTP Server username
+#smtp_username: 'thomaszimmerman93@gmail.com'
+
+# SMTP Server password
+#smtp_password: 'PASSWORD'
+
+# The email address to which notifications will be delivered.
+#email_address: 'thomaszimmerman93@gmail.com'
+
+# You want to be naughty and use SMTP without TLS.
+#smtp_use_tls: 'off'
+
+# Only receive emails when an error occurs.
+#mail_only_on_error: "true"
+
+# Only perform upgrades when a graceful OS shutdown occurs.
+#update_only_on_shutdown: "true"
+
+# Automatically remove unused kernel packages.
+#remove_unused_kernel_packages: "true"
+
+# Automatically remove unused dependencies. 
+#remove_unused_dependencies: "true"
+
+# Automatically perform a reboot after upgrading if required.
+#automatic_reboot_if_required: "true"
+
+# If automatic reboots are enabled, configure the time at which they occur.
+#automatic_reboot_time: "02:00"
+
+# Enable logging to syslog.
+#enable_syslog_logging: "true"
 
 
 ###############################################################################################
