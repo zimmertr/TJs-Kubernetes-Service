@@ -47,7 +47,7 @@
             - { id: "{{ k8s_node2_id }}", hn: "{{ k8s_node2_hn }}", cpu: "{{ k8s_node2_cpu }}", mem: "{{ k8s_node2_mem }}", bridge: "{{ k8s_node2_bridge }}", gw: "{{ k8s_node2_gw }}", ip: "{{ k8s_node2_ip }}", sn: "{{ k8s_node2_sn }}", ns: "{{ k8s_node2_ns }}", sd: "{{ k8s_node2_sd }}" }
             - { id: "{{ k8s_node3_id }}", hn: "{{ k8s_node3_hn }}", cpu: "{{ k8s_node3_cpu }}", mem: "{{ k8s_node3_mem }}", bridge: "{{ k8s_node3_bridge }}", gw: "{{ k8s_node3_gw }}", ip: "{{ k8s_node3_ip }}", sn: "{{ k8s_node3_sn }}", ns: "{{ k8s_node3_ns }}", sd: "{{ k8s_node3_sd }}" }
 
-      - name: Setting the VLAN Tags and adding a serial device to prevent a Kernel Panic.
+      - name: Setting the VLAN Tags for the VMs. 
         shell: >
             qm set {{ item.id }}
             --net0 "virtio,bridge={{ item.bridge }},tag={{ item.vlan }}"
@@ -70,8 +70,13 @@
         shell: qm importdisk {{ item.id }} {{ qcow2_download_location }}image.qcow2 {{ item.stg }}
         with_items: "{{ id_stg_list }}"
 
-      - name: Configuring the disk as scsi0.
-        shell: qm set {{ item.id }} --scsihw virtio-scsi-pci --scsi0 {{ item.stg }}:vm-{{ item.id }}-disk-0
+      - name: Configuring the VM Hardware. 
+        shell: qm set {{ item.id }} 
+               --scsihw virtio-scsi-pci 
+               --scsi0 {{ item.stg }}:vm-{{ item.id }}-disk-0
+               --ide2 {{ item.stg }}:cloudinit
+               --serial0 /dev/tty0
+               --boot c --bootdisk scsi0
         with_items: "{{ id_stg_list }}"
 
       - name: Resizing the disk. 
@@ -81,18 +86,6 @@
             - { id: "{{ k8s_node1_id }}", size: "{{ k8s_node1_size }}" }
             - { id: "{{ k8s_node2_id }}", size: "{{ k8s_node2_size }}" }
             - { id: "{{ k8s_node3_id }}", size: "{{ k8s_node3_size }}" }
-
-      - name: Adding a cloud-init hardware device.
-        shell: qm set {{ item.id }} --ide2 {{ item.stg }}:cloudinit
-        with_items: "{{ id_stg_list }}"
-
-      - name: Adding a serial device to prevent a Kernel Panic on first boot.
-        shell: qm set {{ item.id }} --serial0 /dev/tty0
-        with_items: "{{ id_stg_list }}"
-
-      - name: Setting the boot disk to scsi0 and restricting BIOS to boot from disk only.
-        shell: qm set {{ item }} --boot c --bootdisk scsi0
-        with_items: "{{ id_list }}"
 
       - name: Starting the VMs.
         shell: qm start {{ item }}
