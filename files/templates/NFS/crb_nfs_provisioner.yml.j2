@@ -10,5 +10,5 @@ subjects:
 roleRef:
   kind: ClusterRole
   name: nfs-client-provisioner-runner
-  namespace: nfs-client-provisioner
+  namespace: {{ nfs_namespace }}
   apiGroup: rbac.authorization.k8s.io
