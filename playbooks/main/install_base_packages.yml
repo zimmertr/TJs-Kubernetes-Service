@@ -18,8 +18,19 @@
       - name: Installing the base packages.
         become: yes
         apt:
-            name: ['apt-transport-https', 'ca-certificates', 'curl', 'haveged', 'gnupg2', 'openssl', 'python-pip', 'qemu-guest-agent', 'software-properties-common']
-            
+            name: ['apt-transport-https', 'ca-certificates', 'curl', 'haveged', 'gnupg2', 'openssl', 'python-pip', 'qemu-guest-agent', 'software-properties-common', 'arptables', 'ebtables']
+
+
+      - name: Enabling iptables-legacy mode.
+        become: yes
+        shell: >
+            update-alternatives --set {{ item.name }} /usr/sbin/{{ item.name }}-legacy
+        with_items:
+            - { name: "iptables" }
+            - { name: "ip6tables" }
+            - { name: "arptables" }
+            - { name: "ebtables" }
+
       - name: Adding the necessary GPG keys.
         become: yes
         apt_key: 
