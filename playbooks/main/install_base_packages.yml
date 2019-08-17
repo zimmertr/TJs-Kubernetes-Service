@@ -20,16 +20,16 @@
         apt:
             name: ['apt-transport-https', 'ca-certificates', 'curl', 'haveged', 'gnupg2', 'openssl', 'python-pip', 'qemu-guest-agent', 'software-properties-common', 'arptables', 'ebtables']
 
-
-      - name: Enabling iptables-legacy mode.
+      - name: Configuring the nodes to use legacy iptables for compatibility with Kubernetes.
         become: yes
-        shell: >
-            update-alternatives --set {{ item.name }} /usr/sbin/{{ item.name }}-legacy
+        alternatives:
+            name: "{{ item }}"
+            path: /usr/sbin/{{ item }}-legacy
         with_items:
-            - { name: "iptables" }
-            - { name: "ip6tables" }
-            - { name: "arptables" }
-            - { name: "ebtables" }
+            - "iptables"
+            - "ip6tables"
+            - "arptables"
+            - "ebtables"
 
       - name: Adding the necessary GPG keys.
         become: yes
