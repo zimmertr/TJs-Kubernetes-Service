@@ -14,7 +14,7 @@
       - name: Installing the required packages to send emails to your SMTP server.
         become: yes
         apt:
-            name: ['mailutils', 'msmtp']
+            name: ['bsd-mailx', 'msmtp', 'msmtp-mta']
         when: 
             - smtp_server is defined
             - smtp_server|length != 0

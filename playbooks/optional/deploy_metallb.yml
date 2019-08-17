@@ -8,7 +8,7 @@
             
       - name: Deploying MetalLB.
         become: yes
-        shell: kubectl apply -f https://raw.githubusercontent.com/google/metallb/v0.8.0/manifests/metallb.yaml
+        shell: kubectl apply -f https://raw.githubusercontent.com/google/metallb/v0.8.1/manifests/metallb.yaml
   
       - name: Configuring MetalLB.
         become: yes
