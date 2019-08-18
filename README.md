@@ -42,7 +42,8 @@ Declaratively build a 4 node Kubernetes cluster on Proxmox using Ansible and QEM
 ## Tips
 1. You can rollback the entire deployment with: `ansible-playbook -i inventory.ini playbooks/optional/delete_all_resources.yml`
 2. If Calico isn't deploying correctly it's likely the CIDR you assigned to it in `vars.yml` conflicts with your network. 
-3. See [this repository](https://github.com/zimmertr/Bootstrap-Kubernetes-with-LXC) to do this with LXC instead.  Benefits of using LXC include:
+3. [There appears to be an issue](https://forum.proxmox.com/threads/has-cloud-init-been-changed-between-5-3-and-6-0.56175/) with Proxmox's `cloud-init` implementation. Perhaps just with Debian? As a result, your VM might not have the correct information in `/etc/resolv.conf` and may also have multiple IP Addresses assigned to the `eth0` network interfaces. Furthermore, if you do not have a DHCP server active in the network that you are provisoning the VMs to, it is entirely possible that nothing will be present at all in `/etc/resolv.conf`.  
+4. See [this repository](https://github.com/zimmertr/Bootstrap-Kubernetes-with-LXC) to do this with LXC instead.  Benefits of using LXC include:
 ```
 * No virtualization overhead means better performance
 * Ability to directly mount volumes from your server into your containers.
