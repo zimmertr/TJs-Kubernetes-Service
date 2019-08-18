@@ -6,7 +6,7 @@
 
 # qcow2 image to use for your Virtual Machines: 
 # Can be found here: https://cdimage.debian.org/cdimage/openstack/current/?C=M;O=A 
-qcow2_image: 'https://cdimage.debian.org/cdimage/openstack/current/debian-10.0.2-20190721-openstack-amd64.qcow2'
+qcow2_image: 'https://cdimage.debian.org/cdimage/openstack/current/debian-10.0.3-20190815-openstack-amd64.qcow2'
 
 # Location to use for storing the qcow2 image. Be sure to end the absolute path with a '/'.
 qcow2_download_location: '/tmp/'
@@ -138,19 +138,19 @@ k8s_node3_vlan: '40'
 ###############################################################################################
 
 # SMTP Server
-#smtp_server: 'smtp.gmail.com'
+smtp_server: 'smtp.gmail.com'
 
 # SMTP Port 
-#smtp_port: '587'
+smtp_port: '587'
 
 # SMTP Server username
-#smtp_username: 'thomaszimmerman93@gmail.com'
+smtp_username: 'thomaszimmerman93@gmail.com'
 
 # SMTP Server password
-#smtp_password: 'PASSWORD'
+smtp_password: 'PASSWORD'
 
 # The email address to which notifications will be delivered.
-#email_address: 'thomaszimmerman93@gmail.com'
+email_address: 'thomaszimmerman93@gmail.com'
 
 # You want to be naughty and use SMTP without TLS.
 #smtp_use_tls: 'off'
@@ -181,7 +181,7 @@ k8s_node3_vlan: '40'
 #                                        -NFS Options-                                        # 
 ###############################################################################################
 # These parameters are only required if you have an NFS server and would like to enable the   #
-# optional support for dynamic provisioning of Persistent Storage volumes for your pods.
+# optional support for dynamic provisioning of Persistent Storage volumes for your pods.      #
 ###############################################################################################
 
 # NFS server
