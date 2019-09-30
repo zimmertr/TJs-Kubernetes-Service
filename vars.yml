@@ -5,8 +5,7 @@
 ###############################################################################################
 
 # qcow2 image to use for your Virtual Machines: 
-# Can be found here: https://cdimage.debian.org/cdimage/openstack/current/?C=M;O=A 
-qcow2_image: 'https://cdimage.debian.org/cdimage/openstack/current/debian-10.0.3-20190815-openstack-amd64.qcow2'
+qcow2_image: 'https://cdimage.debian.org/cdimage/openstack/current-10/debian-10-openstack-amd64.qcow2'
 
 # Location to use for storing the qcow2 image. Be sure to end the absolute path with a '/'.
 qcow2_download_location: '/tmp/'
@@ -98,7 +97,7 @@ calico_policy_url: 'https://docs.projectcalico.org/v3.8/manifests/calico.yaml'
 
 # The URL for the Kubernetes Dashboard Manifest. Not locally hosted as it changes frequently.
 # Can be found in the `Getting Started` section of this page: https://github.com/kubernetes/dashboard/blob/master/README.md
-k8s_dasboard_url: 'https://raw.githubusercontent.com/kubernetes/dashboard/v1.10.1/src/deploy/recommended/kubernetes-dashboard.yaml'
+k8s_dasboard_url: 'https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-beta4/aio/deploy/recommended.yaml'
 
 # Service user created for the dashboard.
 k8s_user_name: 'tj'
@@ -156,16 +155,16 @@ email_address: 'thomaszimmerman93@gmail.com'
 #smtp_use_tls: 'off'
 
 # Only receive emails when an error occurs.
-#mail_only_on_error: "true"
+mail_only_on_error: "true"
 
 # Only perform upgrades when a graceful OS shutdown occurs.
 #update_only_on_shutdown: "true"
 
 # Automatically remove unused kernel packages.
-#remove_unused_kernel_packages: "true"
+remove_unused_kernel_packages: "true"
 
 # Automatically remove unused dependencies. 
-#remove_unused_dependencies: "true"
+remove_unused_dependencies: "true"
 
 # Automatically perform a reboot after upgrading if required.
 #automatic_reboot_if_required: "true"
@@ -240,7 +239,7 @@ metallb_peer_router: '192.168.1.1'
 metallb_peer_asn: '64512'
 
 # The names of your address pools.
-metallb_ap1_name: 'VLAN20'
+metallb_ap1_name: 'VLAN10'
 metallb_ap4_name: 'VLAN70'
 metallb_ap2_name: 'VLAN50'
 metallb_ap3_name: 'VLAN60'
@@ -252,7 +251,7 @@ metallb_ap3_protocol: 'bgp'
 metallb_ap4_protocol: 'bgp'
 
 # The CIDRs of your address pools.
-metallb_ap1_cidr: '192.168.20.1/24'
+metallb_ap1_cidr: '192.168.10.1/24'
 metallb_ap2_cidr: '192.168.50.1/24'
 metallb_ap3_cidr: '192.168.60.1/24'
 metallb_ap4_cidr: '192.168.70.1/24'
