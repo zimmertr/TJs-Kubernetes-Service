@@ -51,18 +51,6 @@
         with_items: 
             - "sa_dashboard.yml.j2"
             - "rb_dashboard.yml.j2" 
-
-      - name: Deploying Heapster, InfluxDB, and configuring RBAC for the Dashboard stack.
-        become: yes
-        k8s:
-            definition: "{{ lookup('template', '../../files/manifests/Dashboard/{{ item }}') | from_yaml }}"
-        with_items:         
-            - "sa_heapster.yml"
-            - "rb_heapster.yml"
-            - "svc_heapster.yml"
-            - "svc_influxdb.yml"
-            - "dep_heapster.yml"
-            - "dep_influxdb.yml"
   
       - name: Retrieving the authentication token for your service user.
         become: yes
