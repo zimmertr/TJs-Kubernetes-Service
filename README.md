@@ -57,6 +57,7 @@ Declaratively build a 4 node Kubernetes cluster on Proxmox using Ansible and QEM
 4. Add playbook to integrate k8s with a log server.
 5. Create playbook to upgrade kubernetes version for kubeadm cluster.
 6. Move dashboard deployment to optional features.
+7. Add logic to disable DHCP on image, inject static configuration, flush eth0, & reboot.
 
 
 ## Problems
