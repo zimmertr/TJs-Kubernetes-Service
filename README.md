@@ -24,7 +24,7 @@ Declaratively build a 4 node Kubernetes cluster on Proxmox using Ansible and QEM
 2. Provision DNS A records for the IP Addresses & Hostnames you defined for your nodes in the `vars.yml` file.
 3. Modify the `inventory.ini` file to reflect your chosen DNS records and the location of the SSH keys used to connect to the nodes.
 4. Run the deployment: `ansible-playbook -i inventory.ini site.yml`
-5. After deployment, a `~/.kube` directory will be created on your workstation. Within your `config` an `authentication_token` file can be be found. This token is used to authenticate against the Kubernetes API and Dashboard using your account. To connect to the dashboard, install `kubectl` on your workstation and run `kubectl proxy` then navigate to the [Dashboard Endpoint](http://localhost:8001/api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy/) in your browser.
+5. After deployment, a `~/.kube` directory will be created on your workstation. Within your `config` an `authentication_token` file can be be found. This token is used to authenticate against the Kubernetes API and Dashboard using your account. To connect to the dashboard, install `kubectl` on your workstation and run `kubectl proxy` then navigate to the [Dashboard Endpoint](http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/) in your browser.
 
 **Optional:**
 
