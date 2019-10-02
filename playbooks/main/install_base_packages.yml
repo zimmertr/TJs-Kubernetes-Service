@@ -74,3 +74,14 @@
             - "kubelet"
             - "qemu-guest-agent"
             - "haveged"
+
+      - name: Removing the DHCP lines for eth0 from the interfaces file.
+        become: yes
+        lineinfile:
+            state: absent
+            path: /etc/network/interfaces
+            line: iface eth0 inet dhcp
+
+      - name: Rebooting the OS to switch to cloud-init provided network configuration & finalize any necessary package upgrades.
+        become: yes
+        reboot:
