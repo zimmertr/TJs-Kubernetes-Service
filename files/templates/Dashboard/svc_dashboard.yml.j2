@@ -1,0 +1,20 @@
+kind: Service
+apiVersion: v1
+metadata:
+    name: kubernetes-dashboard
+    namespace: kubernetes-dashboard
+    annotations:
+        metallb.universe.tf/address-pool: {{ dashboard_load_balancer_address_pool }}  
+    labels:
+        k8s-app: kubernetes-dashboard
+spec:
+    type: LoadBalancer
+    externalTrafficPolicy: Local
+    selector:
+        k8s-app: kubernetes-dashboard
+    loadBalancerIP: {{ dashboard_load_balancer_ip }}
+    ports:
+        - name: "http-web"
+          protocol: TCP
+          port: 8443
+          targetPort: 8443

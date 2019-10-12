@@ -40,17 +40,13 @@
             path: /tmp/calico.yml
             state: absent
   
-      - name: Deploying the Dashboard to Kubernetes.
-        become: yes
-        shell: kubectl apply -f {{ k8s_dasboard_url }}
-  
-      - name: Configuring RBAC for the Dashboard service account.
+      - name: Configuring RBAC for the personal Service Account.
         become: yes
         k8s:
-            definition: "{{ lookup('template', '../../files/templates/Dashboard/{{ item }}') | from_yaml }}"
+            definition: "{{ lookup('template', '../../files/templates/Service_Account/{{ item }}') | from_yaml }}"
         with_items: 
-            - "sa_dashboard.yml.j2"
-            - "rb_dashboard.yml.j2" 
+            - "sa_personal.yml.j2"
+            - "rb_personal.yml.j2" 
   
       - name: Retrieving the authentication token for your service user.
         become: yes
@@ -91,10 +87,3 @@
       - name: Joining the nodes to the master.
         become: yes
         shell: "{{ hostvars[groups['k8s_master'][0]]['k8s_join_command']['stdout'] }} --ignore-preflight-errors=all"
-
-
-- hosts: localhost
-  gather_facts: False
-  tasks:
-      - name: Echoing instructions to user.
-        debug: msg="Check your ~/.kube directory for secrets. You can now connect to the dashboard by running $(kubectl proxy) and navigating to http://localhost:8001/api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy/"

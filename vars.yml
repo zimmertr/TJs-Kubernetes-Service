@@ -97,10 +97,39 @@ calico_policy_url: 'https://docs.projectcalico.org/v3.8/manifests/calico.yaml'
 
 # The URL for the Kubernetes Dashboard Manifest. Not locally hosted as it changes frequently.
 # Can be found in the `Getting Started` section of this page: https://github.com/kubernetes/dashboard/blob/master/README.md
-k8s_dasboard_url: 'https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-beta4/aio/deploy/recommended.yaml'
+k8s_dashboard_url: 'https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.0-beta4/aio/deploy/recommended.yaml'
 
 # Service user created for the dashboard.
 k8s_user_name: 'tj'
+
+
+###############################################################################################
+#                                     -Dashboard Options-                                     # 
+###############################################################################################
+# These parameters are only required if you intend to deploy the Kubernetes Dashboard to your #
+# cluster. If you wish to bind the Dashboard service to a Load Balanced IP Address, then      #
+# uncomment and provide the values below. If you wish to deploy the Dashboard like normal,    #
+# and use `kubectl-proxy` or `kubectl port-forward` to expose it, leave them commented out.   #
+#                                                                                             #
+# If you exposed the Dashboard with MetalLB, you can navigate to: https://HOSTNAME:8443/      #
+# If you are exposing the Dashboard with `kubectl proxy`, you can find instructions on how to #
+# access the dashboard here:                                                                  #
+# https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard/               #
+#                                                                                             #
+# TKS has already provisioned a Service Account that you can use to authenticate against your #
+# Dashboard. You can retrieve this token like so. Be sure to replace K8S_USER_NAME with the   #
+#value that you set for `k8s_user_name` above.                                                #
+# kubectl describe -n kube-system secret K8S_USER_NAME-token | grep token: | awk '{print $2}' #
+###############################################################################################
+
+# The MetalLB Address Pool from which you want to obtain an IP address.
+dashboard_load_balancer_address_pool: 'VLAN50'
+
+# The IP address within the Address Pool to which you want to bind the service. 
+dashboard_load_balancer_ip: '192.168.50.100'
+
+# The hostname with which you want to test connectivity to the IP Address after the deployment has completed.
+dashboard_hostname: 'amalthea.sol.milkyway'
 
 
 ###############################################################################################

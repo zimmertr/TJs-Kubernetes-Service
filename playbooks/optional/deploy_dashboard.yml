@@ -1,0 +1,137 @@
+---
+- hosts: k8s_master
+  gather_facts: False
+  tasks:
+      - name: Including the variables.
+        include_vars:
+           file: ../../vars.yml
+
+      - name: Deploying the Kubernetes Dashboard.
+        become: yes
+        shell: kubectl apply -f {{ k8s_dashboard_url }}
+
+      - name: Creating a directory for the Dashboard certificates.
+        file: 
+            path: /tmp/dashboard_cert
+            state: directory
+
+      - name: Creating a Private Key for the Dashboard Certificate.
+        openssl_privatekey:
+            path: /tmp/dashboard_cert/dashboard.key
+        when:
+            - dashboard_load_balancer_address_pool is defined
+            - dashboard_load_balancer_address_pool|length != 0
+            - dashboard_load_balancer_ip is defined
+            - dashboard_load_balancer_ip|length != 0
+            - dashboard_hostname is defined
+            - dashboard_hostname|length !=0
+
+      - name: Creating a CSR for the Dashboard Certificate.
+        openssl_csr:
+            path: /tmp/dashboard_cert/dashboard.csr
+            privatekey_path: /tmp/dashboard_cert/dashboard.key
+            common_name: kubernetes-dashboard
+        when:
+            - dashboard_load_balancer_address_pool is defined
+            - dashboard_load_balancer_address_pool|length != 0
+            - dashboard_load_balancer_ip is defined
+            - dashboard_load_balancer_ip|length != 0
+            - dashboard_hostname is defined
+            - dashboard_hostname|length !=0
+
+      - name: Creating a Certificate for the Dashboard.
+        openssl_certificate:
+            path: /tmp/dashboard_cert/dashboard.crt
+            privatekey_path: /tmp/dashboard_cert/dashboard.key
+            csr_path: /tmp/dashboard_cert/dashboard.csr
+            provider: selfsigned
+        when:
+            - dashboard_load_balancer_address_pool is defined
+            - dashboard_load_balancer_address_pool|length != 0
+            - dashboard_load_balancer_ip is defined
+            - dashboard_load_balancer_ip|length != 0
+            - dashboard_hostname is defined
+            - dashboard_hostname|length !=0
+
+      - name: Removing the existing certificates Secret for the Dashboard.
+        become: yes
+        shell: kubectl delete secret -n kubernetes-dashboard kubernetes-dashboard-certs 
+        when:
+            - dashboard_load_balancer_address_pool is defined
+            - dashboard_load_balancer_address_pool|length != 0
+            - dashboard_load_balancer_ip is defined
+            - dashboard_load_balancer_ip|length != 0
+            - dashboard_hostname is defined
+            - dashboard_hostname|length !=0
+
+      - name: Removing the existing Service for the Dashboard.
+        become: yes
+        shell: kubectl delete service -n kubernetes-dashboard kubernetes-dashboard
+        when:
+            - dashboard_load_balancer_address_pool is defined
+            - dashboard_load_balancer_address_pool|length != 0
+            - dashboard_load_balancer_ip is defined
+            - dashboard_load_balancer_ip|length != 0
+            - dashboard_hostname is defined
+            - dashboard_hostname|length !=0
+
+      - name: Creating a Secret to hold the Certificates.
+        become: yes
+        shell: kubectl create secret generic kubernetes-dashboard-certs --from-file=/tmp/dashboard_cert -n kubernetes-dashboard
+        when:
+            - dashboard_load_balancer_address_pool is defined
+            - dashboard_load_balancer_address_pool|length != 0
+            - dashboard_load_balancer_ip is defined
+            - dashboard_load_balancer_ip|length != 0
+            - dashboard_hostname is defined
+            - dashboard_hostname|length !=0
+
+      - name: Creating a Service to expose the Dashboard.
+        become: yes
+        k8s:
+            definition: "{{ lookup('template', '../../files/templates/Dashboard/svc_dashboard.yml.j2') | from_yaml }}"
+        when:
+            - dashboard_load_balancer_address_pool is defined
+            - dashboard_load_balancer_address_pool|length != 0
+            - dashboard_load_balancer_ip is defined
+            - dashboard_load_balancer_ip|length != 0
+            - dashboard_hostname is defined
+            - dashboard_hostname|length !=0
+
+      - name: Deleting the existing Dashboard pod to reload the certificate.
+        become: yes
+        shell: kubectl delete pod -n kubernetes-dashboard -l k8s-app=kubernetes-dashboard
+        when:
+            - dashboard_load_balancer_address_pool is defined
+            - dashboard_load_balancer_address_pool|length != 0
+            - dashboard_load_balancer_ip is defined
+            - dashboard_load_balancer_ip|length != 0
+            - dashboard_hostname is defined
+            - dashboard_hostname|length !=0
+
+      - name: Deleting the temporary Dashboard Certs directory.
+        file:
+            path: /tmp/dashboard_cert
+            state: absent
+        when:
+            - dashboard_load_balancer_address_pool is defined
+            - dashboard_load_balancer_address_pool|length != 0
+            - dashboard_load_balancer_ip is defined
+            - dashboard_load_balancer_ip|length != 0
+            - dashboard_hostname is defined
+            - dashboard_hostname|length !=0
+
+      - name: Waiting for the deployment to be ready.
+        wait_for:
+            host: "{{ dashboard_hostname }}"
+            port: 8443
+            timeout: 300
+            msg: "Application was not available after 5 minutes. Something has probably gone wrong."
+        when:
+            - dashboard_load_balancer_address_pool is defined
+            - dashboard_load_balancer_address_pool|length != 0
+            - dashboard_load_balancer_ip is defined
+            - dashboard_load_balancer_ip|length != 0
+            - dashboard_hostname is defined
+            - dashboard_hostname|length !=0
+

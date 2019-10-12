@@ -5,7 +5,7 @@
 </p>
 
 ## Summary
-Declaratively build a 4 node Kubernetes cluster on Proxmox using Ansible and QEMU. Optionally enable advanced features including ingress, load balancing, unattended upgrades etc.
+Declaratively build a 4 node Kubernetes cluster on Proxmox using Ansible and QEMU. Optionally enable advanced features including ingress, load balancing, unattended upgrades, the Dashboard, etc.
 
 **Approximate deployment time:** 25 minutes
 
@@ -24,7 +24,7 @@ Declaratively build a 4 node Kubernetes cluster on Proxmox using Ansible and QEM
 2. Provision DNS A records for the IP Addresses & Hostnames you defined for your nodes in the `vars.yml` file.
 3. Modify the `inventory.ini` file to reflect your chosen DNS records and the location of the SSH keys used to connect to the nodes.
 4. Run the deployment: `ansible-playbook -i inventory.ini site.yml`
-5. After deployment, a `~/.kube` directory will be created on your workstation. Within your `config` an `authentication_token` file can be be found. This token is used to authenticate against the Kubernetes API and Dashboard using your account. To connect to the dashboard, install `kubectl` on your workstation and run `kubectl proxy` then navigate to the [Dashboard Endpoint](http://localhost:8001/api/v1/namespaces/kubernetes-dashboard/services/https:kubernetes-dashboard:/proxy/) in your browser.
+5. After deployment, a `~/.kube` directory will be created on your workstation. You can use the `config` file within to interact with your cluster.
 
 **Optional:**
 
@@ -32,6 +32,7 @@ Declaratively build a 4 node Kubernetes cluster on Proxmox using Ansible and QEM
 
 | Feature | Command | Requirements |
 | ------- | ------- | ------------ |
+| [Kubernetes Dashboard](https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard/) | `ansible-playbook -i inventory.ini playbooks/optional/deploy_dashboard.yml` | |
 | [NFS backed persistent storage](https://github.com/kubernetes-incubator/external-storage/tree/master/nfs-client) | `ansible-playbook -i inventory.ini playbooks/optional/deploy_nfs_provisioner.yml` | |
 | [MetalLB Load Balancer](https://metallb.universe.tf) | `ansible-playbook -i inventory.ini playbooks/optional/deploy_metallb.yml` | | 
 | [NGINX Ingress Controller](https://github.com/kubernetes/ingress-nginx) | `ansible-playbook -i inventory.ini playbooks/optional/deploy_ingress-nginx.yml` | [MetalLB](https://metallb.universe.tf/) or other Load Balancer integration |
@@ -55,7 +56,6 @@ Declaratively build a 4 node Kubernetes cluster on Proxmox using Ansible and QEM
 2. Perform security audit and enhance if necessary.
 3. Add info to README about updating inventory file and how to handle SSH key generation and propegation.
 4. Create playbook to upgrade kubernetes version for kubeadm cluster.
-5. Move dashboard deployment to optional features.
 
 
 ## Problems
