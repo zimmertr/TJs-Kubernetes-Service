@@ -1,0 +1,15 @@
+[submodule "TKS-Bootstrap_Proxmox"]
+	path = TKS-Bootstrap_Proxmox
+	url = https://github.com/zimmertr/TKS-Bootstrap_Proxmox
+[submodule "TKS-Build_Proxmox_Template"]
+	path = TKS-Build_Proxmox_Template
+	url = https://github.com/zimmertr/TKS-Build_Proxmox_Template
+[submodule "TKS-Deploy_Software_LoadBalancer"]
+	path = TKS-Deploy_Software_LoadBalancer
+	url = https://github.com/zimmertr/TKS-Deploy_Software_LoadBalancer
+[submodule "TKS-Bootstrap_Kubernetes"]
+	path = TKS-Bootstrap_Kubernetes
+	url = https://github.com/zimmertr/TKS-Bootstrap_Kubernetes
+[submodule "TKS-Deploy-Vault"]
+	path = TKS-Deploy-Vault
+	url = https://github.com/zimmertr/TKS-Deploy-Vault
