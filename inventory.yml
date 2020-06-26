@@ -1,0 +1,7 @@
+proxmox:
+  hosts:
+    earth.sol.milkyway:
+  vars:
+    ansible_user: root
+    ansible_ssh_private_key_file: '~/.ssh/earth.sol.milkyway'
+    ansible_ssh_common_args: '-o ServerAliveInterval=5 -o StrictHostKeyChecking=no'
