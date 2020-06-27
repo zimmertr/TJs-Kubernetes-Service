@@ -1,16 +1,9 @@
 # TKS
 
-Looking for the opinionated Ansible-driven solution? Check here: https://github.com/zimmertr/Bootstrap-Kubernetes-with-QEMU
+TKS is being refactored. If you still see this message, it is not yet complete. Check [here](https://github.com/zimmertr/Bootstrap-Kubernetes-with-QEMU) for the older project.
 
 ## Summary
 
-## Submodules
+Enable enthusiasts and administrators alike to easily provision highly available and production-ready Kubernetes clusters on Proxmox VE. 
 
-## Frequently Asked Questions
-
-## Contributing
-
-## Contact
-
-## License
-
+To get started, take a look at the [Documentation](https://github.com/zimmertr/TKS-Documentation/).
