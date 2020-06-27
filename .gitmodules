@@ -6,10 +6,6 @@
 	path = TKS-Build_Proxmox_Template
 	url = https://github.com/zimmertr/TKS-Build_Proxmox_Template
 	branch = master
-[submodule "TKS-Deploy_Software_LoadBalancer"]
-	path = TKS-Deploy_Software_LoadBalancer
-	url = https://github.com/zimmertr/TKS-Deploy_Software_LoadBalancer
-	branch = master
 [submodule "TKS-Bootstrap_Kubernetes"]
 	path = TKS-Bootstrap_Kubernetes
 	url = https://github.com/zimmertr/TKS-Bootstrap_Kubernetes
