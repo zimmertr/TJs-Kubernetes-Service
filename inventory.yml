@@ -1,4 +1,16 @@
-proxmox:
+# Managing Proxmox servers directly
+proxmox: 
   hosts:
     earth.sol.milkyway:
+    saturn.sol.milkyway:
+
+# Managing a Proxmox master server
+# Only ONE master is supported.
+master:
+  hosts:
+    earth.sol.milkyway:
+
+# Managing Proxmox nodes
+nodes:
+  hosts:
     saturn.sol.milkyway:
