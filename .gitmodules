@@ -10,10 +10,6 @@
 	path = TKS-Bootstrap_Kubernetes
 	url = https://github.com/zimmertr/TKS-Bootstrap_Kubernetes
 	branch = master
-[submodule "TKS-Deploy-Vault"]
-	path = TKS-Deploy-Vault
-	url = https://github.com/zimmertr/TKS-Deploy-Vault
-	branch = master
 [submodule "TKS-Deploy_Kubernetes_Apps"]
 	path = TKS-Deploy_Kubernetes_Apps
 	url = https://github.com/zimmertr/TKS-Deploy_Kubernetes_Apps
