@@ -10,3 +10,7 @@
 	path = TKS-Deploy_Kubernetes_Apps
 	url = https://github.com/zimmertr/TKS-Deploy_Kubernetes_Apps
 	branch = master
+[submodule "TKS-Deploy_Harbor"]
+	path = TKS-Deploy_Harbor
+	url = https://github.com/zimmertr/TKS-Deploy_Harbor
+	branch = master
