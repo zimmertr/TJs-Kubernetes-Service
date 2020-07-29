@@ -1,5 +1,5 @@
 # Managing Proxmox servers directly
-proxmox: 
+proxmox:
   hosts:
     earth.sol.milkyway:
     saturn.sol.milkyway:
@@ -14,3 +14,8 @@ master:
 nodes:
   hosts:
     saturn.sol.milkyway:
+
+# Managing Harbor
+harbor:
+  hosts:
+    harbor.sol.milkyway:
