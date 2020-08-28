@@ -1,21 +1,41 @@
-# Managing Proxmox servers directly
+# Proxmox Servers
 proxmox:
   hosts:
     earth.sol.milkyway:
-    saturn.sol.milkyway:
+    # saturn.sol.milkyway:
 
-# Managing a Proxmox master server
-# Only ONE master is supported.
-master:
-  hosts:
-    earth.sol.milkyway:
-
-# Managing Proxmox nodes
-nodes:
-  hosts:
-    saturn.sol.milkyway:
-
-# Managing Harbor
+# Harbor
 harbor:
   hosts:
     harbor.sol.milkyway:
+
+# Kubernetes Debian Template
+k8s_template:
+  hosts:
+    template.sol.milkyway:
+  vars:
+    ansible_user: "tks"
+    ansible_ssh_private_key_file: "/Users/tj/.ssh/Sol.Milkyway/kubernetes.sol.milkyway"
+
+# Kubernetes Control Plane
+k8s_cp:
+  hosts:
+  vars:
+    ansible_user: "tks"
+    ansible_ssh_private_key_file: "/Users/tj/.ssh/Sol.Milkyway/kubernetes.sol.milkyway"
+
+# Kubernetes Worker Nodes
+k8s_nodes:
+  hosts:
+  vars:
+    ansible_user: "tks"
+    ansible_ssh_private_key_file: "/Users/tj/.ssh/Sol.Milkyway/kubernetes.sol.milkyway"
+
+# All Kubernetes Hosts
+k8s:
+  hosts:
+    k8s_cp:
+    k8s_nodes:
+  vars:
+    ansible_user: "tks"
+    ansible_ssh_private_key_file: "/Users/tj/.ssh/Sol.Milkyway/kubernetes.sol.milkyway"

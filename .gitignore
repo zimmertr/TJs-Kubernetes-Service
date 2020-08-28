@@ -1,3 +1,5 @@
 *.un~
 *.retry
 TODO.md
+.terraform/
+terraform.tfstate*
