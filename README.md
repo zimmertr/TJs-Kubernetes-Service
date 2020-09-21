@@ -70,13 +70,19 @@ Clone this repository to retrieve the submodules below. Review their documentati
 >
 > **A:** I retired that project in favor of TKS. You can find the code [here](https://github.com/zimmertr/Bootstrap-Kubernetes-with-QEMU), however. 
 
+
+
 > **Q:** Why do you make things so complicated?
 >
 > **A:** It's fun.
 
+
+
 > **Q:** I found and issue! How should I notify you?
 >
 > **A:** Please file a GitHub issue under the respective subproject. Please do not email me for support until you have initiated the issue process on GitHub. 
+
+
 
 > **Q:** What are some ways that I can contribute?
 >
