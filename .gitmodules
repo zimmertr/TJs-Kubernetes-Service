@@ -14,3 +14,7 @@
 	path = TKS-Deploy_Harbor
 	url = https://github.com/zimmertr/TKS-Deploy_Harbor
 	branch = master
+[submodule "TKS-Deploy_Grafana"]
+	path = TKS-Deploy_Grafana
+	url = https://github.com/zimmertr/TKS-Deploy_Grafana
+	branch = master
