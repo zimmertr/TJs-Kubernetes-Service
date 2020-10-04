@@ -76,34 +76,34 @@ Clone this repository to retrieve the submodules below. This repository is treat
 
 ## Frequently Asked Questions
 
-**Q:** Where did the older Ansible/QEMU based project go?
+**Q: Where did the older Ansible/QEMU based project go?**
 
 I retired that project in favor of TKS. You can find the code [here](https://github.com/zimmertr/Bootstrap-Kubernetes-with-QEMU), however. 
 
-**Q:** Why did you choose Debian instead of X?
+**Q: Why did you choose Debian instead of X?**
 
 * Debian is stable and easy to configure
 * I [tried](https://github.com/Telmate/terraform-provider-proxmox/issues/208#issuecomment-703230173) to use Flatcar first unsuccessfully
 * CentOS is enterprisey
 * If you're still opposed, consider adding a PR with support for another OS? :) 
 
-**Q:** Why did you expose configuration through environment variables?
+**Q: Why did you expose configuration through environment variables?**
 
 IaC and CaC tooling usually expose configuration through variables files, so I understand why you might ask that. My goal in exposing configuration through environment variables was to better support CI/CD with this tooling. 
 
-**Q:** Why didn't you use X? Why aren't you using Y?
+**Q: Why didn't you use X? Why aren't you using Y?**
 
 Consider opening an issue informing me why you think that.
 
-**Q:** Why do you make things so complicated?
+**Q: Why do you make things so complicated?**
 
 It's fun. TKS is developed as a hobby. 
 
-**Q:** I found an issue! How should I notify you?
+**Q: I found an issue! How should I notify you?**
 
 Please file a GitHub issue under the respective subproject. Please do not email me for support until you have initiated the issue process on GitHub. Pull requests are also welcome and encouraged. :) 
 
-**Q:** What are some ways that I can contribute?
+**Q: What are some ways that I can contribute?**
 
 - Add support for additional types of storage
 - Add support for multiple Proxmox nodes
