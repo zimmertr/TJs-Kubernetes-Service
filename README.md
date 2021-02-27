@@ -60,6 +60,8 @@ I'm able to use all of the tooling here from both MacOS and Arch Linux. It will 
 
 Clone this repository to retrieve the submodules below. This repository is treated like a *Release* and each Submodule should reflect the most current stable commit from each project. You can review the `master` branch for each project for additional unstable updates if desired. Detailed instructions for how to use each project is located in the respective README.
 
+The `./inventory.yml` file at the root of this repository is used for Ansible in each of the submodules. Be sure to modify it as per your environment before starting.
+
 | Name                                                         | Description                                                  |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
 | [TKS-Bootstrap_Proxmox]( https://github.com/zimmertr/TKS-Bootstrap_Proxmox) | * Prepare iDRAC or a Bootable USB Device<br />* Provision and Configure Proxmox VE<br />* Initialize Storage & Clustering |
