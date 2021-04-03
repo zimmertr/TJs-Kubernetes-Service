@@ -1,5 +1,7 @@
 # TKS
 
+**Warning:** You must clone this repositiory with [recursion](https://stackoverflow.com/questions/3796927/how-to-git-clone-including-submodules) in order to pull the submodules. 
+
 * [Summary](#Summary)
 * [Requirements](#Requirements)
   * [Hardware](#Hardware)
