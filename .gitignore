@@ -3,3 +3,4 @@
 TODO.md
 .terraform/
 terraform.tfstate*
+.terraform.lock.hcl
