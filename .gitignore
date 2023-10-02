@@ -1,6 +1,15 @@
-*.un~
-*.retry
-TODO.md
-.terraform/
-terraform.tfstate*
-.terraform.lock.hcl
+# Terraform
+.terraform*
+*.tfstate*
+
+# Secrets
+config.env
+
+# Talos
+talosconfig
+
+# Kubernetes
+kubeconfig
+
+# MacOS
+.DS_Store
