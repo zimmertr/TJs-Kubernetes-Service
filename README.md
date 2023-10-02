@@ -21,7 +21,7 @@ TJ's Kubernetes Service, or *TKS*, is an IaC project that is used to deliver Kub
    source config.env
    ```
 
-5. Create DNS records and DHCP reservations for your nodes according to your configured Hostname, MAC address, and IP Address prefixes. Due to the way the values are generated in Terraform, there is a limitated of 9 control planes and 9 worker nodes. Here is how mine was configured with the default values:
+5. Create DNS records and DHCP reservations for your nodes according to your configured Hostname, MAC address, and IP Address prefixes. Due to the way the values are generated in Terraform, there is a limit of 9 control planes and 9 worker nodes. Here is how mine was configured with the default values:
 
    | Hostname        | MAC Address       | IP Address     |
    | --------------- | ----------------- | -------------- |
