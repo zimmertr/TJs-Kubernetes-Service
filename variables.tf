@@ -89,7 +89,7 @@ variable "CONTROLPLANE_HOSTNAME_PREFIX" {
   default     = "k8s-cp"
   description = "Hostname prefix (less the last digit) of the controlplane nodes"
 }
-variable "CONTROLPLANE_NODE_NAME"{
+variable "CONTROLPLANE_NODE_NAME" {
   type        = string
   description = "Proxmox node used for provisioning the workernodes"
 }
@@ -116,7 +116,7 @@ variable "CONTROLPLANE_DATASTORE" {
 variable "CONTROLPLANE_DISK_SIZE" {
   # Talos recommends 100Gb
   type        = string
-  default     = "50" 
+  default     = "50"
   description = "Quantity of disk space (gigabytes) to apply to the controlplane virtual machines"
 }
 variable "CONTROLPLANE_NETWORK_DEVICE" {
@@ -154,7 +154,7 @@ variable "WORKERNODE_HOSTNAME_PREFIX" {
   default     = "k8s-node"
   description = "Hostname prefix (less the last digit) of the workernode nodes"
 }
-variable "WORKERNODE_NODE_NAME"{
+variable "WORKERNODE_NODE_NAME" {
   type        = string
   description = "Proxmox node used for provisioning the workernodes"
 }

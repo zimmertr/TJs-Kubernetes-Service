@@ -1,13 +1,13 @@
 resource "proxmox_virtual_environment_file" "talos_image" {
-  content_type  = "iso"
-  datastore_id  = var.TALOS_IMAGE_DATASTORE
-  node_name     = var.TALOS_IMAGE_NODE_NAME
+  content_type = "iso"
+  datastore_id = var.TALOS_IMAGE_DATASTORE
+  node_name    = var.TALOS_IMAGE_NODE_NAME
 
   source_file {
-    path        = "https://github.com/siderolabs/talos/releases/download/${var.TALOS_VERSION}/nocloud-amd64.raw.xz"
-    file_name   = "talos-${var.TALOS_VERSION}-nocloud-amd64.iso"
+    path      = "https://github.com/siderolabs/talos/releases/download/${var.TALOS_VERSION}/nocloud-amd64.raw.xz"
+    file_name = "talos-${var.TALOS_VERSION}-nocloud-amd64.iso"
   }
-  
+
   connection {
     type     = "ssh"
     user     = "root"
