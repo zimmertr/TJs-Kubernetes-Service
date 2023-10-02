@@ -40,31 +40,37 @@ TJ's Kubernetes Service, or *TKS*, is an IaC project that is used to deliver Kub
    | test-k8s-node-2 | 00:00:00:00:02:32 | 192.168.40.232 |
    | test-k8s-node-3 | 00:00:00:00:02:33 | 192.168.40.233 |
 
-6. Initialize Terraform and create the cluster
+6. Create and select a workspace for your Terraform state. Or configure a different backend accordingly.
+   ```bash
+   terraform workspace new test
+   ```
+
+7. Initialize Terraform and create the cluster
+
    ```bash
    terraform init
    terraform apply
    ```
 
-7. Retrieve the Kubernetes and Talos configuration files. 
+8. Retrieve the Kubernetes and Talos configuration files. 
    ```bash
    mkdir -p ~/.{kube,talos}
    terraform output -raw kubeconfig > ~/.kube/config
    terraform output -raw talosconfig > ~/.talos/config
    ```
 
-8. Confirm Kubernetes is bootstrapped and all of the nodes have joined the cluster. The Controlplane nodes might take a moment to respond. You can confirm the status of each Talos node using `talosctl` or by reviewing the VM consoles in Proxmox.
+9. Confirm Kubernetes is bootstrapped and all of the nodes have joined the cluster. The Controlplane nodes might take a moment to respond. You can confirm the status of each Talos node using `talosctl` or by reviewing the VM consoles in Proxmox.
    ```bash
    watch kubectl get nodes,all -A
    ```
 
-9. Upgrade the nodes to enable QEMU Guest Agent. If you run this too soon, etcd won't be ready and the control planes will fail to upgrade. 
+10. Upgrade the nodes to enable QEMU Guest Agent. If you run this too soon, etcd won't be ready and the control planes will fail to upgrade. 
    ```bash
    NODES=$(kubectl get nodes --no-headers=true | awk '{print $1}' | tr '\n' ',')
    ./bin/manage_nodes $NODES upgrade
    ```
 
-10. Use Kubernetes as you see fit. You can find my personal collection of manifests [here](https://github.com/zimmertr/Application-Manifests). 
+11. Use Kubernetes as you see fit. You can find my personal collection of manifests [here](https://github.com/zimmertr/Application-Manifests). 
 
 
 
