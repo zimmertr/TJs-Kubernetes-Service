@@ -3,7 +3,7 @@ resource "proxmox_virtual_environment_vm" "controlplane" {
   vm_id                     = "${var.CONTROLPLANE_VMID_PREFIX}${count.index + 1}"
   
   pool_id                   = proxmox_virtual_environment_pool.resource_pool.id
-  node_name                 = var.CONTROLPLANE_WORKERNODE_NAME
+  node_name                 = var.CONTROLPLANE_NODE_NAME
 
   name                      = "${var.CONTROLPLANE_HOSTNAME_PREFIX}-${count.index + 1}"
   description               = "${var.CONTROLPLANE_HOSTNAME_PREFIX}: ${count.index + 1}"

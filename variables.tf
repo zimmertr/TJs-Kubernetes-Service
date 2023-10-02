@@ -96,7 +96,7 @@ variable "CONTROLPLANE_HOSTNAME_PREFIX" {
   default     = "k8s-cp"
   description = "Hostname prefix (less the last digit) of the controlplane nodes"
 }
-variable "CONTROLPLANE_WORKERNODE_NAME"{
+variable "CONTROLPLANE_NODE_NAME"{
   type        = string
   default     = "earth"
   description = "Proxmox node used for provisioning the workernodes"
@@ -164,7 +164,7 @@ variable "WORKERNODE_HOSTNAME_PREFIX" {
   default     = "k8s-node"
   description = "Hostname prefix (less the last digit) of the workernode nodes"
 }
-variable "WORKERNODE_WORKERNODE_NAME"{
+variable "WORKERNODE_NODE_NAME"{
   type        = string
   default     = "earth"
   description = "Proxmox node used for provisioning the workernodes"

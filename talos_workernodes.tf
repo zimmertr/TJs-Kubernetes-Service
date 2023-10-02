@@ -3,7 +3,7 @@ resource "proxmox_virtual_environment_vm" "workernode" {
   vm_id                     = "${var.WORKERNODE_VMID_PREFIX}${count.index + 1}"
   
   pool_id                   = proxmox_virtual_environment_pool.resource_pool.id
-  node_name                 = var.WORKERNODE_WORKERNODE_NAME
+  node_name                 = var.WORKERNODE_NODE_NAME
 
   name                      = "${var.WORKERNODE_HOSTNAME_PREFIX}-${count.index + 1}"
   description               = "${var.WORKERNODE_HOSTNAME_PREFIX}: ${count.index + 1}"
