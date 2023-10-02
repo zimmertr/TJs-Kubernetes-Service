@@ -52,7 +52,7 @@ TJ's Kubernetes Service, or *TKS*, is an IaC project that is used to deliver Kub
    terraform apply
    ```
 
-8. Retrieve the Kubernetes and Talos configuration files. 
+8. Retrieve the Kubernetes and Talos configuration files. Be sure not to overwrite any existing configs you wish to preserve.
    ```bash
    mkdir -p ~/.{kube,talos}
    terraform output -raw kubeconfig > ~/.kube/config
