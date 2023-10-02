@@ -6,8 +6,9 @@
 upgrade_node(){
   for node in $(echo $1 | sed "s/,/ /g"); do
 
-    until kubectl get node $node --kubeconfig $tmp_dir/kubeconfig; do
+    until kubectl get node $node --kubeconfig $tmp_dir/kubeconfig > /dev/null 2>&1 ; do
       echo "Waiting for node..."
+      sleep 5
     done
 
     talosctl upgrade \
@@ -32,10 +33,12 @@ remove_node(){
 }
 
 main(){
-
   tmp_dir=$(mktemp -d)
   nodes=$1
   command=$2
+
+  terraform output -raw kubeconfig > $tmp_dir/kubeconfig
+  terraform output -raw talosconfig > $tmp_dir/talosconfig
 
   if [ "$command" = "upgrade" ]; then
     upgrade_node "$nodes"

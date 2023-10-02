@@ -1,8 +1,8 @@
-# TKS
+# TJ's Kubernetes Service
 
 ## Summary
 
-TKS, or *TJ's Kubernetes Service*, is an IaC project that is used to deliver Kubernetes to Proxmox. Across the years, it has evolved many times and used a multitude of different technologies. Nowadays, it is comprised of a relatively simple collection of Terraform manifests thanks to the work of [BPG](https://github.com/bpg/terraform-provider-proxmox) and [Sidero Labs](https://github.com/siderolabs/terraform-provider-talos). 
+TJ's Kubernetes Service, or *TKS*, is an IaC project that is used to deliver Kubernetes to Proxmox. Across the years, it has evolved many times and has used a multitude of different technologies. Nowadays, it is a relatively simple collection of Terraform manifests thanks to the work of [BPG](https://github.com/bpg/terraform-provider-proxmox) and [Sidero Labs](https://github.com/siderolabs/terraform-provider-talos). 
 
 ## Instructions
 
@@ -21,7 +21,16 @@ TKS, or *TJ's Kubernetes Service*, is an IaC project that is used to deliver Kub
    source config.env
    ```
 
-5. Create DNS records and DHCP reservations for your nodes according to your configured Hostname, MAC address, and IP Address prefixes. 
+5. Create DNS records and DHCP reservations for your nodes according to your configured Hostname, MAC address, and IP Address prefixes. Due to the way the values are generated in Terraform, there is a limitated of 9 control planes and 9 worker nodes. Here is how mine was configured with the default values:
+
+   | Hostname        | MAC Address       | IP Address     |
+   | --------------- | ----------------- | -------------- |
+   | test-k8s-cp-1   | 00:00:00:00:00:01 | 192.168.40.101 |
+   | test-k8s-cp-2   | 00:00:00:00:00:02 | 192.168.40.102 |
+   | test-k8s-cp-3   | 00:00:00:00:00:03 | 192.168.40.103 |
+   | test-k8s-node-1 | 00:00:00:00:00:11 | 192.168.40.151 |
+   | test-k8s-node-2 | 00:00:00:00:00:12 | 192.168.40.152 |
+   | test-k8s-node-3 | 00:00:00:00:00:13 | 192.168.40.153 |
 
 6. Initialize Terraform and create the cluster
    ```bash
@@ -43,7 +52,7 @@ TKS, or *TJ's Kubernetes Service*, is an IaC project that is used to deliver Kub
 
 9. Upgrade the nodes to enable QEMU Guest Agent. If you run this too soon, etcd won't be ready and the control planes will fail to upgrade. 
    ```bash
-   NODES=$(kubectl --kubeconfig kubeconfig get nodes --no-headers=true | awk '{print $1}' | tr '\n' ',')
+   NODES=$(kubectl get nodes --no-headers=true | awk '{print $1}' | tr '\n' ',')
    ./bin/manage_nodes $NODES upgrade
    ```
 

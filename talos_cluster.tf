@@ -1,10 +1,6 @@
 locals {
   controlplane_nodes          = [for i in range(1, var.CONTROLPLANE_NUM + 1) : "${var.CONTROLPLANE_IP_PREFIX}${i}"]
   worker_nodes                = [for i in range(1, var.WORKERNODE_NUM + 1) : "${var.WORKERNODE_IP_PREFIX}${i}"]
-
-  controlplane_node_hostnames = [for i in range(1, var.CONTROLPLANE_NUM + 1) : "${var.CONTROLPLANE_HOSTNAME_PREFIX}-${i}"]
-  worker_node_hostnames       = [for i in range(1, var.WORKERNODE_NUM + 1) : "${var.WORKERNODE_HOSTNAME_PREFIX}-${i}"]
-  all_nodes                   = join(",", concat(local.controlplane_node_hostnames, local.worker_node_hostnames))
 }
 
 resource "talos_machine_secrets" "this" {
