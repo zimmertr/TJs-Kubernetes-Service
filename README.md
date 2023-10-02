@@ -21,16 +21,24 @@ TJ's Kubernetes Service, or *TKS*, is an IaC project that is used to deliver Kub
    source config.env
    ```
 
-5. Create DNS records and DHCP reservations for your nodes according to your configured Hostname, MAC address, and IP Address prefixes. Due to the way the values are generated in Terraform, there is a limit of 9 control planes and 9 worker nodes. Here is how mine was configured with the default values:
+5. Create DNS records and DHCP reservations for your nodes according to your configured Hostname, MAC address, and IP Address prefixes. Due to the way the values are generated in Terraform, there is a limit of 9 control planes and 9 worker nodes. Here is how mine is configured for two clusters:
 
    | Hostname        | MAC Address       | IP Address     |
    | --------------- | ----------------- | -------------- |
-   | test-k8s-cp-1   | 00:00:00:00:00:01 | 192.168.40.101 |
-   | test-k8s-cp-2   | 00:00:00:00:00:02 | 192.168.40.102 |
-   | test-k8s-cp-3   | 00:00:00:00:00:03 | 192.168.40.103 |
-   | test-k8s-node-1 | 00:00:00:00:00:11 | 192.168.40.151 |
-   | test-k8s-node-2 | 00:00:00:00:00:12 | 192.168.40.152 |
-   | test-k8s-node-3 | 00:00:00:00:00:13 | 192.168.40.153 |
+   | k8s-vip         | N/A               | 192.168.40.20  |
+   | k8s-cp-1        | 00:00:00:00:00:21 | 192.168.40.21  |
+   | k8s-cp-2        | 00:00:00:00:00:22 | 192.168.40.22  |
+   | k8s-cp-3        | 00:00:00:00:00:23 | 192.168.40.23  |
+   | k8s-node-1      | 00:00:00:00:00:31 | 192.168.40.31  |
+   | k8s-node-2      | 00:00:00:00:00:32 | 192.168.40.32  |
+   | k8s-node-3      | 00:00:00:00:00:33 | 192.168.40.33  |
+   | test-k8s-vip    | N/A               | 192.168.40.220 |
+   | test-k8s-cp-1   | 00:00:00:00:02:21 | 192.168.40.221 |
+   | test-k8s-cp-2   | 00:00:00:00:02:22 | 192.168.40.222 |
+   | test-k8s-cp-3   | 00:00:00:00:02:23 | 192.168.40.223 |
+   | test-k8s-node-1 | 00:00:00:00:02:31 | 192.168.40.231 |
+   | test-k8s-node-2 | 00:00:00:00:02:32 | 192.168.40.232 |
+   | test-k8s-node-3 | 00:00:00:00:02:33 | 192.168.40.233 |
 
 6. Initialize Terraform and create the cluster
    ```bash

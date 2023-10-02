@@ -37,8 +37,6 @@ resource "proxmox_virtual_environment_vm" "controlplane" {
     size                    = var.CONTROLPLANE_DISK_SIZE
   }
 
-  lifecycle {ignore_changes = [tags]}
-
   # Remove the node from Kubernetes on destroy
   provisioner "local-exec" {
     when                    = destroy
