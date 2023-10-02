@@ -1,0 +1,52 @@
+#!/bin/bash
+
+# "System extensions are only activated during the installation or upgrade of Talos Linux.
+# With system extensions installed, the Talos root filesystem is still immutable and read-only."
+# https://www.talos.dev/v1.5/talos-guides/configuration/system-extensions/
+upgrade_node(){
+  for node in $(echo $1 | sed "s/,/ /g"); do
+
+    until kubectl get node $node --kubeconfig $tmp_dir/kubeconfig; do
+      echo "Waiting for node..."
+    done
+
+    talosctl upgrade \
+      --nodes $node \
+      --preserve=true \
+      --wait \
+      --talosconfig $tmp_dir/talosconfig
+
+    sleep 30
+  done
+}
+
+# https://www.talos.dev/v1.5/talos-guides/howto/scaling-down/
+remove_node(){
+  talosctl reset \
+    --nodes $1 \
+    --talosconfig $tmp_dir/talosconfig
+
+  kubectl delete node \
+    --kubeconfig $tmp_dir/kubeconfig \
+    $1
+}
+
+main(){
+
+  tmp_dir=$(mktemp -d)
+  nodes=$1
+  command=$2
+
+  if [ "$command" = "upgrade" ]; then
+    upgrade_node "$nodes"
+  elif [ "$command" = "remove" ]; then
+    remove_node "$nodes"
+  else
+    echo "No command given"
+    exit 1
+  fi
+
+  rm -rf $tmp_dir
+}
+
+main "$@"

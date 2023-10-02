@@ -1,0 +1,7 @@
+machine:
+  network:
+    interfaces:
+      - interface: "eth0"
+        dhcp: true
+        vip:
+          ip: "${VIRTUAL_IP}"
