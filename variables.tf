@@ -95,7 +95,7 @@ variable "CONTROLPLANE_NODE_NAME"{
 }
 variable "CONTROLPLANE_TAGS" {
   type        = string
-  default     = "kubernetes,controlplane"
+  default     = "app-kubernetes,type-controlplane"
   description = "Tags to apply to the controlplane virtual machines"
 }
 variable "CONTROLPLANE_CPU_CORES" {
@@ -160,7 +160,7 @@ variable "WORKERNODE_NODE_NAME"{
 }
 variable "WORKERNODE_TAGS" {
   type        = string
-  default     = "kubernetes,workernode"
+  default     = "app-kubernetes,type-workernode"
   description = "Tags to apply to the workernode virtual machines"
 }
 variable "WORKERNODE_CPU_CORES" {
