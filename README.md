@@ -52,7 +52,7 @@ TJ's Kubernetes Service, or *TKS*, is an IaC project that is used to deliver Kub
    terraform apply
    ```
 
-8. Retrieve the Kubernetes and Talos configuration files. Be sure not to overwrite any existing configs you wish to preserve.
+8. Retrieve the Kubernetes and Talos configuration files. Be sure not to overwrite any existing configs you wish to preserve. I use [kubecm](https://github.com/sunny0826/kubecm) to merge configs and [kubectx](https://github.com/ahmetb/kubectx) to change contexts. 
    ```bash
    mkdir -p ~/.{kube,talos}
    terraform output -raw kubeconfig > ~/.kube/config
@@ -65,11 +65,10 @@ TJ's Kubernetes Service, or *TKS*, is an IaC project that is used to deliver Kub
    ```
 
 10. Upgrade the nodes to enable QEMU Guest Agent. If you run this too soon, etcd won't be ready and the control planes will fail to upgrade. 
-   ```bash
-   NODES=$(kubectl get nodes --no-headers=true | awk '{print $1}' | tr '\n' ',')
-   ./bin/manage_nodes $NODES upgrade
-   ```
-
+    ```bash
+    NODES=$(kubectl get nodes --no-headers=true | awk '{print $1}' | tr '\n' ',')
+    ./bin/manage_nodes $NODES upgrade
+    ```
 11. Use Kubernetes as you see fit. You can find my personal collection of manifests [here](https://github.com/zimmertr/Application-Manifests). 
 
 
