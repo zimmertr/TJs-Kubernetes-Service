@@ -3,7 +3,7 @@
 *.tfstate*
 
 # Secrets
-config.env
+*.env
 
 # Talos
 talosconfig
