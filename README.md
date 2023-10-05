@@ -79,7 +79,8 @@ TJ's Kubernetes Service, or *TKS*, is an IaC project that is used to deliver Kub
    kubectx admin@test
    ```
 
-10. Confirm Kubernetes is bootstrapped and that all of the nodes have joined the cluster. The Controlplane nodes might take a moment to respond. You can confirm the status of each Talos node using `talosctl` or by reviewing the VM consoles in Proxmox. The nodes and some pods will not be `Ready` until a CNI is installed in the next step.
+10. Confirm Kubernetes is bootstrapped and that all of the nodes have joined the cluster. The Controlplane nodes might take a moment to respond. You can confirm the status of each Talos node using `talosctl` or by reviewing the VM consoles in Proxmox.
+
     ```bash
     watch kubectl get nodes,all -A
     ```
