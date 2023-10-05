@@ -1,0 +1,14 @@
+machine:
+  features:
+    kubernetesTalosAPIAccess:
+      enabled: true
+      allowedRoles:
+        - os:operator
+      allowedKubernetesNamespaces:
+        - talos-system
+  network:
+    interfaces:
+      - interface: "eth0"
+        dhcp: true
+        vip:
+          ip: "${talos_virtual_ip}"

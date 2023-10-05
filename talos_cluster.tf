@@ -1,16 +1,16 @@
 locals {
-  controlplane_nodes = [for i in range(1, var.CONTROLPLANE_NUM + 1) : "${var.CONTROLPLANE_IP_PREFIX}${i}"]
-  worker_nodes       = [for i in range(1, var.WORKERNODE_NUM + 1) : "${var.WORKERNODE_IP_PREFIX}${i}"]
+  controlplane_nodes = [for i in range(1, var.controlplane_num + 1) : "${var.controlplane_ip_prefix}${i}"]
+  worker_nodes       = [for i in range(1, var.workernode_num + 1) : "${var.workernode_ip_prefix}${i}"]
 }
 
 resource "talos_machine_secrets" "this" {
-  talos_version = var.TALOS_VERSION
+  talos_version = var.talos_version
 }
 
 data "talos_client_configuration" "this" {
-  cluster_name         = var.CLUSTER_NAME
-  client_configuration = talos_machine_secrets.this.client_configuration
-  endpoints            = [for node in local.controlplane_nodes : node]
+  cluster_name = var.kubernetes_cluster_name
+  client_configuration    = talos_machine_secrets.this.client_configuration
+  endpoints               = [for node in local.controlplane_nodes : node]
 }
 
 data "talos_cluster_kubeconfig" "this" {
@@ -23,7 +23,7 @@ data "talos_cluster_kubeconfig" "this" {
 }
 
 resource "talos_machine_bootstrap" "this" {
-  count = var.CONTROLPLANE_NUM
+  count = var.controlplane_num
   depends_on = [
     talos_machine_configuration_apply.controlplane
   ]

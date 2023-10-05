@@ -1,5 +1,17 @@
 #!/bin/bash
 
+install_cilium(){
+  cilium install \
+    --helm-set=ipam.mode=kubernetes \
+    --helm-set=kubeProxyReplacement=true \
+    --helm-set=securityContext.capabilities.ciliumAgent="{CHOWN,KILL,NET_ADMIN,NET_RAW,IPC_LOCK,SYS_ADMIN,SYS_RESOURCE,DAC_OVERRIDE,FOWNER,SETGID,SETUID}" \
+    --helm-set=securityContext.capabilities.cleanCiliumState="{NET_ADMIN,SYS_ADMIN,SYS_RESOURCE}" \
+    --helm-set=cgroup.autoMount.enabled=false \
+    --helm-set=cgroup.hostRoot=/sys/fs/cgroup \
+    --helm-set=k8sServiceHost=localhost \
+    --helm-set=k8sServicePort=7445
+}
+
 # "System extensions are only activated during the installation or upgrade of Talos Linux.
 # With system extensions installed, the Talos root filesystem is still immutable and read-only."
 # https://www.talos.dev/v1.5/talos-guides/configuration/system-extensions/
@@ -14,33 +26,34 @@ upgrade_node(){
     talosctl upgrade \
       --nodes $node \
       --preserve=true \
-      --wait \
-      --talosconfig $tmp_dir/talosconfig
+      --wait
 
     sleep 30
   done
 }
 
+# Ensure that a node is also removed from the cluster when Terraform destroys it.
 # https://www.talos.dev/v1.5/talos-guides/howto/scaling-down/
 remove_node(){
-  talosctl reset \
-    --nodes $1 \
-    --talosconfig $tmp_dir/talosconfig
-
-  kubectl delete node \
-    --kubeconfig $tmp_dir/kubeconfig \
-    $1
+  talosctl reset --nodes $1
+  talosctl shutdown --nodes $1
+  kubectl delete node $1
 }
 
 main(){
   tmp_dir=$(mktemp -d)
-  nodes=$1
-  command=$2
+  command=$1
+  nodes=$2
 
   terraform output -raw kubeconfig > $tmp_dir/kubeconfig
   terraform output -raw talosconfig > $tmp_dir/talosconfig
 
-  if [ "$command" = "upgrade" ]; then
+  export KUBECONFIG=$tmp_dir/kubeconfig
+  export TALOSCONFIG=$tmp_dir/talosconfig
+
+  if [ "$command" = "cilium" ]; then
+    install_cilium $nodes
+  elif [ "$command" = "upgrade" ]; then
     upgrade_node "$nodes"
   elif [ "$command" = "remove" ]; then
     remove_node "$nodes"
