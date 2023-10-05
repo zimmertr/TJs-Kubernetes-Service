@@ -9,7 +9,7 @@
 
 ## Summary
 
-TJ's Kubernetes Service, or *TKS*, is an IaC project that is used to deliver Kubernetes to Proxmox. Across the years, it has evolved many times and has used a multitude of different technologies. Nowadays, it is a relatively simple collection of Terraform manifests thanks to the work of [BPG](https://github.com/bpg/terraform-provider-proxmox) and [Sidero Labs](https://github.com/siderolabs/terraform-provider-talos). 
+TJ's Kubernetes Service, or *TKS*, is an IaC project that is used to deliver Kubernetes to Proxmox. Across the years, it has evolved many times and has used a multitude of different technologies. Nowadays, it is a relatively simple collection of Terraform manifests thanks to the work of [BPG](https://github.com/bpg/terraform-provider-proxmox) and [Sidero Labs](https://github.com/siderolabs/terraform-provider-talos).
 
 <hr>
 
@@ -20,6 +20,7 @@ TJ's Kubernetes Service, or *TKS*, is an IaC project that is used to deliver Kub
 2. Create an API token on Proxmox. I personally use [this Ansible role](https://github.com/zimmertr/Bootstrap-Proxmox/blob/master/roles/configure_terraform_user/tasks/main.yml).
 
 3. Add your SSH key to `ssh-agent`:
+
    ```bash
    eval "$(ssh-agent -s)"
    ssh-add --apple-use-keychain ~/.ssh/sol.Milkyway
@@ -53,6 +54,7 @@ TJ's Kubernetes Service, or *TKS*, is an IaC project that is used to deliver Kub
    | test-k8s-node-3 | 00:00:00:00:02:33 | 192.168.40.233 |
 
 7. Initialize Terraform and create a workspace for your Terraform state. Or configure a different backend accordingly.
+
    ```bash
    terraform init
    terraform workspace new test
@@ -64,24 +66,25 @@ TJ's Kubernetes Service, or *TKS*, is an IaC project that is used to deliver Kub
    terraform apply --var-file="vars/test.tfvars"
    ```
 
-9. Retrieve the Kubernetes and Talos configuration files. Be sure not to overwrite any existing configs you wish to preserve. I use [kubecm](https://github.com/sunny0826/kubecm) to add/merge configs and [kubectx](https://github.com/ahmetb/kubectx) to change contexts. 
+9. Retrieve the Kubernetes and Talos configuration files. Be sure not to overwrite any existing configs you wish to preserve. I use [kubecm](https://github.com/sunny0826/kubecm) to add/merge configs and [kubectx](https://github.com/ahmetb/kubectx) to change contexts.
+
    ```bash
    mkdir -p ~/.{kube,talos}
    touch ~/.kube/config
-   
+
    terraform output -raw talosconfig > ~/.talos/config-test
    terraform output -raw kubeconfig > ~/.kube/config-test
-   
+
    kubecm add -f ~/.kube/config-test
    kubectx admin@test
    ```
 
 10. Confirm Kubernetes is bootstrapped and that all of the nodes have joined the cluster. The Controlplane nodes might take a moment to respond. You can confirm the status of each Talos node using `talosctl` or by reviewing the VM consoles in Proxmox. The nodes and some pods will not be `Ready` until a CNI is installed in the next step.
-   ```bash
-   watch kubectl get nodes,all -A
-   ```
+    ```bash
+    watch kubectl get nodes,all -A
+    ```
 
-11. Once everything has become `Ready`, upgrade the nodes to enable QEMU Guest Agent. 
+11. Once everything has become `Ready`, upgrade the nodes to enable QEMU Guest Agent.
 
     ```bash
     NODES=$(kubectl get nodes --no-headers=true | awk '{print $1}' | tr '\n' ',')
@@ -92,16 +95,17 @@ TJ's Kubernetes Service, or *TKS*, is an IaC project that is used to deliver Kub
 
 ## Scaling the Cluster
 
-The Terraform provider makes it quite easy to scale in, out, up, or down. Simply adjust the variables for resources or desired number of nodes and run `terraform plan` again. If the plan looks. good, apply it. 
+The Terraform provider makes it quite easy to scale in, out, up, or down. Simply adjust the variables for resources or desired number of nodes and run `terraform plan` again. If the plan looks. good, apply it.
 
 In the event you scale down a node, terraform will execute a local-provisioner that runs the following command to remove the node from the cluster for you as well:
+
 ```bash
 ./bin/manage_nodes remove $NODE
 ```
 
 Considerations:
 
-* At this time I don't think it's possible to choose a specific node to remove. You must scale up and down the last node. 
+* At this time I don't think it's possible to choose a specific node to remove. You must scale up and down the last node.
 * Due to the way I configure IP Addressing using DHCP reservations, there is a limit of both 9 controlplanes and 9 workernodes.
 
 <hr>
@@ -109,6 +113,7 @@ Considerations:
 ## Installing Cilium
 
 By default, Talos uses Flannel. However, I pefer to use Cilium. To switch over, ake sure that `var.talos_disable_flannel` is set to `true` during provisioning and follow [this guide](https://www.talos.dev/v1.5/kubernetes-guides/network/deploying-cilium/). Or....
+
 
 ```bash
 ./bin/manage_nodes cilium
@@ -118,7 +123,7 @@ By default, Talos uses Flannel. However, I pefer to use Cilium. To switch over, 
 
 ## Installing Other Apps
 
-You can find my personal collection of manifests [here](https://github.com/zimmertr/Application-Manifests). 
+You can find my personal collection of manifests [here](https://github.com/zimmertr/Application-Manifests).
 
 
 
