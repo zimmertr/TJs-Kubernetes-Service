@@ -1,4 +1,4 @@
-resource "proxmox_virtual_environment_pool" "resource_pool" {
+resource "proxmox_virtual_environment_pool" "proxmox_resource_pool" {
   comment = "Resources pertaining to Kubernetes"
-  pool_id = var.RESOURCE_POOL
+  pool_id = var.proxmox_resource_pool
 }
