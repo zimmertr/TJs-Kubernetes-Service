@@ -106,6 +106,7 @@ In the event you scale down a node, terraform will execute a local-provisioner t
 
 Considerations:
 
+* As QEMU Guest Agent's installation is not managed by Terraform, be sure to run `./bin/manage_nodes upgrade $NODE` against any new nodes that are added to enable it. Otherwise, Terraform will have issues interacting with it through the Proxmox API.
 * At this time I don't think it's possible to choose a specific node to remove. You must scale up and down the last node.
 * Due to the way I configure IP Addressing using DHCP reservations, there is a limit of both 9 controlplanes and 9 workernodes.
 
