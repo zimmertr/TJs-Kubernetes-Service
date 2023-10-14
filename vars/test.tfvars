@@ -7,6 +7,7 @@ proxmox_resource_pool           = "Kubernetes-Test"
 # Talos #########################
 talos_image_node_name           = "earth"
 talos_virtual_ip                = "192.168.40.220"
+talos_disable_flannel           = true
 
 
 # Kubernetes ####################
@@ -23,8 +24,8 @@ controlplane_ip_prefix          = "192.168.40.22"     # 221-229
 controlplane_mac_address_prefix = "00:00:00:00:02:2"  # 02:21 - 02:29
 controlplane_vlan_id            = "40"
 
-controlplane_cpu_cores          = "1"
-controlplane_memory             = "2048"
+controlplane_cpu_cores          = "4"
+controlplane_memory             = "4096"
 controlplane_disk_size          = "10"
 
 controlplane_tags               = [
@@ -44,8 +45,8 @@ workernode_ip_prefix            = "192.168.40.23"     # 231-239
 workernode_mac_address_prefix   = "00:00:00:00:02:3"  # 02:31 - 02:39
 workernode_vlan_id              = "40"
 
-workernode_cpu_cores            = "1"
-workernode_memory               = "2048"
+workernode_cpu_cores            = "4"
+workernode_memory               = "4096"
 workernode_disk_size            = "10"
 
 workernode_tags                 = [
