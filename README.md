@@ -114,11 +114,11 @@ Considerations:
 
 ## Installing Cilium
 
-By default, Talos uses Flannel. However, I pefer to use Cilium. To switch over, ake sure that `var.talos_disable_flannel` is set to `true` during provisioning and follow [this guide](https://www.talos.dev/v1.5/kubernetes-guides/network/deploying-cilium/). Or....
+By default, Talos uses Flannel. However, I pefer to use Cilium. To switch over, ake sure that `var.talos_disable_flannel` is set to `true` during provisioning and follow [this guide](https://www.talos.dev/v1.5/kubernetes-guides/network/deploying-cilium/). Or use the following command. Include a regular expression that matches your node names as a parameter to [auto-accept the certificate signing requests](https://github.com/postfinance/kubelet-csr-approver). 
 
 
 ```bash
-./bin/manage_nodes cilium
+./bin/manage_nodes cilium "^.*k8s-(cp|node)-[1-9]$"
 ```
 
 <hr>

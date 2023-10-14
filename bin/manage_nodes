@@ -10,6 +10,16 @@ install_cilium(){
     --helm-set=cgroup.hostRoot=/sys/fs/cgroup \
     --helm-set=k8sServiceHost=localhost \
     --helm-set=k8sServicePort=7445
+
+  helm repo add \
+    kubelet-csr-approver \
+    https://postfinance.github.io/kubelet-csr-approver
+
+  helm install \
+    kubelet-csr-approver \
+    kubelet-csr-approver/kubelet-csr-approver \
+    -n kube-system \
+    --set providerRegex="$1"
 }
 
 # "System extensions are only activated during the installation or upgrade of Talos Linux.
