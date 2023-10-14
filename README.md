@@ -4,9 +4,14 @@
 * [Requirements](#requirements)
 * [Instructions](#instructions)
 * [Post Install](#post-install)
-  * [Scaling the Cluster](#scaling-the-cluster)
+  * [Installing QEMU Guest Agent](#installing-qemu-guest-agent)
   * [Installing A Different CNI](#installing-a-different-cni)
+  * [Scaling the Cluster](#scaling-the-cluster)
   * [Installing Other Apps](#installing-other-apps)
+
+* [Troubleshooting](#troubleshooting)
+  * [Terraform is Stuck Deleting](#terraform-is-stuck-deleting)
+
 
 <hr>
 
@@ -26,6 +31,8 @@ TJ's Kubernetes Service, or *TKS*, is an IaC project that is used to deliver Kub
 | `ssh-agent`  | Used for connecting to the Proxmox server to bootstrap the Talos image |
 | Proxmox      | You already know                                             |
 | DNS Resolver | Used for configuring DHCP reservation during cluster creation and DNS resolution within the cluster |
+
+<hr>
 
 ## Instructions
 
@@ -99,12 +106,28 @@ TJ's Kubernetes Service, or *TKS*, is an IaC project that is used to deliver Kub
     watch kubectl get nodes,all -A
     ```
 
-11. Once everything has become `Ready`, upgrade the nodes to enable QEMU Guest Agent.
+<hr>
+## Post Install
 
-    ```bash
-    NODES=$(kubectl get nodes --no-headers=true | awk '{print $1}' | tr '\n' ',')
-    ./bin/manage_nodes upgrade $NODES
-    ```
+## Installing QEMU Guest Agent
+
+Talos installs the QEMU Guest Agent, but it won't be enabled until the nodes are _upgraded_. Once everything in the cluster has become `Ready`, upgrade the nodes using `talosctl` or the `manage_nodes` script. If you opted to disable Flannel, you need to install a CNI before this will work.
+
+```bash
+NODES=$(kubectl get nodes --no-headers=true | awk '{print $1}' | tr '\n' ',')
+./bin/manage_nodes upgrade $NODES
+```
+
+<hr>
+
+## Installing A Different CNI
+
+By default, Talos uses Flannel. To use a different CNI make sure that `var.talos_disable_flannel` is set to `true` during provisioning. The cluster will not be functional and you will not be able to _upgrade_ the nodes to install QEMU Guest Agent until a CNI is enabled. Cilium can be installed using the following two Kustomizations:
+
+| Project                                                      | Description                                                  |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| [cilium](https://github.com/zimmertr/Kubernetes-Manifests/tree/main/core/cilium) | The Cilium CNI                                               |
+| [kubelet-csr-approver](https://github.com/zimmertr/Kubernetes-Manifests/tree/main/core/kubelet-csr-approver) | A [project](https://github.com/postfinance/kubelet-csr-approver) to automatically approve Certificate Signing Requests |
 
 <hr>
 
@@ -125,21 +148,18 @@ Considerations:
 * Due to the way I configure IP Addressing using DHCP reservations, there is a limit of both 9 controlplanes and 9 workernodes.
 
 <hr>
-
-## Installing A Different CNI
-
-By default, Talos uses Flannel. To use a different CNI make sure that `var.talos_disable_flannel` is set to `true` during provisioning. The cluster will not be functional and you will not be able to _upgrade_ the nodes to install QEMU Guest Agent until a CNI is enabled. Cilium can be installed using the following two Kustomizations:
-
-| Project                                                      | Description                                                  |
-| ------------------------------------------------------------ | ------------------------------------------------------------ |
-| [cilium](https://github.com/zimmertr/Application-Manifests/core/cilium) | The Cilium CNI                                               |
-| [kubelet-csr-approver](https://github.com/zimmertr/Application-Manifests/core/kubelet-csr-approver) | A [project](https://github.com/postfinance/kubelet-csr-approver) to automatically approve Certificate Signing Requests |
-
-<hr>
-
 ## Installing Other Apps
 
 You can find my personal collection of manifests [here](https://github.com/zimmertr/Application-Manifests).
 
+<hr>
 
+## Troubleshooting
 
+### Terraform is Stuck Deleting
+
+Proxmox won't be able to issue a shutdown signal to the virtual machines unless QEMU Guest Agent is enabled. This can lead to Terraform trying to destroy nodes unsuccessfully until the API times out the command. In the event this occurs, you can work connect to Proxmox manually and remove the VMs, then proceed with `terraform destroy` as usual. For example:
+
+```bash
+ssh -i ~/.ssh/sol.milkyway root@earth.sol.milkyway "rm /var/lock/qemu-server/lock-*; qm list | grep 40 | awk '{print \$1}' | xargs -L1 qm stop && sleep 5 && qm list | grep 40 | awk '{print \$1}' | xargs -L1 qm destroy"
+```
