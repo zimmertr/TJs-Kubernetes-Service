@@ -107,6 +107,7 @@ TJ's Kubernetes Service, or *TKS*, is an IaC project that is used to deliver Kub
     ```
 
 <hr>
+
 ## Post Install
 
 ## Installing QEMU Guest Agent
@@ -148,6 +149,7 @@ Considerations:
 * Due to the way I configure IP Addressing using DHCP reservations, there is a limit of both 9 controlplanes and 9 workernodes.
 
 <hr>
+
 ## Installing Other Apps
 
 You can find my personal collection of manifests [here](https://github.com/zimmertr/Application-Manifests).
