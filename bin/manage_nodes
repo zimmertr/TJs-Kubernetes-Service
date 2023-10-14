@@ -1,27 +1,5 @@
 #!/bin/bash
 
-install_cilium(){
-  cilium install \
-    --helm-set=ipam.mode=kubernetes \
-    --helm-set=kubeProxyReplacement=true \
-    --helm-set=securityContext.capabilities.ciliumAgent="{CHOWN,KILL,NET_ADMIN,NET_RAW,IPC_LOCK,SYS_ADMIN,SYS_RESOURCE,DAC_OVERRIDE,FOWNER,SETGID,SETUID}" \
-    --helm-set=securityContext.capabilities.cleanCiliumState="{NET_ADMIN,SYS_ADMIN,SYS_RESOURCE}" \
-    --helm-set=cgroup.autoMount.enabled=false \
-    --helm-set=cgroup.hostRoot=/sys/fs/cgroup \
-    --helm-set=k8sServiceHost=localhost \
-    --helm-set=k8sServicePort=7445
-
-  helm repo add \
-    kubelet-csr-approver \
-    https://postfinance.github.io/kubelet-csr-approver
-
-  helm install \
-    kubelet-csr-approver \
-    kubelet-csr-approver/kubelet-csr-approver \
-    -n kube-system \
-    --set providerRegex="$1"
-}
-
 # "System extensions are only activated during the installation or upgrade of Talos Linux.
 # With system extensions installed, the Talos root filesystem is still immutable and read-only."
 # https://www.talos.dev/v1.5/talos-guides/configuration/system-extensions/
@@ -61,9 +39,7 @@ main(){
   export KUBECONFIG=$tmp_dir/kubeconfig
   export TALOSCONFIG=$tmp_dir/talosconfig
 
-  if [ "$command" = "cilium" ]; then
-    install_cilium $nodes
-  elif [ "$command" = "upgrade" ]; then
+  if [ "$command" = "upgrade" ]; then
     upgrade_node "$nodes"
   elif [ "$command" = "remove" ]; then
     remove_node "$nodes"

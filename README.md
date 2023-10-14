@@ -1,17 +1,31 @@
 # TJ's Kubernetes Service
 
 * [Summary](#summary)
+* [Requirements](#requirements)
 * [Instructions](#instructions)
 * [Post Install](#post-install)
   * [Scaling the Cluster](#scaling-the-cluster)
-  * [Installing Cilium](#installing-cilium)
+  * [Installing A Different CNI](#installing-a-different-cni)
   * [Installing Other Apps](#installing-other-apps)
+
+<hr>
 
 ## Summary
 
 TJ's Kubernetes Service, or *TKS*, is an IaC project that is used to deliver Kubernetes to Proxmox. Across the years, it has evolved many times and has used a multitude of different technologies. Nowadays, it is a relatively simple collection of Terraform manifests thanks to the work of [BPG](https://github.com/bpg/terraform-provider-proxmox) and [Sidero Labs](https://github.com/siderolabs/terraform-provider-talos).
 
 <hr>
+
+## Requirements
+
+| Requirement  | Description                                                  |
+| ------------ | ------------------------------------------------------------ |
+| `terraform`  | Used for creating the cluster                                |
+| `kubectl`    | Used for *upgrading* the Talos nodes to install QEMU Guest Agent and removing nodes from the cluster |
+| `talosctl`   | Used for *upgrading* the Talos nodes to install QEMU Guest Agent and removing nodes from the cluster |
+| `ssh-agent`  | Used for connecting to the Proxmox server to bootstrap the Talos image |
+| Proxmox      | You already know                                             |
+| DNS Resolver | Used for configuring DHCP reservation during cluster creation and DNS resolution within the cluster |
 
 ## Instructions
 
@@ -112,14 +126,14 @@ Considerations:
 
 <hr>
 
-## Installing Cilium
+## Installing A Different CNI
 
-By default, Talos uses Flannel. However, I pefer to use Cilium. To switch over, ake sure that `var.talos_disable_flannel` is set to `true` during provisioning and follow [this guide](https://www.talos.dev/v1.5/kubernetes-guides/network/deploying-cilium/). Or use the following command. Include a regular expression that matches your node names as a parameter to [auto-accept the certificate signing requests](https://github.com/postfinance/kubelet-csr-approver). 
+By default, Talos uses Flannel. To use a different CNI make sure that `var.talos_disable_flannel` is set to `true` during provisioning. The cluster will not be functional and you will not be able to _upgrade_ the nodes to install QEMU Guest Agent until a CNI is enabled. Cilium can be installed using the following two Kustomizations:
 
-
-```bash
-./bin/manage_nodes cilium "^.*k8s-(cp|node)-[1-9]$"
-```
+| Project                                                      | Description                                                  |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| [cilium](https://github.com/zimmertr/Application-Manifests/core/cilium) | The Cilium CNI                                               |
+| [kubelet-csr-approver](https://github.com/zimmertr/Application-Manifests/core/kubelet-csr-approver) | A [project](https://github.com/postfinance/kubelet-csr-approver) to automatically approve Certificate Signing Requests |
 
 <hr>
 
