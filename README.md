@@ -55,24 +55,24 @@ TJ's Kubernetes Service, or *TKS*, is an IaC project that is used to deliver Kub
 
 5. Review `variables.tf` and set any overrides according to your environment in a new [tfvars](https://developer.hashicorp.com/terraform/language/values/variables#variable-definitions-tfvars-files) file.
 
-6. Create DNS records and DHCP reservations for your nodes according to your configured Hostname, MAC address, and IP Address prefixes. Due to the way the values are generated in Terraform, there is a limit of 9 control planes and 9 worker nodes. Here is how mine is configured for two clusters:
+6. Create DNS records and DHCP reservations for your nodes according to your configured Hostname, MAC address, and IP Address prefixes. Here is how mine is configured for two clusters:
 
-   | Hostname        | MAC Address       | IP Address     |
-   | --------------- | ----------------- | -------------- |
-   | k8s-vip         | N/A               | 192.168.40.20  |
-   | k8s-cp-1        | 00:00:00:00:00:21 | 192.168.40.21  |
-   | k8s-cp-2        | 00:00:00:00:00:22 | 192.168.40.22  |
-   | k8s-cp-3        | 00:00:00:00:00:23 | 192.168.40.23  |
-   | k8s-node-1      | 00:00:00:00:00:31 | 192.168.40.31  |
-   | k8s-node-2      | 00:00:00:00:00:32 | 192.168.40.32  |
-   | k8s-node-3      | 00:00:00:00:00:33 | 192.168.40.33  |
-   | test-k8s-vip    | N/A               | 192.168.40.220 |
-   | test-k8s-cp-1   | 00:00:00:00:02:21 | 192.168.40.221 |
-   | test-k8s-cp-2   | 00:00:00:00:02:22 | 192.168.40.222 |
-   | test-k8s-cp-3   | 00:00:00:00:02:23 | 192.168.40.223 |
-   | test-k8s-node-1 | 00:00:00:00:02:31 | 192.168.40.231 |
-   | test-k8s-node-2 | 00:00:00:00:02:32 | 192.168.40.232 |
-   | test-k8s-node-3 | 00:00:00:00:02:33 | 192.168.40.233 |
+   | Hostname        | MAC Address       | IP Address    |
+   | --------------- | ----------------- | ------------- |
+   | k8s-vip         | N/A               | 192.168.40.10 |
+   | k8s-cp-1        | 00:00:00:00:00:11 | 192.168.40.11 |
+   | k8s-cp-2        | 00:00:00:00:00:12 | 192.168.40.12 |
+   | k8s-cp-3        | 00:00:00:00:00:13 | 192.168.40.13 |
+   | k8s-node-1      | 00:00:00:00:00:21 | 192.168.40.21 |
+   | k8s-node-2      | 00:00:00:00:00:22 | 192.168.40.22 |
+   | k8s-node-3      | 00:00:00:00:00:23 | 192.168.40.23 |
+   | test-k8s-vip    | N/A               | 192.168.40.50 |
+   | test-k8s-cp-1   | 00:00:00:00:00:51 | 192.168.40.51 |
+   | test-k8s-cp-2   | 00:00:00:00:00:52 | 192.168.40.52 |
+   | test-k8s-cp-3   | 00:00:00:00:00:53 | 192.168.40.53 |
+   | test-k8s-node-1 | 00:00:00:00:00:61 | 192.168.40.61 |
+   | test-k8s-node-2 | 00:00:00:00:00:62 | 192.168.40.62 |
+   | test-k8s-node-3 | 00:00:00:00:00:63 | 192.168.40.63 |
 
 7. Initialize Terraform and create a workspace for your Terraform state. Or configure a different backend accordingly.
 
