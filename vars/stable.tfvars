@@ -15,12 +15,12 @@ kubernetes_cluster_name         = "stable"
 
 
 # Controlplanes #################
-controlplane_vmid_prefix        = "402"               # 4021-4029
+controlplane_vmid_prefix        = "402"               # 4011-4019
 controlplane_node_name          = "earth"
 
 controlplane_hostname_prefix    = "k8s-cp"
-controlplane_ip_prefix          = "192.168.40.2"      # 21-29
-controlplane_mac_address_prefix = "00:00:00:00:00:2"  # 00:21 - 00:29
+controlplane_ip_prefix          = "192.168.40.1"      # 11-19
+controlplane_mac_address_prefix = "00:00:00:00:00:1"  # 00:11 - 00:19
 controlplane_vlan_id            = "40"
 
 controlplane_tags               = [
@@ -31,12 +31,12 @@ controlplane_tags               = [
 
 
 # Worker Nodes ##################
-workernode_vmid_prefix          = "403"               # 4031-4039
+workernode_vmid_prefix          = "403"               # 4021-4029
 workernode_node_name            = "earth"
 
 workernode_hostname_prefix      = "k8s-node"
-workernode_ip_prefix            = "192.168.40.3"      # 31-39
-workernode_mac_address_prefix   = "00:00:00:00:00:3"  # 00:31 - 00:39
+workernode_ip_prefix            = "192.168.40.2"      # 21-29
+workernode_mac_address_prefix   = "00:00:00:00:00:2"  # 00:21 - 00:29
 workernode_vlan_id              = "40"
 
 workernode_tags                 = [
