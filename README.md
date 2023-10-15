@@ -8,7 +8,6 @@
   * [Installing A Different CNI](#installing-a-different-cni)
   * [Scaling the Cluster](#scaling-the-cluster)
   * [Installing Other Apps](#installing-other-apps)
-
 * [Troubleshooting](#troubleshooting)
   * [Terraform is Stuck Deleting](#terraform-is-stuck-deleting)
 
