@@ -37,7 +37,7 @@ TJ's Kubernetes Service, or *TKS*, is an IaC project that is used to deliver Kub
 
 1. Configure SSH access with a private key to your Proxmox server. This is needed to provision the installation image and also for [certain API actions](https://registry.terraform.io/providers/bpg/proxmox/latest/docs#api-token-authentication) executed by the Terraform provider.
 
-2. Create an API token on Proxmox. I personally use [this Ansible role](https://github.com/zimmertr/Bootstrap-Proxmox/blob/master/roles/configure_terraform_user/tasks/main.yml).
+2. Create an API token on Proxmox. I personally use [this Ansible role](https://github.com/zimmertr/Bootstrap-Proxmox/blob/main/roles/create_terraform_user/tasks/main.yml).
 
 3. Add your SSH key to `ssh-agent`:
 
@@ -111,7 +111,7 @@ TJ's Kubernetes Service, or *TKS*, is an IaC project that is used to deliver Kub
 
 ## Installing QEMU Guest Agent
 
-Talos installs the QEMU Guest Agent, but it won't be enabled until the nodes are _upgraded_. Once everything in the cluster has become `Ready`, upgrade the nodes using `talosctl` or the `manage_nodes` script. If you opted to disable Flannel, you need to install a CNI before this will work.
+Talos installs the QEMU Guest Agent, but it won't be enabled until the nodes are _upgraded_. Once everything in the cluster has become `Ready`, upgrade the nodes using `talosctl` or the [manage_nodes](https://github.com/zimmertr/TJs-Kubernetes-Service/blob/b15bb923cccb607254b8001201772be45aab3806/bin/manage_nodes#L6) script. If you opted to disable Flannel, you need to install a CNI before this will work.
 
 ```bash
 NODES=$(kubectl get nodes --no-headers=true | awk '{print $1}' | tr '\n' ',')
@@ -122,20 +122,21 @@ NODES=$(kubectl get nodes --no-headers=true | awk '{print $1}' | tr '\n' ',')
 
 ## Installing A Different CNI
 
-By default, Talos uses Flannel. To use a different CNI make sure that `var.talos_disable_flannel` is set to `true` during provisioning. The cluster will not be functional and you will not be able to _upgrade_ the nodes to install QEMU Guest Agent until a CNI is enabled. Cilium can be installed using the following two Kustomizations:
+By default, Talos uses Flannel. To use a different CNI make sure that `var.talos_disable_flannel` is set to `true` during provisioning. The cluster will not be functional and you will not be able to _upgrade_ the nodes to install QEMU Guest Agent until a CNI is enabled. Cilium can be installed using my Core project found [here](https://github.com/zimmertr/Kubernetes-Manifests/tree/main/core). You will also likely want to install Kubelet CSR Approver to automatically. accept the required certificate signing requests. Alternatively, after installing you can accept them manually:
 
-| Project                                                      | Description                                                  |
-| ------------------------------------------------------------ | ------------------------------------------------------------ |
-| [cilium](https://github.com/zimmertr/Kubernetes-Manifests/tree/main/core/cilium) | The Cilium CNI                                               |
-| [kubelet-csr-approver](https://github.com/zimmertr/Kubernetes-Manifests/tree/main/core/kubelet-csr-approver) | A [project](https://github.com/postfinance/kubelet-csr-approver) to automatically approve Certificate Signing Requests |
+```bash
+kubectl get csr
+kubectl certificate approve $CSR
+```
+
 
 <hr>
 
 ## Scaling the Cluster
 
-The Terraform provider makes it quite easy to scale in, out, up, or down. Simply adjust the variables for resources or desired number of nodes and run `terraform plan` again. If the plan looks. good, apply it.
+The Terraform provider makes it quite easy to scale in, out, up, or down. Simply adjust the variables for resources or desired number of nodes and run `terraform plan` again. If the plan looks good, apply it.
 
-In the event you scale down a node, terraform will execute a local-provisioner that runs the following command to remove the node from the cluster for you as well:
+In the event you scale down a node, terraform will execute a local-provisioner that runs [manage_nodes](https://github.com/zimmertr/TJs-Kubernetes-Service/blob/main/bin/manage_nodes#L25) to remove the node from the cluster for you as well:
 
 ```bash
 ./bin/manage_nodes remove $NODE
