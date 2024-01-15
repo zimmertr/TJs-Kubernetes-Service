@@ -122,7 +122,7 @@ NODES=$(kubectl get nodes --no-headers=true | awk '{print $1}' | tr '\n' ',')
 
 ## Installing A Different CNI
 
-By default, Talos uses Flannel. To use a different CNI make sure that `var.talos_disable_flannel` is set to `true` during provisioning. The cluster will not be functional and you will not be able to _upgrade_ the nodes to install QEMU Guest Agent until a CNI is enabled. Cilium can be installed using my Core project found [here](https://github.com/zimmertr/Kubernetes-Manifests/tree/main/core). You will also likely want to install Kubelet CSR Approver to automatically. accept the required certificate signing requests. Alternatively, after installing you can accept them manually:
+By default, Talos uses Flannel. To use a different CNI make sure that `var.talos_disable_flannel` is set to `true` during provisioning. The cluster will not be functional and you will not be able to _upgrade_ the nodes to install QEMU Guest Agent until a CNI is enabled. Cilium can be installed using my project found [here](https://github.com/zimmertr/Kubernetes-Manifests/tree/main/cilium). You will also likely want to install Kubelet CSR Approver to automatically. accept the required certificate signing requests. Alternatively, after installing you can accept them manually:
 
 ```bash
 kubectl get csr
