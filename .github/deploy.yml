@@ -1,0 +1,45 @@
+name: Deploy Kubernetes on Proxmox
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Checkout repository
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    # Setup SSH Key
+    - name: Configure SSH Key
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.PVE_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan -p 23 ${{ secrets.PVE_HOST }} >> ~/.ssh/known_hosts
+
+    # Setup Terraform
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: 1.6.0
+
+    # Initialize Terraform
+    - name: Terraform Init
+      run: terraform init
+
+    # Terraform Validate
+    - name: Terraform Validate
+      run: terraform validate
+
+    # Terraform Apply
+    - name: Terraform Apply
+      run: |
+        terraform apply -auto-approve \
+          -var="pve_host=${{ secrets.PVE_HOST }}" \
+          -var="pve_user=${{ secrets.PVE_USER }}" \
+          -var="ssh_port=23"
