@@ -6,7 +6,7 @@ proxmox_resource_pool           = "Kubernetes-Stable"
 
 # Talos #########################
 talos_image_node_name           = "earth"
-talos_virtual_ip                = "192.168.40.20"
+talos_virtual_ip                = "192.168.40.10"
 
 
 # Kubernetes ####################

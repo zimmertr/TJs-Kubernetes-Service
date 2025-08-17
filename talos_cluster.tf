@@ -13,7 +13,7 @@ data "talos_client_configuration" "this" {
   endpoints               = [for node in local.controlplane_nodes : node]
 }
 
-data "talos_cluster_kubeconfig" "this" {
+resource "talos_cluster_kubeconfig" "this" {
   depends_on = [
     talos_machine_bootstrap.this
   ]
@@ -33,7 +33,7 @@ resource "talos_machine_bootstrap" "this" {
 }
 
 output "kubeconfig" {
-  value     = data.talos_cluster_kubeconfig.this.kubeconfig_raw
+  value     = talos_cluster_kubeconfig.this.kubeconfig_raw
   sensitive = true
 }
 
