@@ -12,3 +12,8 @@ machine:
         dhcp: true
         vip:
           ip: "${talos_virtual_ip}"
+        vlans:
+          - vlanId: 40
+            dhcp: true
+            vip:
+              ip: "${talos_virtual_ip}"

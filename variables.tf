@@ -1,8 +1,11 @@
 # Proxmox
+variable "proxmox_username" {
+  # A remote-exec SSH provisoner is used to download the image in talos_image.tf.
+  type        = string
+  default     = "root"
+  description = "IP address or hostname of the Proxmox server"
+}
 variable "proxmox_hostname" {
-  # The Talos image is distributed as an XZ archive and the Proxmox API does not allow you to
-  # upload an image with that file format. A remote-exec SSH provisoner is used to manage the
-  # image in talos_image.tf.
   type        = string
   description = "IP address or hostname of the Proxmox server"
 }
@@ -32,18 +35,13 @@ variable "talos_image_node_name" {
 # Kubernetes Cluster
 variable "talos_version" {
   type        = string
-  default     = "v1.5.3"
+  default     = "v1.10.6"
   description = "Identify here: https://github.com/siderolabs/talos/releases"
 }
 variable "kubernetes_version" {
   type        = string
-  default     = "v1.28.2"
+  default     = "v1.33.4"
   description = "Identify here: https://github.com/siderolabs/kubelet/pkgs/container/kubelet"
-}
-variable "qemu_guest_agent_version" {
-  type        = string
-  default     = "8.1.0"
-  description = "Identify here: https://github.com/siderolabs/extensions/pkgs/container/qemu-guest-agent"
 }
 variable "kubernetes_cluster_name" {
   type        = string

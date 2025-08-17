@@ -3,9 +3,6 @@ machine:
     kubePrism:
       enabled: true
       port: 7445
-  install:
-    extensions:
-      - image: "ghcr.io/siderolabs/qemu-guest-agent:${qemu_guest_agent_version}"
   kubelet:
     extraArgs:
       rotate-server-certificates: true

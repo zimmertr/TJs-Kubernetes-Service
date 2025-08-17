@@ -74,8 +74,6 @@ resource "talos_machine_configuration_apply" "workernode" {
   machine_configuration_input = data.talos_machine_configuration.workernode.machine_configuration
 
   config_patches = [
-    templatefile("configs/global.yml", {
-      qemu_guest_agent_version = var.qemu_guest_agent_version
-    })
+    file("${path.module}/configs/global.yml")
   ]
 }
