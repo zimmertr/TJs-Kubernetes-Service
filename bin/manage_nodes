@@ -1,18 +1,92 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
+
+tmp_dir=""
+
+cleanup() {
+  if [[ -n "${tmp_dir:-}" && -d "${tmp_dir:-}" ]]; then
+    rm -rf "$tmp_dir"
+  fi
+}
+trap cleanup EXIT
+
+is_ipv4() {
+  [[ "${1:-}" =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}$ ]]
+}
+
+# Given a node NAME, return its InternalIP
+get_ip_by_name() {
+  local name="$1"
+  kubectl get node "$name" -o jsonpath='{range .status.addresses[?(@.type=="InternalIP")]}{.address}{end}'
+}
+
+# Given an InternalIP, return the node NAME
+get_name_by_ip() {
+  local ip="$1"
+  # Column 6 is INTERNAL-IP in "kubectl get nodes -o wide" output
+  kubectl get nodes -o wide --no-headers | awk -v ip="$ip" '$6==ip{print $1; exit}'
+}
+
+# Normalize an input item (name or ip) into: node_name + node_ip
+resolve_node() {
+  local item="$1"
+  local name=""
+  local ip=""
+
+  item="${item//[[:space:]]/}"
+
+  if is_ipv4 "$item"; then
+    ip="$item"
+    name="$(get_name_by_ip "$ip" || true)"
+  else
+    name="$item"
+    ip="$(get_ip_by_name "$name" || true)"
+  fi
+
+  if [[ -z "$name" || -z "$ip" ]]; then
+    echo "ERROR: Could not resolve node '$item' to both name+ip. (name='$name', ip='$ip')"
+    echo "Hint: run: kubectl get nodes -o wide"
+    exit 1
+  fi
+
+  echo "$name;$ip"
+}
 
 # "System extensions are only activated during the installation or upgrade of Talos Linux.
 # With system extensions installed, the Talos root filesystem is still immutable and read-only."
 # https://www.talos.dev/v1.5/talos-guides/configuration/system-extensions/
-upgrade_node(){
-  for node in $(echo $1 | sed "s/,/ /g"); do
+upgrade_node() {
+  local nodes_csv="$1"
+  local installer_image="$2"
 
-    until kubectl get node $node --kubeconfig $tmp_dir/kubeconfig > /dev/null 2>&1 ; do
-      echo "Waiting for node..."
+  if [[ -z "$nodes_csv" ]]; then
+    echo "ERROR: No nodes provided for upgrade."
+    exit 1
+  fi
+  if [[ -z "$installer_image" ]]; then
+    echo "ERROR: installer_image is empty."
+    exit 1
+  fi
+
+  IFS=',' read -ra NODES_ARR <<< "$nodes_csv"
+  for item in "${NODES_ARR[@]}"; do
+    item="${item//[[:space:]]/}"
+    [[ -n "$item" ]] || continue
+
+    local resolved node_name node_ip
+    resolved="$(resolve_node "$item")"
+    node_name="${resolved%%;*}"
+    node_ip="${resolved##*;}"
+
+    until kubectl get node "$node_name" --kubeconfig "$tmp_dir/kubeconfig" >/dev/null 2>&1; do
+      echo "Waiting for node '$node_name' to be visible in Kubernetes..."
       sleep 5
     done
 
+    echo "Upgrading node: name=$node_name ip=$node_ip image=$installer_image"
     talosctl upgrade \
-      --nodes $node \
+      --nodes "$node_ip" \
+      --image "$installer_image" \
       --preserve=true \
       --wait
 
@@ -22,33 +96,80 @@ upgrade_node(){
 
 # Ensure that a node is also removed from the cluster when Terraform destroys it.
 # https://www.talos.dev/v1.5/talos-guides/howto/scaling-down/
-remove_node(){
-  talosctl reset --nodes $1
-  talosctl shutdown --nodes $1
-  kubectl delete node $1
-}
+remove_node() {
+  local nodes_csv="$1"
 
-main(){
-  tmp_dir=$(mktemp -d)
-  command=$1
-  nodes=$2
-
-  terraform output -raw kubeconfig > $tmp_dir/kubeconfig
-  terraform output -raw talosconfig > $tmp_dir/talosconfig
-
-  export KUBECONFIG=$tmp_dir/kubeconfig
-  export TALOSCONFIG=$tmp_dir/talosconfig
-
-  if [ "$command" = "upgrade" ]; then
-    upgrade_node "$nodes"
-  elif [ "$command" = "remove" ]; then
-    remove_node "$nodes"
-  else
-    echo "No command given"
+  if [[ -z "$nodes_csv" ]]; then
+    echo "ERROR: No node(s) provided for remove."
     exit 1
   fi
 
-  rm -rf $tmp_dir
+  IFS=',' read -ra NODES_ARR <<< "$nodes_csv"
+  for item in "${NODES_ARR[@]}"; do
+    item="${item//[[:space:]]/}"
+    [[ -n "$item" ]] || continue
+
+    local resolved node_name node_ip
+    resolved="$(resolve_node "$item")"
+    node_name="${resolved%%;*}"
+    node_ip="${resolved##*;}"
+
+    echo "Removing node: name=$node_name ip=$node_ip"
+    talosctl reset --nodes "$node_ip"
+    talosctl shutdown --nodes "$node_ip"
+    kubectl delete node "$node_name" || true
+  done
+}
+
+main() {
+  if [[ $# -lt 2 ]]; then
+    echo "Usage:"
+    echo "  $0 upgrade <nodes_csv>"
+    echo "  $0 remove  <node_or_nodes_csv>"
+    exit 1
+  fi
+
+  local command="$1"
+  local nodes="$2"
+
+  tmp_dir="$(mktemp -d)"
+
+  # Grab configs from terraform output
+  if ! terraform output -raw kubeconfig > "$tmp_dir/kubeconfig" 2>/dev/null; then
+    if [[ "$command" == "remove" ]]; then
+      echo "WARN: Could not get kubeconfig (likely due to destroy lock). Skipping node removal."
+      exit 0
+    fi
+    echo "ERROR: Could not get kubeconfig from terraform output."
+    exit 1
+  fi
+
+  if ! terraform output -raw talosconfig > "$tmp_dir/talosconfig" 2>/dev/null; then
+    if [[ "$command" == "remove" ]]; then
+      echo "WARN: Could not get talosconfig. Skipping node removal."
+      exit 0
+    fi
+    echo "ERROR: Could not get talosconfig from terraform output."
+    exit 1
+  fi
+
+  export KUBECONFIG="$tmp_dir/kubeconfig"
+  export TALOSCONFIG="$tmp_dir/talosconfig"
+
+  if [[ "$command" == "upgrade" ]]; then
+    local installer_image
+    installer_image="$(terraform output -raw talos_installer_image 2>/dev/null || true)"
+    if [[ -z "$installer_image" ]]; then
+      echo "ERROR: Could not get talos_installer_image from terraform output."
+      exit 1
+    fi
+    upgrade_node "$nodes" "$installer_image"
+  elif [[ "$command" == "remove" ]]; then
+    remove_node "$nodes"
+  else
+    echo "ERROR: Unknown command '$command' (expected: upgrade | remove)"
+    exit 1
+  fi
 }
 
 main "$@"

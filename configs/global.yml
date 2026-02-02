@@ -4,8 +4,7 @@ machine:
       enabled: true
       port: 7445
   install:
-    extensions:
-      - image: "ghcr.io/siderolabs/qemu-guest-agent:${qemu_guest_agent_version}"
+    image: "${talos_installer_image}"
   kubelet:
     extraArgs:
       rotate-server-certificates: true

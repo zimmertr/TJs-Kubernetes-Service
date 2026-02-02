@@ -45,8 +45,9 @@ resource "proxmox_virtual_environment_vm" "workernode" {
 
   # Remove the node from Kubernetes on destroy
   provisioner "local-exec" {
-    when    = destroy
-    command = "./bin/manage_nodes remove ${self.name}"
+    when       = destroy
+    command    = "./bin/manage_nodes remove ${self.name}"
+    on_failure = continue
   }
 }
 
@@ -73,9 +74,12 @@ resource "talos_machine_configuration_apply" "workernode" {
   client_configuration        = talos_machine_secrets.this.client_configuration
   machine_configuration_input = data.talos_machine_configuration.workernode.machine_configuration
 
-  config_patches = [
-    templatefile("configs/global.yml", {
-      qemu_guest_agent_version = var.qemu_guest_agent_version
-    })
-  ]
+  config_patches = concat(
+    [
+      templatefile("configs/global.yml", {
+        talos_installer_image = "factory.talos.dev/nocloud-installer/${var.talos_schematic_id}:${var.talos_version}"
+      }),
+    ],
+    var.talos_disable_flannel ? [file("configs/disable_flannel.yml")] : []
+  )
 }
