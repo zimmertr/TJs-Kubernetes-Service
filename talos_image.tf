@@ -4,15 +4,15 @@ resource "proxmox_virtual_environment_file" "talos_image" {
   node_name    = var.talos_image_node_name
 
   source_file {
-    path      = "https://github.com/siderolabs/talos/releases/download/${var.talos_version}/nocloud-amd64.raw.xz"
+    path      = "https://factory.talos.dev/image/${var.talos_schematic_id}/${var.talos_version}/nocloud-amd64.raw.xz"
     file_name = "talos-${var.talos_version}-nocloud-amd64.iso"
   }
 
   connection {
-    type     = "ssh"
-    user     = "root"
-    password = var.proxmox_ssh_key_path
-    host     = var.proxmox_hostname
+    type        = "ssh"
+    user        = "root"
+    private_key = file(var.proxmox_ssh_key_path)
+    host        = var.proxmox_hostname
   }
 
   # Proxmox won't let you upload a xz archive as a disk image. So trick it by saving the file as *.iso.

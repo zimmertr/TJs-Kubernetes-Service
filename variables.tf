@@ -27,23 +27,22 @@ variable "talos_image_node_name" {
   type        = string
   description = "Proxmox node used for storing the Talos image"
 }
+variable "talos_schematic_id" {
+  type        = string
+  description = "The Schematic ID from Talos Image Factory"
+}
 
 
 # Kubernetes Cluster
 variable "talos_version" {
   type        = string
-  default     = "v1.5.3"
+  default     = "v1.12.4"
   description = "Identify here: https://github.com/siderolabs/talos/releases"
 }
 variable "kubernetes_version" {
   type        = string
-  default     = "v1.28.2"
+  default     = "v1.35.2"
   description = "Identify here: https://github.com/siderolabs/kubelet/pkgs/container/kubelet"
-}
-variable "qemu_guest_agent_version" {
-  type        = string
-  default     = "8.1.0"
-  description = "Identify here: https://github.com/siderolabs/extensions/pkgs/container/qemu-guest-agent"
 }
 variable "kubernetes_cluster_name" {
   type        = string
@@ -53,6 +52,10 @@ variable "kubernetes_cluster_name" {
 variable "talos_virtual_ip" {
   type        = string
   description = "Virtual IP address you wish for Talos to use"
+  validation {
+    condition     = can(regex("^([0-9]{1,3}\\.){3}[0-9]{1,3}$", var.talos_virtual_ip))
+    error_message = "Must be a valid IPv4 address."
+  }
 }
 variable "talos_disable_flannel" {
   type        = bool
@@ -88,6 +91,10 @@ variable "controlplane_num" {
   type        = number
   default     = 3
   description = "Quantity of controlplane nodes to provision"
+  validation {
+    condition     = var.controlplane_num >= 1 && var.controlplane_num <= 9
+    error_message = "Control plane count must be between 1 and 9 due to IP/MAC addressing schema"
+  }
 }
 variable "controlplane_hostname_prefix" {
   type        = string
@@ -99,8 +106,8 @@ variable "controlplane_node_name" {
   description = "Proxmox node used for provisioning the workernodes"
 }
 variable "controlplane_tags" {
-  type        = list
-  default     = ["app-kubernetes","type-controlplane"]
+  type        = list(string)
+  default     = ["app-kubernetes", "type-controlplane"]
   description = "Tags to apply to the controlplane virtual machines"
 }
 variable "controlplane_cpu_cores" {
@@ -120,7 +127,7 @@ variable "controlplane_datastore" {
 }
 variable "controlplane_disk_size" {
   # Talos recommends 100Gb
-  type        = string
+  type        = number
   default     = "50"
   description = "Quantity of disk space (gigabytes) to apply to the controlplane virtual machines"
 }
@@ -153,6 +160,11 @@ variable "workernode_num" {
   type        = number
   default     = 3
   description = "Quantity of workernode nodes to provision"
+
+  validation {
+    condition     = var.workernode_num >= 1 && var.workernode_num <= 9
+    error_message = "Worker node count must be between 1 and 9 due to IP/MAC addressing schema"
+  }
 }
 variable "workernode_hostname_prefix" {
   type        = string
@@ -164,8 +176,8 @@ variable "workernode_node_name" {
   description = "Proxmox node used for provisioning the workernodes"
 }
 variable "workernode_tags" {
-  type        = list
-  default     = ["app-kubernetes","type-workernode"]
+  type        = list(string)
+  default     = ["app-kubernetes", "type-workernode"]
   description = "Tags to apply to the workernode virtual machines"
 }
 variable "workernode_cpu_cores" {
@@ -185,7 +197,7 @@ variable "workernode_datastore" {
 }
 variable "workernode_disk_size" {
   # Talos recommends 100Gb
-  type        = string
+  type        = number
   default     = "50"
   description = "Quantity of disk space (gigabytes) to apply to the workernode virtual machines"
 }

@@ -73,20 +73,31 @@ TJ's Kubernetes Service, or *TKS*, is an IaC project that is used to deliver Kub
    | test-k8s-node-2 | 00:00:00:00:00:62 | 192.168.40.62 |
    | test-k8s-node-3 | 00:00:00:00:00:63 | 192.168.40.63 |
 
-7. Initialize Terraform and create a workspace for your Terraform state. Or configure a different backend accordingly.
+7. Create a Talos Image Factory Schematic ID:
+
+   ```bash
+   export TF_VAR_talos_schematic_id=$( \
+     curl -X POST "https://factory.talos.dev/schematics" \
+       -H "Content-Type: application/yaml" \
+       --data-binary "@configs/talos_image_factory.yml" \
+       | jq -r '.id'
+   )
+   ```
+
+8. Initialize Terraform and create a workspace for your Terraform state. Or configure a different backend accordingly.
 
    ```bash
    terraform init
    terraform workspace new test
    ```
 
-8. Create the cluster
+9. Create the cluster
 
    ```bash
    terraform apply --var-file="vars/test.tfvars"
    ```
 
-9. Retrieve the Kubernetes and Talos configuration files. Be sure not to overwrite any existing configs you wish to preserve. I use [kubecm](https://github.com/sunny0826/kubecm) to add/merge configs and [kubectx](https://github.com/ahmetb/kubectx) to change contexts.
+10. Retrieve the Kubernetes and Talos configuration files. Be sure not to overwrite any existing configs you wish to preserve. I use [kubecm](https://github.com/sunny0826/kubecm) to add/merge configs and [kubectx](https://github.com/ahmetb/kubectx) to change contexts.
 
    ```bash
    mkdir -p ~/.{kube,talos}
@@ -99,7 +110,7 @@ TJ's Kubernetes Service, or *TKS*, is an IaC project that is used to deliver Kub
    kubectx admin@test
    ```
 
-10. Confirm Kubernetes is bootstrapped and that all of the nodes have joined the cluster. The Controlplane nodes might take a moment to respond. You can confirm the status of each Talos node using `talosctl` or by reviewing the VM consoles in Proxmox.
+11. Confirm Kubernetes is bootstrapped and that all of the nodes have joined the cluster. The Controlplane nodes might take a moment to respond. You can confirm the status of each Talos node using `talosctl` or by reviewing the VM consoles in Proxmox.
 
     ```bash
     watch kubectl get nodes,all -A
@@ -109,20 +120,9 @@ TJ's Kubernetes Service, or *TKS*, is an IaC project that is used to deliver Kub
 
 ## Post Install
 
-## Installing QEMU Guest Agent
-
-Talos installs the QEMU Guest Agent, but it won't be enabled until the nodes are _upgraded_. Once everything in the cluster has become `Ready`, upgrade the nodes using `talosctl` or the [manage_nodes](https://github.com/zimmertr/TJs-Kubernetes-Service/blob/b15bb923cccb607254b8001201772be45aab3806/bin/manage_nodes#L6) script. If you opted to disable Flannel, you need to install a CNI before this will work.
-
-```bash
-NODES=$(kubectl get nodes --no-headers=true | awk '{print $1}' | tr '\n' ',')
-./bin/manage_nodes upgrade $NODES
-```
-
-<hr>
-
 ## Installing A Different CNI
 
-By default, Talos uses Flannel. To use a different CNI make sure that `var.talos_disable_flannel` is set to `true` during provisioning. The cluster will not be functional and you will not be able to _upgrade_ the nodes to install QEMU Guest Agent until a CNI is enabled. Cilium can be installed using my project found [here](https://github.com/zimmertr/Kubernetes-Manifests/tree/main/cilium). You will also likely want to install Kubelet CSR Approver to automatically. accept the required certificate signing requests. Alternatively, after installing you can accept them manually:
+By default, Talos uses Flannel. To use a different CNI make sure that `var.talos_disable_flannel` is set to `true` during provisioning. The cluster will not be functional and you will not be able to _upgrade_ the nodes to install QEMU Guest Agent until a CNI is enabled. Cilium can be installed using my project found [here](https://github.com/zimmertr/Kubernetes-Manifests/tree/main/cilium). You will also likely want to install Kubelet CSR Approver to automatically accept the required certificate signing requests. Alternatively, after installing you can accept them manually:
 
 ```bash
 kubectl get csr

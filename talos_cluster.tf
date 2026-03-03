@@ -8,12 +8,12 @@ resource "talos_machine_secrets" "this" {
 }
 
 data "talos_client_configuration" "this" {
-  cluster_name = var.kubernetes_cluster_name
-  client_configuration    = talos_machine_secrets.this.client_configuration
-  endpoints               = [for node in local.controlplane_nodes : node]
+  cluster_name         = var.kubernetes_cluster_name
+  client_configuration = talos_machine_secrets.this.client_configuration
+  endpoints            = [for node in local.controlplane_nodes : node]
 }
 
-data "talos_cluster_kubeconfig" "this" {
+resource "talos_cluster_kubeconfig" "this" {
   depends_on = [
     talos_machine_bootstrap.this
   ]
@@ -23,7 +23,6 @@ data "talos_cluster_kubeconfig" "this" {
 }
 
 resource "talos_machine_bootstrap" "this" {
-  count = var.controlplane_num
   depends_on = [
     talos_machine_configuration_apply.controlplane
   ]
@@ -33,7 +32,7 @@ resource "talos_machine_bootstrap" "this" {
 }
 
 output "kubeconfig" {
-  value     = data.talos_cluster_kubeconfig.this.kubeconfig_raw
+  value     = talos_cluster_kubeconfig.this.kubeconfig_raw
   sensitive = true
 }
 
