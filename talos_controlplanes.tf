@@ -46,7 +46,7 @@ resource "proxmox_virtual_environment_vm" "controlplane" {
   # Remove the node from Kubernetes on destroy
   provisioner "local-exec" {
     when    = destroy
-    command = "./bin/manage_nodes remove ${self.name}"
+    command = "${path.module}/bin/manage_nodes remove ${self.name}"
   }
 }
 
@@ -76,7 +76,7 @@ resource "talos_machine_configuration_apply" "controlplane" {
   config_patches = concat(
     [
       templatefile("configs/global.yml", {
-        talos_installer_image = "factory.talos.dev/nocloud-installer/${var.talos_schematic_id}:${var.talos_version}"
+        talos_installer_image = "factory.talos.dev/nocloud-installer/${local.talos_schematic_id}:${var.talos_version}"
       }),
       templatefile("configs/controlplane.yml", {
         talos_virtual_ip = var.talos_virtual_ip

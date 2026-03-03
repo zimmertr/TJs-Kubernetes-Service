@@ -4,7 +4,6 @@
 * [Requirements](#requirements)
 * [Instructions](#instructions)
 * [Post Install](#post-install)
-  * [Installing QEMU Guest Agent](#installing-qemu-guest-agent)
   * [Installing A Different CNI](#installing-a-different-cni)
   * [Scaling the Cluster](#scaling-the-cluster)
   * [Installing Other Apps](#installing-other-apps)
@@ -25,8 +24,8 @@ TJ's Kubernetes Service, or *TKS*, is an IaC project that is used to deliver Kub
 | Requirement  | Description                                                  |
 | ------------ | ------------------------------------------------------------ |
 | `terraform`  | Used for creating the cluster                                |
-| `kubectl`    | Used for *upgrading* the Talos nodes to install QEMU Guest Agent and removing nodes from the cluster |
-| `talosctl`   | Used for *upgrading* the Talos nodes to install QEMU Guest Agent and removing nodes from the cluster |
+| `kubectl`    | Used for removing nodes from the cluster |
+| `talosctl`   | Used for removing nodes from the cluster |
 | `ssh-agent`  | Used for connecting to the Proxmox server to bootstrap the Talos image |
 | Proxmox      | You already know                                             |
 | DNS Resolver | Used for configuring DHCP reservation during cluster creation and DNS resolution within the cluster |
@@ -73,31 +72,20 @@ TJ's Kubernetes Service, or *TKS*, is an IaC project that is used to deliver Kub
    | test-k8s-node-2 | 00:00:00:00:00:62 | 192.168.40.62 |
    | test-k8s-node-3 | 00:00:00:00:00:63 | 192.168.40.63 |
 
-7. Create a Talos Image Factory Schematic ID:
-
-   ```bash
-   export TF_VAR_talos_schematic_id=$( \
-     curl -X POST "https://factory.talos.dev/schematics" \
-       -H "Content-Type: application/yaml" \
-       --data-binary "@configs/talos_image_factory.yml" \
-       | jq -r '.id'
-   )
-   ```
-
-8. Initialize Terraform and create a workspace for your Terraform state. Or configure a different backend accordingly.
+7. Initialize Terraform and create a workspace for your Terraform state. Or configure a different backend accordingly.
 
    ```bash
    terraform init
    terraform workspace new test
    ```
 
-9. Create the cluster
+8. Create the cluster
 
    ```bash
    terraform apply --var-file="vars/test.tfvars"
    ```
 
-10. Retrieve the Kubernetes and Talos configuration files. Be sure not to overwrite any existing configs you wish to preserve. I use [kubecm](https://github.com/sunny0826/kubecm) to add/merge configs and [kubectx](https://github.com/ahmetb/kubectx) to change contexts.
+9. Retrieve the Kubernetes and Talos configuration files. Be sure not to overwrite any existing configs you wish to preserve. I use [kubecm](https://github.com/sunny0826/kubecm) to add/merge configs and [kubectx](https://github.com/ahmetb/kubectx) to change contexts.
 
    ```bash
    mkdir -p ~/.{kube,talos}
@@ -110,10 +98,21 @@ TJ's Kubernetes Service, or *TKS*, is an IaC project that is used to deliver Kub
    kubectx admin@test
    ```
 
-11. Confirm Kubernetes is bootstrapped and that all of the nodes have joined the cluster. The Controlplane nodes might take a moment to respond. You can confirm the status of each Talos node using `talosctl` or by reviewing the VM consoles in Proxmox.
+10. Confirm Kubernetes is bootstrapped and that all of the nodes have joined the cluster. The Controlplane nodes might take a moment to respond. You can confirm the status of each Talos node using `talosctl` or by reviewing the VM consoles in Proxmox.
 
     ```bash
     watch kubectl get nodes,all -A
+    ```
+
+11. Kubernetes will only automatically approve certificate signing requests (CSRs) if your nodes use a standard FQDN that matches the cluster’s expected domain. If your nodes have custom or non-standard hostnames, you may need to manually review and approve CSRs to complete cluster bootstrapping:
+
+    ```bash
+    # Review pending CSRs to validate they are as expected
+    kubectl get csr
+    kubectl describe csr csr-foobar
+
+    # Approve all pending CSRs
+    kubectl get csr -o name | xargs kubectl certificate approve
     ```
 
 <hr>
@@ -122,7 +121,7 @@ TJ's Kubernetes Service, or *TKS*, is an IaC project that is used to deliver Kub
 
 ## Installing A Different CNI
 
-By default, Talos uses Flannel. To use a different CNI make sure that `var.talos_disable_flannel` is set to `true` during provisioning. The cluster will not be functional and you will not be able to _upgrade_ the nodes to install QEMU Guest Agent until a CNI is enabled. Cilium can be installed using my project found [here](https://github.com/zimmertr/Kubernetes-Manifests/tree/main/cilium). You will also likely want to install Kubelet CSR Approver to automatically accept the required certificate signing requests. Alternatively, after installing you can accept them manually:
+By default, Talos uses Flannel. To use a different CNI make sure that `var.talos_disable_flannel` is set to `true` during provisioning. The cluster will not be functional and you will not be able to _upgrade_ the nodes until a CNI is enabled. Cilium can be installed using my project found [here](https://github.com/zimmertr/Kubernetes-Manifests/tree/main/cilium). You will also likely want to install Kubelet CSR Approver to automatically accept the required certificate signing requests. Alternatively, after installing you can accept them manually:
 
 ```bash
 kubectl get csr
@@ -144,7 +143,6 @@ In the event you scale down a node, terraform will execute a local-provisioner t
 
 Considerations:
 
-* As QEMU Guest Agent's installation is not managed by Terraform, be sure to run `./bin/manage_nodes upgrade $NODE` against any new nodes that are added to enable it. Otherwise, Terraform will have issues interacting with it through the Proxmox API.
 * At this time I don't think it's possible to choose a specific node to remove. You must scale up and down the last node.
 * Due to the way I configure IP Addressing using DHCP reservations, there is a limit of both 9 controlplanes and 9 workernodes.
 
@@ -160,7 +158,7 @@ You can find my personal collection of manifests [here](https://github.com/zimme
 
 ### Terraform is Stuck Deleting
 
-Proxmox won't be able to issue a shutdown signal to the virtual machines unless QEMU Guest Agent is enabled. This can lead to Terraform trying to destroy nodes unsuccessfully until the API times out the command. In the event this occurs, you can work connect to Proxmox manually and remove the VMs, then proceed with `terraform destroy` as usual. For example:
+If QEMU Guest Agent is not functional correctly, Proxmox may hang when trying to issue a shutdown to the VMs. This can lead to Terraform trying to destroy nodes unsuccessfully until the API times out the command. In the event this occurs, you can work connect to Proxmox manually and remove the VMs, then proceed with `terraform destroy` as usual. For example:
 
 ```bash
 ssh -i ~/.ssh/sol.milkyway root@earth.sol.milkyway "rm /var/lock/qemu-server/lock-*; qm list | grep 40 | awk '{print \$1}' | xargs -L1 qm stop && sleep 5 && qm list | grep 40 | awk '{print \$1}' | xargs -L1 qm destroy"

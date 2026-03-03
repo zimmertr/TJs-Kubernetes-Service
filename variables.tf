@@ -6,6 +6,12 @@ variable "proxmox_hostname" {
   type        = string
   description = "IP address or hostname of the Proxmox server"
 }
+variable "proxmox_username" {
+  # A remote-exec SSH provisoner is used to download the image in talos_image.tf.
+  type        = string
+  default     = "root"
+  description = "IP address or hostname of the Proxmox server"
+}
 variable "proxmox_ssh_key_path" {
   type        = string
   description = "Path to an SSH key used to connect to the Proxmox server"
@@ -26,10 +32,6 @@ variable "talos_image_datastore" {
 variable "talos_image_node_name" {
   type        = string
   description = "Proxmox node used for storing the Talos image"
-}
-variable "talos_schematic_id" {
-  type        = string
-  description = "The Schematic ID from Talos Image Factory"
 }
 
 
