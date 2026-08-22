@@ -1,0 +1,21 @@
+# Applied to control planes only when var.talos_expose_metrics is true.
+#
+# Talos binds the control-plane components' metrics to localhost by default,
+# which leaves a kube-prometheus stack scraping targets that can never
+# answer. These expose them on the node addresses. The scheduler and
+# controller-manager still authenticate scrapes (their metrics ports are
+# TLS + RBAC); etcd's metrics listener and kube-proxy's are plain HTTP,
+# readable by anything on the node network — which is why this is opt-in.
+cluster:
+  controllerManager:
+    extraArgs:
+      bind-address: "0.0.0.0"
+  etcd:
+    extraArgs:
+      listen-metrics-urls: "http://0.0.0.0:2381"
+  proxy:
+    extraArgs:
+      metrics-bind-address: "0.0.0.0:10249"
+  scheduler:
+    extraArgs:
+      bind-address: "0.0.0.0"

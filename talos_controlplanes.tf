@@ -82,6 +82,7 @@ resource "talos_machine_configuration_apply" "controlplane" {
         talos_virtual_ip = var.talos_virtual_ip
       }),
     ],
-    var.talos_disable_flannel ? [file("configs/disable_flannel.yml")] : []
+    var.talos_disable_flannel ? [file("configs/disable_flannel.yml")] : [],
+    var.talos_expose_metrics ? [file("configs/expose_metrics.yml")] : []
   )
 }
