@@ -64,6 +64,11 @@ variable "talos_disable_flannel" {
   default     = false
   description = "Whether or not the Flannel CNI & Kube Proxy should be disabled for Cilium"
 }
+variable "talos_expose_metrics" {
+  type        = bool
+  default     = false
+  description = "Whether or not etcd, the scheduler, the controller-manager, and kube-proxy should serve Prometheus metrics on the node addresses instead of localhost"
+}
 variable "controlplane_ip_prefix" {
   # While I use DHCP reservation to assign IP Addresses to each virtual machine, talos must know
   # the IP Address of a node in order to apply configuration and bootstrap it. This prefix is used

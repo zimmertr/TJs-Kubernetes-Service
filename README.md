@@ -128,6 +128,12 @@ kubectl get csr
 kubectl certificate approve $CSR
 ```
 
+## Exposing Control Plane Metrics
+
+By default, Talos binds the metrics endpoints for etcd, the scheduler, the controller-manager, and kube-proxy to localhost, so a monitoring stack like [kube-prometheus-stack](https://github.com/zimmertr/Kubernetes-Manifests/tree/main/observability) cannot scrape them. Set `var.talos_expose_metrics` to `true` to bind them to the node addresses instead. The scheduler and controller-manager still authenticate scrapes with TLS and RBAC; etcd's metrics listener (`2381`) and kube-proxy's (`10249`) are plain HTTP, readable by anything that can reach the node network, which is why this is opt-in.
+
+On a running cluster, the scheduler, controller-manager, and API server pick the change up on their own when the configuration is applied. etcd does not: Talos refuses API-driven etcd restarts, so reboot each control plane node one at a time with `talosctl -n $NODE reboot`, verifying `talosctl etcd status` between nodes. kube-proxy is a bootstrap manifest and only re-renders on `talosctl upgrade-k8s --to $CURRENT_VERSION`.
+
 
 <hr>
 
