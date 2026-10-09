@@ -41,3 +41,4 @@ The new record says `Supersedes NNNN` in its status line. The old record changes
 | [0022](0022-secrets-ignore-config-version.md) | The machine secrets ignore later `talos_version` changes instead of refusing to be destroyed | 2026-10-09 | Accepted |
 | [0023](0023-manage-nodes-returns.md) | A slimmed-down `bin/manage_nodes` returns for node removal and rolling reboots | 2026-10-09 | Accepted |
 | [0024](0024-secureboot.md) | Every node boots with UEFI SecureBoot | 2026-10-09 | Accepted |
+| [0025](0025-destroy-does-not-reset.md) | Destroying a node only deletes its VM, and `manage_nodes remove` takes a single node out of the cluster | 2026-10-09 | Accepted |

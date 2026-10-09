@@ -32,7 +32,7 @@ Nothing in an upgrade replaces a VM. The VM reads its image only when it is crea
 
 ## Removing a node
 
-Delete it from the tfvars and apply. `talos_machine` drains and resets the node first, so a control plane leaves etcd, and then the VM is destroyed. Workers are removed before control planes. The Kubernetes Node object stays until `bin/manage_nodes remove` deletes it, because nothing in the cluster removes Nodes whose VMs are gone.
+Terraform only deletes a removed node's VM. It doesn't reset the node, so `terraform destroy` of a whole cluster never waits on etcd or on draining. `bin/manage_nodes remove` takes a single node out of the cluster: run before the apply, it drains the node, resets it gracefully (so a control plane leaves etcd) and deletes the Node object. Run after, it removes the dead etcd member from another control plane and deletes the Node object. It refuses to remove the last control plane.
 
 ## Changing a node's hardware
 

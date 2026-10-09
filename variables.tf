@@ -42,10 +42,6 @@ variable "cluster" {
     kubernetes_version   = optional(string, "v1.37.1")
     disable_flannel      = optional(bool, false)
     expose_metrics       = optional(bool, false)
-    # Nodes leave etcd and wipe themselves when removed. Turn off and apply
-    # before destroying a whole cluster: the last control plane can't leave
-    # etcd, so its reset fails.
-    reset_on_destroy = optional(bool, true)
   })
   description = "Cluster identity, versions and feature switches"
 
