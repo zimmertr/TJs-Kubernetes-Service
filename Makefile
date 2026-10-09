@@ -74,6 +74,7 @@ test: cache
 
 actionlint:
 	$(ACTIONLINT) -color
+	$(DOCKER) --entrypoint shellcheck rhysd/actionlint:$(ACTIONLINT_VERSION) .github/scripts/*.sh
 
 docs:
 	$(TFDOCS) --config .terraform-docs.yml .
