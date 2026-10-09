@@ -1,6 +1,6 @@
 # Configuration
 
-Every input variable, generated from the code by `make docs`. Set them in a tfvars file under `vars/`, and pass it with `-var-file`. This reference describes the v1 variables on `main` today.
+Every input variable, generated from the code by `make docs`. Set them in a tfvars file under `vars/`, and pass it with `-var-file`.
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements

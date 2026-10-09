@@ -37,7 +37,7 @@ Every merge releases, including Renovate's dependency bumps.
 
 Renovate (`.github/renovate.json`) opens PRs for Terraform providers, `required_version`, GitHub Actions (pinned to commit SHAs), and the tool images in the `Makefile` (through their `# renovate:` comments). It keeps a dependency dashboard issue.
 
-Updates below a major (minor, patch, digest and pin) merge themselves through GitHub auto-merge once the required checks pass. Majors wait for a maintainer. v2 adds the Talos and Kubernetes versions to Renovate, holds Kubernetes minors for review, and adds a check that comments on whether each proposed Talos and Kubernetes pair is supported.
+Updates below a major (minor, patch, digest and pin) merge themselves through GitHub auto-merge once the required checks pass. Majors wait for a maintainer.
 
 ## Protecting `main`
 

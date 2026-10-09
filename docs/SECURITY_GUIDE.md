@@ -7,9 +7,9 @@ How TKS handles credentials and secrets, and what CI scans. To report a vulnerab
 | Credential | Where it lives | Used for |
 | --- | --- | --- |
 | Proxmox API token | `vars/config.env` (gitignored) as `PROXMOX_VE_API_TOKEN` | Every provider API call |
-| SSH key for the Proxmox host | `ssh-agent` | The provider's SSH-only actions, and unpacking the Talos image (v1) |
+| SSH key for the Proxmox host | `ssh-agent` | The provider's SSH-only actions, and unpacking the Talos image |
 
-Create a dedicated user and token rather than using `root@pam`. v2 adds an optional `bootstrap/` module that creates one with a least-privilege role, and this page will list each privilege and why TKS needs it.
+Create a dedicated user and token rather than using `root@pam`.
 
 ## Secrets in Terraform state
 

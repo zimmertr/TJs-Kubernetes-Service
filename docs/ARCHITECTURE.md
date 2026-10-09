@@ -1,7 +1,5 @@
 # Architecture
 
-This page describes the v1 layout on `main` today. v2 replaces it with modules ([epic #63](https://github.com/zimmertr/TJs-Kubernetes-Service/issues/63)).
-
 ## What TKS creates
 
 | File | Creates |
