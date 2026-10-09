@@ -6,8 +6,9 @@ on:
 permissions:
   contents: read
 
-# Runs on every PR so it can be a required check. It comments only when the PR
-# changes a Talos or Kubernetes version, which is mostly Renovate's bumps.
+# Runs on every PR so it can be a required check. It comments only on
+# Renovate's PRs that change a Talos or Kubernetes version, where the comment
+# tells a reviewer whether the bump is safe to merge.
 jobs:
   talos-kubernetes:
     runs-on: ubuntu-latest
@@ -27,7 +28,8 @@ jobs:
           echo "status=$?" >> "$GITHUB_OUTPUT"
           cat report.md >> "$GITHUB_STEP_SUMMARY"
           cat report.md
-      - name: Comment when this PR changes a version
+      - name: Comment when Renovate changes a version
+        if: github.event.pull_request.user.login == 'renovate[bot]'
         env:
           GH_TOKEN: ${{ github.token }}
           BASE: ${{ github.event.pull_request.base.sha }}

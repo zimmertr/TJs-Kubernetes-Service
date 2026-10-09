@@ -11,7 +11,7 @@
 
 ## Decision
 
-`.github/scripts/talos-k8s-compat.sh` downloads `pkg/machinery/compatibility/talosNNN/talosNNN.go` from the `siderolabs/talos` tag of each pinned Talos version. It reads `MinimumKubernetesVersion` and `MaximumKubernetesVersion`, and fails if the Kubernetes version falls outside that range. It checks the defaults in `variables.tf` and every `vars/*.tfvars`. The rest of 0012 stands.
+`.github/scripts/talos-k8s-compat.sh` downloads `pkg/machinery/compatibility/talosNNN/talosNNN.go` from the `siderolabs/talos` tag of each pinned Talos version. It reads `MinimumKubernetesVersion` and `MaximumKubernetesVersion`, and fails if the Kubernetes version falls outside that range. It checks the defaults in `variables.tf` and every `vars/*.tfvars`, and it runs on every PR. The comment is posted only on Renovate's PRs that change a version, since those are the ones a reviewer decides on from the comment (TJ, 2026-10-09). The rest of 0012 stands.
 
 ## Evidence
 

@@ -15,7 +15,7 @@ Every pull request is checked, every merge to `main` is released, and Renovate k
 | `test` | `make test` | `terraform test` (with mocked providers) in every directory that has tests |
 | `actionlint` | `make actionlint` | actionlint on the workflows, and shellcheck on `.github/scripts/` |
 
-`.github/workflows/compat.yml` runs on every pull request too. It reads the Kubernetes range that each pinned Talos version supports from Talos's source, fails if any Talos and Kubernetes pair in `variables.tf` or `vars/*.tfvars` falls outside it, and comments the table on PRs that change a version.
+`.github/workflows/compat.yml` runs on every pull request too. It reads the Kubernetes range that each pinned Talos version supports from Talos's source, fails if any Talos and Kubernetes pair in `variables.tf` or `vars/*.tfvars` falls outside it, and comments the table on Renovate's PRs that change a version.
 
 `make check` runs the Make targets. `make fmt` and `make docs` (which regenerates [`CONFIGURATION.md`](CONFIGURATION.md)) change files rather than check them. The only local requirements are Docker and Make.
 
