@@ -42,12 +42,10 @@ resource "proxmox_virtual_environment_vm" "this" {
   disk {
     datastore_id = var.proxmox.datastore_id
     interface    = "scsi0"
-    # Read once at creation. A newer image never replaces an existing VM;
-    # talos_machine upgrades it in place instead.
-    import_from = var.image.file_id
-    size        = each.value.disk_gb
-    iothread    = true
-    ssd         = true
+    import_from  = var.image.file_id
+    size         = each.value.disk_gb
+    iothread     = true
+    ssd          = true
     # Lets Talos's periodic trim hand freed blocks back to a thin datastore.
     discard = "on"
   }
@@ -88,6 +86,12 @@ resource "proxmox_virtual_environment_vm" "this" {
 
   operating_system {
     type = "l26"
+  }
+
+  # The image is only read at creation, and talos_machine upgrades the OS in
+  # place. Without this, every Talos upgrade plans a no-op change to every VM.
+  lifecycle {
+    ignore_changes = [disk[0].import_from]
   }
 }
 
