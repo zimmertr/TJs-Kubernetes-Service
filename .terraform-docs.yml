@@ -1,0 +1,12 @@
+formatter: markdown table
+output:
+  file: docs/CONFIGURATION.md
+  mode: inject
+sort:
+  enabled: true
+  by: required
+settings:
+  anchor: false
+  default: true
+  required: true
+  type: true

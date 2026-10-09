@@ -7,6 +7,7 @@ provider "registry.terraform.io/bpg/proxmox" {
   hashes = [
     "h1:09DlffrNTvHWsp+XuZj4Sw56g/g/df4hgRwpBmcub30=",
     "h1:6E3NlPgUs+EPAeL/XcsjTRXqQH1kwTmaW8wI8kdv7LM=",
+    "h1:SZrj8tHYQSlAeFrarJ0CrPtmw4M4P98XtWOLlN1hel0=",
     "h1:V6aVKVAGwTgCDu1iWNulwvu/tKvz5dwdyGPxvrEGXqU=",
     "zh:09b19a92eded796bc59de24f56201e2638fed28120add9b62a84fff0de859708",
     "zh:1991526fe4770293df35b800d1497792379a30670750e310dc669d7bf108eaf8",
@@ -26,11 +27,13 @@ provider "registry.terraform.io/bpg/proxmox" {
 }
 
 provider "registry.terraform.io/hashicorp/http" {
-  version = "3.6.2"
+  version     = "3.6.2"
+  constraints = "~> 3.6"
   hashes = [
     "h1:G0gVRyy5SuURfJYLoyyXh2o2qAWm5655pUaNdpVxg8E=",
     "h1:Nszr/m6TvK0WN0u2GPrPOAIcr4/KwKh/Y2YwvZMyWbA=",
     "h1:YX6PmX1t+BSiclSmnbjqunRRS6Oi33FdK5wWY1hLd4Y=",
+    "h1:t+H0t7gUCC+pomSuC+t/Ca3z9WOpvyErPs+kTLs4/as=",
     "zh:1de57c0f889a6a35e018e8f83b1a1fcaafccda31b1c300fbbb29d29c3a1ce038",
     "zh:502925fe2ebd90715922db22588727c4c688e56939a3e87568ad1ae32ace0da3",
     "zh:5dc16040d1f59e1fadef2247ab4026b661f0e6e06fee8f44fad6bcbce7c1cb73",
@@ -51,6 +54,7 @@ provider "registry.terraform.io/siderolabs/talos" {
   version     = "0.12.0"
   constraints = "~> 0.12.0"
   hashes = [
+    "h1:5TOAcT0dJ9PUsJfivsym5GNtF8CFhq6NQen1CkMbjI4=",
     "h1:MROf5tBE/arrhUXKFBDxVIV2GEp++m+ZfmeEcCBVmUA=",
     "h1:OqLxCyAPZ2+oEzg/DS9ALmNlIdFHDLGexEdy3t2069w=",
     "h1:qnBh8ioMyvKfU0NHIKCqYK5yvADxz0WjnS2Jzv1+54Y=",

@@ -1,0 +1,12 @@
+# Terraform misconfiguration scanning only. Trivy has no Proxmox- or
+# Talos-specific checks, so findings here are generic Terraform hygiene.
+scan:
+  scanners:
+    - misconfig
+misconfiguration:
+  scanners:
+    - terraform
+severity:
+  - HIGH
+  - CRITICAL
+exit-code: 1
