@@ -1,6 +1,6 @@
 # 0018. The docs describe TKS for its users, and maintainer runbooks stay out of the repository
 
-- Status: Accepted
+- Status: Superseded by [0020](0020-readme-is-tjs.md)
 - Date: 2026-10-09
 - Decider: TJ (planning interview)
 - Issues and PRs: the v2 planning PR

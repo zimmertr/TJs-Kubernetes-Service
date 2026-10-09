@@ -9,6 +9,7 @@
   * [Installing Other Apps](#installing-other-apps)
 * [Troubleshooting](#troubleshooting)
   * [Terraform is Stuck Deleting](#terraform-is-stuck-deleting)
+* [Documentation](#documentation)
 
 
 <hr>
@@ -169,3 +170,18 @@ If QEMU Guest Agent is not functional correctly, Proxmox may hang when trying to
 ```bash
 ssh -i ~/.ssh/sol.milkyway root@earth.sol.milkyway "rm /var/lock/qemu-server/lock-*; qm list | grep 40 | awk '{print \$1}' | xargs -L1 qm stop && sleep 5 && qm list | grep 40 | awk '{print \$1}' | xargs -L1 qm destroy"
 ```
+
+<hr>
+
+## Documentation
+
+More detailed documentation can be found in the [docs](docs) directory:
+
+| Document                                    | Description                                                   |
+| ------------------------------------------- | ------------------------------------------------------------- |
+| [Configuration](docs/CONFIGURATION.md)      | Every input variable, generated from the code                 |
+| [Architecture](docs/ARCHITECTURE.md)        | What TKS creates and how it fits together                     |
+| [Security](docs/SECURITY_GUIDE.md)          | Credentials, secrets in Terraform state, and scanning         |
+| [CI/CD](docs/CICD.md)                       | Checks, releases, and dependency updates                      |
+| [Decisions](docs/decisions/README.md)       | Architectural decision records explaining why TKS is built the way it is |
+| [Contributing](CONTRIBUTING.md)             | How to propose a change                                       |

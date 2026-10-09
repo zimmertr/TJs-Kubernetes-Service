@@ -1,8 +1,29 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:recommended"
+    "config:recommended",
+    "helpers:pinGitHubActionDigests",
+    ":semanticCommits"
   ],
+  "dependencyDashboard": true,
   "prConcurrentLimit": 0,
-  "prHourlyLimit": 0
+  "prHourlyLimit": 0,
+  "packageRules": [
+    {
+      "description": "Everything below a major merges itself once the required checks pass (decision 0012).",
+      "matchUpdateTypes": ["minor", "patch", "digest", "pin", "pinDigest"],
+      "automerge": true,
+      "platformAutomerge": true
+    }
+  ],
+  "customManagers": [
+    {
+      "description": "Tool versions in the Makefile, each annotated with a `# renovate:` comment.",
+      "customType": "regex",
+      "managerFilePatterns": ["/^Makefile$/"],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)( extractVersion=(?<extractVersion>\\S+))?\\n[A-Z_]+ := (?<currentValue>\\S+)"
+      ]
+    }
+  ]
 }

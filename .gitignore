@@ -1,15 +1,27 @@
-# Terraform
-.terraform*
-*.tfstate*
+# Terraform (from github/gitignore Terraform.gitignore). The root lock file is
+# committed so provider hash changes are reviewed; module lock files are not,
+# because a module's providers are locked by the root that calls it.
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+*.tfvars.json
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc
+modules/**/.terraform.lock.hcl
 
-# Provider
+# Tool caches written by the Makefile's containers
+.cache/
+
+# Credentials and generated client configs
 config.env
-
-# Talos
 talosconfig
-
-# Kubernetes
 kubeconfig
 
-# MacOS
+# macOS
 .DS_Store

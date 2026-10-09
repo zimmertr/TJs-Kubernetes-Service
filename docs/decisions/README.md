@@ -34,5 +34,6 @@ The new record says `Supersedes NNNN` in its status line. The old record changes
 | [0015](0015-gpu-reset-risk-accepted.md) | The GPU reset risk is accepted and tested on first attach, rather than in a separate spike | 2026-10-09 | Accepted |
 | [0016](0016-q35-uefi-everywhere.md) | Every node uses the q35 machine type with UEFI firmware | 2026-10-09 | Accepted |
 | [0017](0017-gpu-taint-extended-resource-toleration.md) | GPU nodes carry the taint `amd.com/gpu:NoSchedule`, and pods that request the GPU tolerate it automatically | 2026-10-09 | Accepted |
-| [0018](0018-docs-for-users.md) | The docs describe TKS for its users, and maintainer runbooks stay out of the repository | 2026-10-09 | Accepted |
+| [0018](0018-docs-for-users.md) | The docs describe TKS for its users, and maintainer runbooks stay out of the repository | 2026-10-09 | Superseded by 0020 |
 | [0019](0019-a-handful-of-prs.md) | v2 lands as a handful of pull requests into `main`, after `v1.0.0` is tagged | 2026-10-09 | Accepted |
+| [0020](0020-readme-is-tjs.md) | The README stays in TJ's own voice and remains the main guide, and `docs/` holds the reference pages | 2026-10-09 | Accepted |
