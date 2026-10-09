@@ -21,7 +21,6 @@ The README is an index: summary, requirements, quick start and a docs table. Pro
 | [`docs/SECURITY_GUIDE.md`](docs/SECURITY_GUIDE.md) | Token privileges, secrets in state, scanning. The root `SECURITY.md` is only the vulnerability-reporting policy |
 | [`docs/decisions/`](docs/decisions/README.md) | One record per design decision. The README is the index |
 
-The first five pages are created by task T10. Until then, only the decision records exist.
 
 - **Docs describe TKS for its users.** Never commit the maintainer's own runbooks, one-off host commands or throwaway scripts. A host prerequisite is a row in the README's Requirements table, not a set of commands. The planning docs and decision records are exempt: they are history, and they keep dated facts about TJ's environment.
 - **A doc change ships in the PR that causes it.** Nothing enforces this, so check the affected page before you open the PR.
@@ -47,4 +46,4 @@ Every design decision gets a record in `docs/decisions/`, written in the same PR
 
 ## Development commands
 
-Every CI check is a Make target that runs a pinned container image (`make fmt`, `make validate`, `make lint`, `make scan`, `make test`, `make actionlint`, `make docs`, and `make check` for all of them). The Makefile lands with task T5. Until then, there are no checks. `docs/CICD.md` describes the pipeline. Applies use `-parallelism=1` through `vars/config.env`, so upgrades roll one node at a time.
+Every CI check is a Make target that runs a pinned container image: `make fmt-check`, `make validate`, `make lint`, `make scan`, `make test` and `make actionlint`, with `make check` for all of them. `make fmt` formats, and `make docs` regenerates `docs/CONFIGURATION.md`. Use the targets rather than local tool installs, so versions match CI. [`docs/CICD.md`](docs/CICD.md) describes the pipeline.
