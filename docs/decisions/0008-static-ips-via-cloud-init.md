@@ -15,7 +15,7 @@ Each node's address, gateway and DNS servers are written by the VM resource's `i
 
 ## Evidence
 
-Static addressing through cloud-init is the approach Sidero documents for Talos on Proxmox. It has not yet been proven on TJ's network. Task T23 in [`PLAN.md`](../PLAN.md) verifies it on `test` before anything else depends on it.
+Static addressing through cloud-init is the approach Sidero documents for Talos on Proxmox. It has not yet been proven on TJ's network. Task T23 verifies it on `test` before anything else depends on it.
 
 ## Alternatives rejected
 

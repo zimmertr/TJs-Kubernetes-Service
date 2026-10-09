@@ -2,7 +2,8 @@
 
 - Status: Draft for review
 - Date: 2026-10-09
-- Source: [`PRD.md`](PRD.md)
+- Source: the PRD, which becomes the body of the epic issue in T3
+- This file is a review copy. It is not committed to `main`. At T3 every task becomes an issue, and from then on the issues are the plan.
 
 Every task below becomes a GitHub issue titled `[T<id>] <title>`, in the repository named on the task, and all of them go on one GitHub Project. `Depends on` becomes GitHub's "blocked by" relationship. Task 1 is the only task with no dependency, and tasks 26 and 32 are the only ones nothing depends on. Every task is connected to the graph.
 
@@ -109,7 +110,7 @@ flowchart LR
 ### T2. Review and merge the planning PR
 - Repo: TKS
 - Depends on: T1
-- Context: this PR (`docs/v2-plan`) carries `docs/PRD.md`, `docs/PLAN.md`, `docs/decisions/` and `CLAUDE.md`. Merging it is TJ's sign-off on the plan.
+- Context: this PR (`docs/v2-plan`) merges `docs/decisions/` and `CLAUDE.md`. The PRD and this plan are reviewed through links to an earlier commit on the branch, and are never committed to `main`. Merging the PR is TJ's sign-off on all four.
 - Subtasks:
   - [ ] 2.1 TJ reviews in the PR, and comments are resolved by follow-up commits.
   - [ ] 2.2 TJ approves and merges, with the title `docs: plan TKS v2 and the GPU worker`.
@@ -123,10 +124,11 @@ flowchart LR
   - [ ] 3.1 Get the `project` scope on the token.
   - [ ] 3.2 Create the labels `phase:0-setup` … `phase:4-ai` and `needs-tj` (an apply or approval step) in each repo that gets issues.
   - [ ] 3.3 Create a user-level Project "TKS v2 + GPU" with the default Status field.
-  - [ ] 3.4 Create one issue per task (T1–T32). The body is the task text, and the subtasks are a checklist. T26 goes in Bootstrap-Proxmox, T32 in Kubernetes-Manifests, the rest in TKS.
-  - [ ] 3.5 Add a "blocked by" relationship for each `Depends on`, and add every issue to the Project.
-  - [ ] 3.6 Close T1–T3 with links.
-- Done when: the Project shows 32 issues and every dependency appears as a relationship.
+  - [ ] 3.4 Create the epic issue `[Epic] TKS v2 and the GPU worker` in TKS. Its body is the PRD, with relative links rewritten to absolute GitHub URLs, and it is pinned.
+  - [ ] 3.5 Create one issue per task (T1–T32). The body is the task text, and the subtasks are a checklist. T26 goes in Bootstrap-Proxmox, T32 in Kubernetes-Manifests, the rest in TKS. Each is a sub-issue of the epic.
+  - [ ] 3.6 Add a "blocked by" relationship for each `Depends on`, and add every issue, epic included, to the Project.
+  - [ ] 3.7 Close T1–T3 with links.
+- Done when: the Project shows the epic and its 32 sub-issues, and every dependency appears as a relationship.
 
 ## Phase 1: Repository foundations (one PR)
 
@@ -347,7 +349,7 @@ Branch `refactor/v2`, titled `feat!: TKS v2 with modules, node maps, static IPs 
 - Repo: TKS
 - Depends on: T17, T18, T19, T20, T21
 - Subtasks:
-  - [ ] 22.1 `vars/stable.tfvars` and `vars/test.tfvars` in the new shape, with the PRD §6 sizes and addresses as the maintainer's examples.
+  - [ ] 22.1 `vars/stable.tfvars` and `vars/test.tfvars` in the new shape, with the sizes and addresses from the epic's tech-stack section as the maintainer's examples.
   - [ ] 22.2 `docs/CONFIGURATION.md`: the `terraform-docs` reference (`make docs`), plus prose on pool defaults and overrides and on the two Talos versions.
   - [ ] 22.3 `docs/USAGE.md`: build, scale, upgrade (merge, then `apply`), remove a node, host reboots, and the optional `bootstrap/` and HCP setups.
   - [ ] 22.4 `docs/ARCHITECTURE.md`: modules, data flow and per-pool images.
@@ -385,7 +387,7 @@ Branch `refactor/v2`, titled `feat!: TKS v2 with modules, node maps, static IPs 
 - Context: TJ rebinds the static PVs and re-bootstraps Argo CD from Kubernetes-Manifests himself. That work isn't tracked here.
 - Subtasks:
   - [ ] 25.1 With TJ: drain `stable` with `kubectl` if he wants a graceful stop, then `terraform destroy` from a `v1.0.0` checkout with the old token.
-  - [ ] 25.2 Apply v2 `stable` (HCP `tks-stable`) with the PRD §6 sizes: control planes at VMIDs 4011–4013, workers at 4021–4023.
+  - [ ] 25.2 Apply v2 `stable` (HCP `tks-stable`) with the epic's sizes: control planes at VMIDs 4011–4013, workers at 4021–4023.
   - [ ] 25.3 Confirm all nodes are Ready, then hand over to TJ for the workload restore.
 - Done when: TJ confirms the workloads are back.
 
@@ -461,7 +463,7 @@ Branch `feat/gpu-worker`, titled `feat: add the optional GPU worker pool`, plus 
 - Subtasks:
   - [ ] 31.1 Add `k8s-node-gpu-1` (.31 / 4031, 16 cores, 192 GB) to `stable.tfvars` and apply.
   - [ ] 31.2 Repeat T28.2 on `stable`, and run one Proxmox stop/start cycle.
-  - [ ] 31.3 Confirm the host's committed memory matches the PRD's 296 GB budget.
+  - [ ] 31.3 Confirm the host's committed memory matches the epic's 296 GB budget.
 - Done when: `stable` has a Ready GPU node with its taint and label.
 
 ## Phase 4: AI workloads
@@ -469,7 +471,7 @@ Branch `feat/gpu-worker`, titled `feat: add the optional GPU worker pool`, plus 
 ### T32. Plan the AI workloads in Kubernetes-Manifests
 - Repo: Kubernetes-Manifests
 - Depends on: T31
-- Context: out of scope for this PRD. This is the placeholder epic for its own planning pass. The intended direction from the TKS interview: llama-swap in front of llama.cpp (Vulkan first, ROCm benchmarked), one inference server owning the GPU, and an OpenAI-compatible endpoint for LAN and cluster clients.
+- Context: out of scope for the TKS epic. This is the placeholder epic for its own planning pass. The intended direction from the TKS interview: llama-swap in front of llama.cpp (Vulkan first, ROCm benchmarked), one inference server owning the GPU, and an OpenAI-compatible endpoint for LAN and cluster clients.
 - Subtasks:
   - [ ] 32.1 Hold a planning interview and write a PRD in Kubernetes-Manifests.
   - [ ] 32.2 Choose between the AMD GPU Operator (inbox driver, `driver.enable=false`) and the standalone ROCm device plugin on Talos. Either DaemonSet needs an explicit toleration for the GPU taint.

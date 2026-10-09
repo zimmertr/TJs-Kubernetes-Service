@@ -6,7 +6,7 @@ This file guides Claude Code (claude.ai/code) when it works in this repository.
 
 TJ's Kubernetes Service (TKS) builds Talos Linux Kubernetes clusters on Proxmox VE with Terraform, using the `bpg/proxmox` and `siderolabs/talos` providers. It is open source and has users other than TJ. One Terraform root builds one cluster per workspace (TJ runs `stable` and `test` on the host `earth`). An optional `gpu_worker` module adds a Talos worker with a host GPU passed through. An optional `bootstrap/` root creates the Proxmox user Terraform runs as.
 
-v2 is under construction. [`docs/PRD.md`](docs/PRD.md) states what v2 is, and [`docs/PLAN.md`](docs/PLAN.md) lists the numbered tasks (`T1`–`T32`), each of which is a GitHub issue titled `[T<id>] …` on the "TKS v2 + GPU" Project. Work one task at a time, tick its checklist in the issue as subtasks land, and keep `PLAN.md` in step when a task's scope changes.
+v2 is under construction. The pinned issue `[Epic] TKS v2 and the GPU worker` holds the PRD: a snapshot of intent at sign-off, not maintained afterwards. Its sub-issues `[T1]`–`[T32]` are the plan, tracked on the "TKS v2 + GPU" Project with "blocked by" relationships. The issues are the only living plan, so no plan or PRD files are committed. Work one task at a time, tick its checklist as subtasks land, and edit the issue when a task's scope changes.
 
 ## Documentation
 
@@ -20,9 +20,8 @@ The README is an index: summary, requirements, quick start and a docs table. Pro
 | [`docs/CICD.md`](docs/CICD.md) | Checks, releases, Renovate and required checks |
 | [`docs/SECURITY_GUIDE.md`](docs/SECURITY_GUIDE.md) | Token privileges, secrets in state, scanning. The root `SECURITY.md` is only the vulnerability-reporting policy |
 | [`docs/decisions/`](docs/decisions/README.md) | One record per design decision. The README is the index |
-| [`docs/PRD.md`](docs/PRD.md), [`docs/PLAN.md`](docs/PLAN.md) | The v2 and GPU requirements, and the task plan |
 
-The first five pages are created by task T10. Until then, only the decisions, PRD and plan exist.
+The first five pages are created by task T10. Until then, only the decision records exist.
 
 - **Docs describe TKS for its users.** Never commit the maintainer's own runbooks, one-off host commands or throwaway scripts. A host prerequisite is a row in the README's Requirements table, not a set of commands. The planning docs and decision records are exempt: they are history, and they keep dated facts about TJ's environment.
 - **A doc change ships in the PR that causes it.** Nothing enforces this, so check the affected page before you open the PR.

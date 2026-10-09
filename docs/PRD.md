@@ -3,7 +3,8 @@
 - Status: Draft for review
 - Date: 2026-10-09
 - Owner: TJ
-- Task plan: [`PLAN.md`](PLAN.md)
+- Task plan: the `[T<id>]` sub-issues of this epic
+- This is a review copy. It is not committed to `main`. At T3 it becomes the body of the pinned epic issue, a snapshot of intent at sign-off that isn't maintained. The decision records in `docs/decisions/` are the durable part.
 - Decisions: [`decisions/`](decisions/README.md)
 
 ## 1. Project overview
@@ -151,7 +152,7 @@ Measured on 2026-10-09.
 
 ## 7. Implementation plan
 
-The detailed, dependency-linked task list is [`PLAN.md`](PLAN.md). In summary:
+The detailed, dependency-linked tasks are this epic's sub-issues. In summary:
 
 | Phase | Lands as | Outcome |
 |---|---|---|

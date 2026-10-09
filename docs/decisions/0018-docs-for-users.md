@@ -27,4 +27,5 @@ None measured.
 ## Consequences
 
 - When something can only be explained with maintainer-specific commands, it belongs outside the repository.
-- Exempt: decision records and the planning docs (`docs/PRD.md`, `docs/PLAN.md`, `docs/decisions/`). They are history and evidence, so they keep dated facts about the maintainer's environment. The user-facing pages never depend on them.
+- Plans and PRDs are not committed. They live in GitHub issues (an epic plus task sub-issues), where they can close instead of rotting.
+- Exempt: decision records (`docs/decisions/`). They are history and evidence, so they keep dated facts about the maintainer's environment. The user-facing pages never depend on them.
