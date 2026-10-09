@@ -9,7 +9,7 @@
   * [Upgrading the Cluster](#upgrading-the-cluster)
   * [Installing Other Apps](#installing-other-apps)
 * [Troubleshooting](#troubleshooting)
-  * [Terraform is Stuck Destroying the Cluster](#terraform-is-stuck-destroying-the-cluster)
+  * [Terraform Fails to Destroy the Cluster](#terraform-fails-to-destroy-the-cluster)
 * [Documentation](#documentation)
 
 
@@ -154,9 +154,9 @@ You can find my personal collection of manifests [here](https://github.com/zimme
 
 ## Troubleshooting
 
-### Terraform is Stuck Destroying the Cluster
+### Terraform Fails to Destroy the Cluster
 
-Each node is reset before it's deleted so that it leaves the cluster. When you destroy the whole cluster, the last control plane can't leave etcd and Terraform may wait on it. Set `reset_on_destroy = false` in your `cluster` variable, apply, and then run `terraform destroy` as usual.
+Each node is reset before it's deleted so that it leaves the cluster. When you destroy the whole cluster, the last controlplane has no one left to hand etcd to and the reset fails with `not enough started members`. Before you destroy a cluster, set `reset_on_destroy = false` in your `cluster` variable and apply it. Then run `terraform destroy` as usual.
 
 <hr>
 

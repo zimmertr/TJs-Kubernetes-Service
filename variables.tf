@@ -36,14 +36,15 @@ variable "cluster" {
     # nodes in place.
     talos_version = optional(string, "v1.14.2")
     # The provider's config-generation contract, pinned when the cluster is
-    # created. Lowering it regenerates the cluster's PKI, so it only ever
-    # moves forward, deliberately.
+    # created. Raising it later changes the generated machine config, not the
+    # cluster's secrets.
     talos_config_version = string
     kubernetes_version   = optional(string, "v1.37.1")
     disable_flannel      = optional(bool, false)
     expose_metrics       = optional(bool, false)
-    # Nodes leave etcd and wipe themselves when removed. Turn off before
-    # destroying a whole cluster if the last control plane refuses to leave.
+    # Nodes leave etcd and wipe themselves when removed. Turn off and apply
+    # before destroying a whole cluster: the last control plane can't leave
+    # etcd, so its reset fails.
     reset_on_destroy = optional(bool, true)
   })
   description = "Cluster identity, versions and feature switches"

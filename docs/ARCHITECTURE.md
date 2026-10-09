@@ -28,7 +28,7 @@ Nothing in an upgrade replaces a VM. The VM reads its image only when it is crea
 - **Talos.** A new `talos_version` downloads a new image and changes the installer image. `talos_machine` drains each node and upgrades it in place. Applies run with `-parallelism=1`, so nodes upgrade one at a time, control planes first.
 - **Kubernetes.** A new `kubernetes_version` makes `talos_cluster` run Talos's `upgrade-k8s`, which checks the cluster's health as it goes.
 
-`talos_config_version` is different from `talos_version`. It fixes the shape of the generated configuration and is set once when the cluster is created. Changing it later would regenerate the cluster's certificates, so Terraform refuses to replace the machine secrets.
+`talos_config_version` is different from `talos_version`. It fixes the shape of the generated configuration and is set once when the cluster is created. The machine secrets keep the version they were created with, because replacing them would regenerate the cluster's certificates.
 
 ## Removing a node
 

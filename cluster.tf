@@ -6,11 +6,11 @@ resource "proxmox_virtual_environment_pool" "this" {
 resource "talos_machine_secrets" "this" {
   talos_version = var.cluster.talos_config_version
 
-  # Replacing these regenerates every certificate in the cluster, which
-  # strands the running nodes. Lowering talos_config_version is one way to
-  # trigger it, so refuse rather than plan it.
+  # Lowering talos_version replaces the secrets, which regenerates every
+  # certificate and strands the running nodes. The secrets only need it at
+  # creation, so later changes to talos_config_version are ignored here.
   lifecycle {
-    prevent_destroy = true
+    ignore_changes = [talos_version]
   }
 }
 

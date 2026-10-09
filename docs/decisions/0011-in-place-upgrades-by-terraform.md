@@ -1,6 +1,6 @@
 # 0011. Version bumps upgrade nodes in place through `talos_machine` and `talos_cluster`, and never replace VMs
 
-- Status: Accepted
+- Status: Accepted. The guard on the machine secrets is amended by 0022
 - Date: 2026-10-09
 - Decider: TJ (planning interview)
 - Issues and PRs: the v2 planning PR
@@ -17,7 +17,7 @@ In v1, a VM's disk is cloned from the image of the current `talos_version`, so c
 - There are two Talos versions:
   - `talos_version` is the installed OS. Renovate bumps it, and it drives the installer image.
   - `talos_config_version` is the provider's config-generation contract. It is pinned when a cluster is created and changed only deliberately.
-- `talos_machine_secrets` has `prevent_destroy`.
+- `talos_machine_secrets` has `prevent_destroy`. (Replaced by `ignore_changes`, see 0022.)
 - Applies run one node at a time (`TF_CLI_ARGS_apply="-parallelism=1"` in `config.env`), so a rolling upgrade never takes down more than one node.
 - VM disks import the image once. A changed image never replaces a VM.
 - `bin/` is removed. Its upgrade, remove and reboot helpers are now provider features or unnecessary.
