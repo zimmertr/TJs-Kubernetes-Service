@@ -10,7 +10,7 @@ v2 is under construction. The pinned issue `[Epic] TKS v2 and the GPU worker` ho
 
 ## Documentation
 
-**The README is TJ's.** It keeps his voice, structure and formatting (linked table of contents, `<hr>` between sections, padded tables, first-person instructions) and stays the main user guide. Edit it only where the code requires it (instructions, requirements, examples, links to `docs/`), and write each change to match the text around it. Never restructure it, rewrite it, or add generated-looking sections such as badges, banners or "under development" notices. Record: [0020](docs/decisions/0020-readme-is-tjs.md)
+**The README is TJ's, and you keep it current.** Every change to the codebase updates the README in the same PR: instructions, requirements, examples, troubleshooting and links to `docs/`. Write each edit in TJ's voice and style (plain first-person prose, the linked table of contents, `<hr>` between sections, padded tables) so it reads as if he wrote it. Never overhaul or restructure it, and never add AI-flavoured prose, badges, banners or "under development" notices. Record: [0020](docs/decisions/0020-readme-is-tjs.md)
 
 `docs/` holds the reference pages the README links to:
 

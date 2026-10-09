@@ -12,7 +12,7 @@
 ## Decision
 
 - The README keeps TJ's structure, voice and formatting: the linked table of contents, `<hr>` between sections, padded tables, and first-person instructions. It stays the main user guide (requirements, instructions, post-install, scaling, troubleshooting).
-- Changes to the README are limited to what the code requires: updating instructions, requirements and examples, and linking to `docs/`. Each change is written to match the surrounding text, never as a rewrite or a new structure.
+- The README is kept current: every change to the codebase updates it in the same PR (instructions, requirements, examples, links to `docs/`). Each edit is written in TJ's voice and style to match the surrounding text, never as a rewrite, a new structure or generic AI prose.
 - `docs/` holds reference pages the README links to: `CONFIGURATION.md` (generated), `ARCHITECTURE.md`, `SECURITY_GUIDE.md`, `CICD.md` and `decisions/`. They don't restate the README's instructions.
 - Docs describe TKS for its users. Maintainer runbooks and one-off host commands stay out. Plans and PRDs live in GitHub issues, not files. Decision records are exempt, and keep dated facts about TJ's environment.
 - Docs don't announce work in progress. The README and the docs describe the code on `main`.
