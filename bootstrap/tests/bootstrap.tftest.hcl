@@ -1,8 +1,9 @@
 mock_provider "proxmox" {
   mock_resource "proxmox_user_token" {
     defaults = {
-      id    = "tks@pve!terraform"
-      value = "00000000-0000-0000-0000-000000000000"
+      id = "tks@pve!terraform"
+      # What the provider really returns, checked against a live token on 2026-10-09.
+      value = "tks@pve!terraform=00000000-0000-0000-0000-000000000000"
     }
   }
 }

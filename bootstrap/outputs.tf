@@ -1,5 +1,6 @@
 output "api_token" {
-  value       = "${proxmox_user_token.tks.id}=${proxmox_user_token.tks.value}"
+  # The provider's value is already the full <id>=<secret> form.
+  value       = proxmox_user_token.tks.value
   sensitive   = true
   description = "PROXMOX_VE_API_TOKEN for vars/config.env"
 }
