@@ -36,14 +36,21 @@ TJ's Kubernetes Service, or *TKS*, is an IaC project that is used to deliver Kub
 
 ## Instructions
 
-1. Create an API token on Proxmox. I use the [bootstrap](bootstrap) Terraform root in this repo to create mine. It needs root credentials once and outputs a token with only the privileges TKS needs. See the [Security](docs/SECURITY_GUIDE.md#the-proxmox-user) docs for the list.
+1. Create an API token on Proxmox. I use the [bootstrap](bootstrap) Terraform root in this repo to create mine. It creates a `tks@pve` user and outputs a token with only the privileges TKS needs. See the [Security](docs/SECURITY_GUIDE.md#the-proxmox-user) docs for the list. It needs root credentials to do that, so use a fresh shell and export them just for this step:
 
    ```bash
    cd bootstrap
+   export PROXMOX_VE_ENDPOINT="https://earth.sol.milkyway:8006"
+   export PROXMOX_VE_INSECURE="true"
+   export PROXMOX_VE_USERNAME="root@pam"
+   export PROXMOX_VE_PASSWORD="REPLACEME"
+
    terraform init
    terraform apply
    terraform output -raw api_token
    ```
+
+   Put the token in `vars/config.env` in the next step, then close that shell so the root password doesn't stick around.
 
 2. Set the environment variables required to authenticate to your Proxmox server according to the provider [docs](https://registry.terraform.io/providers/bpg/proxmox/latest/docs#authentication).  I personally use an API Token and define them in `vars/config.env`. Source them into your shell. Use [`vars/config.env.example`](vars/config.env.example) as a starting point. It also makes Terraform upgrade one node at a time, without it all of the nodes upgrade at once.
 

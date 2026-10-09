@@ -4,7 +4,7 @@ Every pull request is checked, every merge to `main` is released, and Renovate k
 
 ## Checks
 
-`.github/workflows/pr.yml` runs on every pull request and on every push to `main`. Each job is one Make target, so any failure reproduces locally with the same command. Each target runs its tool from a pinned container image, so local and CI versions match.
+`.github/workflows/pr.yml` runs on every pull request and on every push to `main`. Each job is one Make target, so any failure reproduces locally with the same command. Each target runs its tool from a pinned container image, so local and CI versions match. Docker Hub images are pulled through `mirror.gcr.io`, because GitHub's shared runners often hit Docker Hub's anonymous pull limit.
 
 | Job | Make target | What it does |
 | --- | --- | --- |
