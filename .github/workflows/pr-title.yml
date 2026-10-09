@@ -1,0 +1,35 @@
+name: pr-title
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+
+permissions:
+  contents: read
+
+jobs:
+  title:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      # The title arrives through env, never interpolated into the script,
+      # because it is attacker-controlled text.
+      - name: Check the title is a conventional commit
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          re='^(feat|fix|perf|refactor|chore|docs|style|test|ci|build)(\([^)]+\))?!?: .+'
+          if [[ ! $TITLE =~ $re ]]; then
+            echo "::error::PR title must be a conventional commit, e.g. 'feat: add X' or 'fix(gpu)!: change Y'. Got: $TITLE"
+            exit 1
+          fi
+      - name: Predict the release
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          version=$(.github/scripts/next-version.sh "$TITLE")
+          echo "Merging this PR releases **$version**." >> "$GITHUB_STEP_SUMMARY"
+          echo "Merging this PR releases $version"

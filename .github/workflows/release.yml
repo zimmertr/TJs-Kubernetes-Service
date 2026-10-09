@@ -1,0 +1,37 @@
+name: release
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - name: Tag and release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          title=$(git log -1 --format=%s)
+          version=$(.github/scripts/next-version.sh "$title")
+          if git rev-parse -q --verify "refs/tags/$version" >/dev/null; then
+            echo "$version already exists; nothing to release."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "$version" -m "$title"
+          git push origin "$version"
+          gh release create "$version" --verify-tag --generate-notes --title "$version"
