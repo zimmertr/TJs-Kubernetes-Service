@@ -26,7 +26,9 @@ TJ's Kubernetes Service, or *TKS*, is an IaC project that is used to deliver Kub
 | Requirement  | Description                                                  |
 | ------------ | ------------------------------------------------------------ |
 | `terraform`  | Used for creating the cluster                                |
-| `kubectl`    | Used for removing nodes from the cluster |
+| `kubectl`    | Used for removing and rebooting nodes |
+| `talosctl`   | Used for rebooting nodes |
+| `jq`         | Used by `manage_nodes` |
 | Proxmox      | You already know                                             |
 | DNS Resolver | Used for DNS resolution within the cluster |
 
@@ -135,10 +137,17 @@ On a running cluster, the scheduler, controller-manager, and API server pick the
 
 The Terraform provider makes it quite easy to scale in, out, up, or down. Simply add, remove, or resize nodes in your tfvars and run `terraform plan` again. If the plan looks good, apply it.
 
-When you remove a node, Talos drains and resets it first so it leaves etcd cleanly, then Terraform deletes the VM. You can remove any node, not just the last one. Kubernetes doesn't clean up the node object on its own, so delete it afterwards:
+When you remove a node, Talos drains and resets it first so it leaves etcd cleanly, then Terraform deletes the VM. You can remove any node, not just the last one. Kubernetes doesn't clean up the node object on its own, so remove it afterwards with [manage_nodes](bin/manage_nodes):
 
 ```bash
-kubectl delete node $NODE
+./bin/manage_nodes remove $NODE
+```
+
+When you change the CPU, memory, or PCI devices of a node, Proxmox needs to restart the VM for it to take effect. Terraform won't do that for you, otherwise it would restart every node at once. Instead, roll through them one at a time with `manage_nodes`. It drains each node, restarts it from Proxmox, and waits for it to come back before moving on. Controlplanes go first. You can also pass specific nodes.
+
+```bash
+./bin/manage_nodes reboot
+./bin/manage_nodes reboot $NODE
 ```
 
 <hr>

@@ -40,7 +40,7 @@ Every design decision gets a record in `docs/decisions/`, written in the same PR
 - **Optional features cost nothing when off.** A disabled feature plans zero resources, and a test proves it.
 - **No hard-coded hardware addresses.** Devices are found through data sources (vendor and class), never by PCI address. Record: [0006](docs/decisions/0006-gpu-found-by-class.md)
 - **A version bump never replaces a VM.** `talos_machine` upgrades the OS in place when the installer image changes, and `talos_cluster` upgrades Kubernetes. `talos_version` (installed OS, Renovate-managed) and `talos_config_version` (config contract, pinned at creation) are different things. Never lower the contract. `talos_machine_secrets` ignores changes to it, because replacing the secrets regenerates the cluster's PKI. Records: [0011](docs/decisions/0011-in-place-upgrades-by-terraform.md), [0022](docs/decisions/0022-secrets-ignore-config-version.md)
-- **No provisioners and no SSH.** Node removal is `talos_machine`'s `on_destroy` reset. Anything that would need SSH or root on the host (snippets, hookscripts) belongs outside TKS.
+- **No provisioners and no SSH.** Node removal is `talos_machine`'s `on_destroy` reset. The only helper is `bin/manage_nodes`, which TJ runs by hand to delete a removed node from Kubernetes and to reboot nodes one at a time after a hardware change. Record: [0023](docs/decisions/0023-manage-nodes-returns.md). Anything that would need SSH or root on the host (snippets, hookscripts) belongs outside TKS.
 - **No backwards-compatibility code.** Use the provider's current resource names, and `proxmox_*` short names where they exist. Record: [0003](docs/decisions/0003-v2-breaking-rebuild.md)
 - **Comments explain why, not what.**
 

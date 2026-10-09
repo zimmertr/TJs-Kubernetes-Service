@@ -15,5 +15,5 @@ output "nodes" {
     { for name, n in module.controlplanes.nodes : name => merge(n, { role = "controlplane" }) },
     { for name, n in module.workers.nodes : name => merge(n, { role = "worker" }) },
   )
-  description = "Every node's IP, VMID and role, keyed by hostname"
+  description = "Every node's IP, VMID, Proxmox node and role, keyed by hostname. bin/manage_nodes reads it"
 }

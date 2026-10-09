@@ -32,4 +32,8 @@ Nothing in an upgrade replaces a VM. The VM reads its image only when it is crea
 
 ## Removing a node
 
-Delete it from the tfvars and apply. `talos_machine` drains and resets the node first, so a control plane leaves etcd, and then the VM is destroyed. Workers are removed before control planes. The Kubernetes Node object stays until it is deleted with `kubectl delete node`, because nothing in the cluster removes Nodes whose VMs are gone.
+Delete it from the tfvars and apply. `talos_machine` drains and resets the node first, so a control plane leaves etcd, and then the VM is destroyed. Workers are removed before control planes. The Kubernetes Node object stays until `bin/manage_nodes remove` deletes it, because nothing in the cluster removes Nodes whose VMs are gone.
+
+## Changing a node's hardware
+
+VMs have `reboot_after_update = false`, so a change to cores, memory or PCI devices waits for a restart. `bin/manage_nodes reboot` drains each node, restarts its VM through the Proxmox API (a reboot from inside Talos keeps the old hardware), waits for it to be Ready (and for etcd, on a control plane), and uncordons it, one node at a time.

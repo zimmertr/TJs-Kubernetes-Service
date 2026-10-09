@@ -21,6 +21,11 @@ resource "proxmox_virtual_environment_vm" "this" {
   # shutdown of a halted VM hangs until the API times out.
   stop_on_destroy = true
 
+  # Proxmox would restart the VM the moment its hardware changes, and Terraform
+  # moves straight on to the next one, so every control plane could restart
+  # at once. bin/manage_nodes reboot applies the change one node at a time.
+  reboot_after_update = false
+
   cpu {
     cores = each.value.cores
     type  = "host"

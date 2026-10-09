@@ -1,6 +1,6 @@
 output "nodes" {
-  value       = { for name, node in var.nodes : name => { ip = node.ip, vm_id = node.vm_id } }
-  description = "Hostname to IP and VMID for every node in the pool"
+  value       = { for name, node in var.nodes : name => { ip = node.ip, vm_id = node.vm_id, proxmox_node = var.proxmox.node_name } }
+  description = "Hostname to IP, VMID and Proxmox node for every node in the pool"
 }
 
 output "machines" {

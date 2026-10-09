@@ -101,6 +101,15 @@ run "disks_get_their_own_iothread" {
   }
 }
 
+run "hardware_changes_wait_for_a_rolling_reboot" {
+  command = plan
+
+  assert {
+    condition     = proxmox_virtual_environment_vm.this["k8s-node-1"].reboot_after_update == false
+    error_message = "Proxmox must not restart every VM at once after a hardware change"
+  }
+}
+
 run "no_pci_devices_by_default" {
   command = plan
 
