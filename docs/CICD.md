@@ -15,7 +15,9 @@ Every pull request is checked, every merge to `main` is released, and Renovate k
 | `test` | `make test` | `terraform test` (with mocked providers) in every directory that has tests |
 | `actionlint` | `make actionlint` | actionlint on the workflows, and shellcheck on `.github/scripts/` |
 
-`make check` runs them all. `make fmt` and `make docs` (which regenerates [`CONFIGURATION.md`](CONFIGURATION.md)) change files rather than check them. The only local requirements are Docker and Make.
+`.github/workflows/compat.yml` runs on every pull request too. It reads the Kubernetes range that each pinned Talos version supports from Talos's source, fails if any Talos and Kubernetes pair in `variables.tf` or `vars/*.tfvars` falls outside it, and comments the table on PRs that change a version.
+
+`make check` runs the Make targets. `make fmt` and `make docs` (which regenerates [`CONFIGURATION.md`](CONFIGURATION.md)) change files rather than check them. The only local requirements are Docker and Make.
 
 ## Pull request titles
 
@@ -35,9 +37,9 @@ Every merge releases, including Renovate's dependency bumps.
 
 ## Dependency updates
 
-Renovate (`.github/renovate.json`) opens PRs for Terraform providers, `required_version`, GitHub Actions (pinned to commit SHAs), and the tool images in the `Makefile` (through their `# renovate:` comments). It keeps a dependency dashboard issue.
+Renovate (`.github/renovate.json`) opens PRs for Terraform providers, `required_version`, GitHub Actions (pinned to commit SHAs), the tool images in the `Makefile` (through their `# renovate:` comments), and `talos_version` and `kubernetes_version` in `variables.tf` and `vars/*.tfvars`. It leaves `talos_config_version` alone, because that is pinned when a cluster is created. It keeps a dependency dashboard issue.
 
-Updates below a major (minor, patch, digest and pin) merge themselves through GitHub auto-merge once the required checks pass. Majors wait for a maintainer.
+Updates below a major (minor, patch, digest and pin) merge themselves through GitHub auto-merge once the required checks pass. Majors and Kubernetes minors wait for a maintainer, since each Talos release supports a limited range of Kubernetes versions.
 
 ## Protecting `main`
 

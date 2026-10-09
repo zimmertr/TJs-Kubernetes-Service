@@ -1,0 +1,12 @@
+# Optional: keep state in HCP Terraform instead of locally. Copy this file to
+# cloud_override.tf (gitignored) and set your organization. Workspaces stay in
+# local execution mode, since HCP's runners can't reach Proxmox.
+terraform {
+  cloud {
+    organization = "REPLACEME"
+
+    workspaces {
+      tags = ["tks-cluster"]
+    }
+  }
+}

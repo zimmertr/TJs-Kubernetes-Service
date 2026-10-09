@@ -1,0 +1,11 @@
+# Control plane nodes only (both documents are control-plane-only kinds).
+# Deleting KubeFlannelCNIConfig is the documented way to disable Flannel in 1.14.
+apiVersion: v1alpha1
+kind: KubeFlannelCNIConfig
+$patch: delete
+---
+# Deleting KubeProxyConfig is NOT enough: Talos then falls back to the v1alpha1
+# cluster.proxy defaults, which keep kube-proxy enabled.
+apiVersion: v1alpha1
+kind: KubeProxyConfig
+enabled: false

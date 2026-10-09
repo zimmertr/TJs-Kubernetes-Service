@@ -11,19 +11,83 @@
   "packageRules": [
     {
       "description": "Everything below a major merges itself once the required checks pass (decision 0012).",
-      "matchUpdateTypes": ["minor", "patch", "digest", "pin", "pinDigest"],
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "digest",
+        "pin",
+        "pinDigest"
+      ],
       "automerge": true,
       "platformAutomerge": true
+    },
+    {
+      "description": "Kubernetes minors wait for review: each Talos minor supports a bounded Kubernetes range (decision 0012). The compat check comments on every version PR.",
+      "matchDepNames": [
+        "kubernetes/kubernetes"
+      ],
+      "matchUpdateTypes": [
+        "minor"
+      ],
+      "automerge": false
     }
   ],
   "customManagers": [
     {
       "description": "Tool versions in the Makefile, each annotated with a `# renovate:` comment.",
       "customType": "regex",
-      "managerFilePatterns": ["/^Makefile$/"],
+      "managerFilePatterns": [
+        "/^Makefile$/"
+      ],
       "matchStrings": [
         "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)( extractVersion=(?<extractVersion>\\S+))?\\n[A-Z_]+ := (?<currentValue>\\S+)"
       ]
+    },
+    {
+      "description": "Talos and Kubernetes version defaults in variables.tf. talos_config_version is deliberately not managed: it is pinned when a cluster is created.",
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^variables\\.tf$/"
+      ],
+      "matchStrings": [
+        "\\btalos_version\\s*=\\s*optional\\(string,\\s*\"(?<currentValue>v[^\"]+)\"\\)"
+      ],
+      "datasourceTemplate": "github-releases",
+      "depNameTemplate": "siderolabs/talos"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^variables\\.tf$/"
+      ],
+      "matchStrings": [
+        "\\bkubernetes_version\\s*=\\s*optional\\(string,\\s*\"(?<currentValue>v[^\"]+)\"\\)"
+      ],
+      "datasourceTemplate": "github-releases",
+      "depNameTemplate": "kubernetes/kubernetes"
+    },
+    {
+      "description": "Talos and Kubernetes versions pinned in tfvars files.",
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^vars/.+\\.tfvars$/"
+      ],
+      "matchStrings": [
+        "\\btalos_version\\s*=\\s*\"(?<currentValue>v[^\"]+)\""
+      ],
+      "datasourceTemplate": "github-releases",
+      "depNameTemplate": "siderolabs/talos"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^vars/.+\\.tfvars$/"
+      ],
+      "matchStrings": [
+        "\\bkubernetes_version\\s*=\\s*\"(?<currentValue>v[^\"]+)\""
+      ],
+      "datasourceTemplate": "github-releases",
+      "depNameTemplate": "kubernetes/kubernetes"
     }
   ]
 }

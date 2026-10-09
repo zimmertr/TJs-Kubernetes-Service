@@ -1,0 +1,44 @@
+name: compat
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+# Runs on every PR so it can be a required check. It comments only when the PR
+# changes a Talos or Kubernetes version, which is mostly Renovate's bumps.
+jobs:
+  talos-kubernetes:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Check every Talos and Kubernetes pair
+        id: check
+        run: |
+          set +e
+          .github/scripts/talos-k8s-compat.sh > report.md
+          echo "status=$?" >> "$GITHUB_OUTPUT"
+          cat report.md >> "$GITHUB_STEP_SUMMARY"
+          cat report.md
+      - name: Comment when this PR changes a version
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BASE: ${{ github.event.pull_request.base.sha }}
+          PR: ${{ github.event.pull_request.number }}
+          STATUS: ${{ steps.check.outputs.status }}
+        run: |
+          if git diff "$BASE"...HEAD -- variables.tf 'vars/*.tfvars' | grep -qE '^[+-].*(talos_version|kubernetes_version)'; then
+            if [ "$STATUS" = "0" ]; then verdict="Every Talos and Kubernetes pair here is supported."; else verdict="**At least one Talos and Kubernetes pair here is not supported. Don't merge.**"; fi
+            printf '### Talos and Kubernetes compatibility\n\n%s\n\n%s\n' "$verdict" "$(cat report.md)" > comment.md
+            gh pr comment "$PR" --body-file comment.md --edit-last --create-if-none
+          fi
+      - name: Fail on an unsupported pair
+        if: steps.check.outputs.status != '0'
+        run: exit 1

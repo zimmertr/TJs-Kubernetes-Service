@@ -1,7 +1,3 @@
-# Both providers read their credentials from the environment (vars/config.env).
-provider "proxmox" {}
-provider "talos" {}
-
 terraform {
   required_version = ">= 1.16"
   required_providers {
