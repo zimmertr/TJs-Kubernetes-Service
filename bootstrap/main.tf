@@ -17,6 +17,7 @@ locals {
   # The subset of bpg's recommended Terraform role that TKS exercises.
   # docs/SECURITY_GUIDE.md explains why each one is needed.
   privileges = [
+    "Datastore.Allocate",
     "Datastore.AllocateSpace",
     "Datastore.AllocateTemplate",
     "Datastore.Audit",

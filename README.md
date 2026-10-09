@@ -50,9 +50,9 @@ TJ's Kubernetes Service, or *TKS*, is an IaC project that is used to deliver Kub
    terraform output -raw api_token
    ```
 
-   Put the token in `vars/config.env` in the next step, then close that shell so the root password doesn't stick around.
+   The output is the whole value for `PROXMOX_VE_API_TOKEN`, ID and all, so paste it as is in the next step. If zsh shows a `%` at the end, that's just zsh telling you there was no newline, so leave it off. Then close that shell so the root password doesn't stick around.
 
-2. Set the environment variables required to authenticate to your Proxmox server according to the provider [docs](https://registry.terraform.io/providers/bpg/proxmox/latest/docs#authentication).  I personally use an API Token and define them in `vars/config.env`. Source them into your shell. Use [`vars/config.env.example`](vars/config.env.example) as a starting point. It also makes Terraform upgrade one node at a time, without it all of the nodes upgrade at once.
+2. Set the environment variables required to authenticate to your Proxmox server according to the provider [docs](https://registry.terraform.io/providers/bpg/proxmox/latest/docs#authentication).  I personally use an API Token and define them in `vars/config.env`. Source them into your shell. Copy [`vars/config.env.example`](vars/config.env.example) to start, even if you have an old `config.env`. It also makes Terraform upgrade one node at a time, without it all of the nodes upgrade at once.
 
    ```bash
    source vars/config.env

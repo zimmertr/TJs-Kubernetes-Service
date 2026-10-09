@@ -18,6 +18,7 @@ Create a dedicated user and token rather than using `root@pam`. The optional `bo
 | --- | --- |
 | `Datastore.AllocateSpace`, `Datastore.Audit` | Create VM, EFI and cloud-init disks |
 | `Datastore.AllocateTemplate`, `Sys.Audit`, `Sys.Modify` | Download the Talos image to a datastore. `Sys.Audit` also lists the host's PCI devices |
+| `Datastore.Allocate` | Delete an old Talos image after an upgrade or a destroy. Proxmox has nothing narrower for deleting a file, and this also lets the token change datastore settings |
 | `Mapping.Audit`, `Mapping.Modify`, `Mapping.Use` | Create a PCI resource mapping for a GPU and attach it to a VM |
 | `Pool.Allocate`, `Pool.Audit` | Create the cluster's resource pool and put VMs in it |
 | `SDN.Audit`, `SDN.Use` | Attach VMs to a bridge or VLAN |

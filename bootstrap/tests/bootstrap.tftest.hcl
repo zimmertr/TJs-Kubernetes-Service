@@ -42,3 +42,12 @@ run "no_vm_monitor_privilege" {
     error_message = "VM.Monitor no longer exists in Proxmox 9"
   }
 }
+
+run "can_delete_old_images" {
+  command = plan
+
+  assert {
+    condition     = contains(proxmox_virtual_environment_role.tks.privileges, "Datastore.Allocate")
+    error_message = "Proxmox requires Datastore.Allocate to delete a downloaded image"
+  }
+}
