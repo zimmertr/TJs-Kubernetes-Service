@@ -52,6 +52,12 @@ TJ's Kubernetes Service, or *TKS*, is an IaC project that is used to deliver Kub
 
    The output is the whole value for `PROXMOX_VE_API_TOKEN`, so paste it as is in the next step. If zsh shows a `%` at the end, that's just zsh telling you there was no newline, so leave it off. Then close that shell so the root password doesn't stick around.
 
+   I keep my Terraform state in [HCP Terraform](https://app.terraform.io). If you want to as well, do this before running `terraform init` above:
+
+   * In your HCP Terraform organization, set the *Default Execution Mode* to *Local* under *Settings > General*. Otherwise HCP tries to run the plan itself and it can't reach Proxmox.
+   * Run `terraform login`.
+   * Copy `bootstrap/cloud_override.tf.example` to `bootstrap/cloud_override.tf` and set your organization. It uses a workspace named `tks-bootstrap`. If you already applied `bootstrap` with local state, `terraform init` will offer to copy it over.
+
 2. Set the environment variables required to authenticate to your Proxmox server according to the provider [docs](https://registry.terraform.io/providers/bpg/proxmox/latest/docs#authentication).  I personally use an API Token and define them in `vars/config.env`. Source them into your shell. Copy [`vars/config.env.example`](vars/config.env.example) to start, even if you have an old `config.env`. It also makes Terraform upgrade one node at a time, without it all of the nodes upgrade at once.
 
    ```bash
@@ -75,11 +81,11 @@ TJ's Kubernetes Service, or *TKS*, is an IaC project that is used to deliver Kub
    | test-k8s-cp-1   | 192.168.40.51 |
    | test-k8s-node-1 | 192.168.40.61 |
 
-5. Initialize Terraform and create a workspace for your Terraform state. Or configure a different backend accordingly. If you want to use HCP Terraform, copy `cloud_override.tf.example` to `cloud_override.tf`.
+5. Initialize Terraform and create a workspace for your Terraform state. Or configure a different backend accordingly. If you're using HCP Terraform, copy `cloud_override.tf.example` to `cloud_override.tf` and set your organization first. The workspace name is used as is in HCP, so I prefix mine with `tks-`. It also gets tagged `tks-cluster` so `terraform workspace list` only shows clusters.
 
    ```bash
    terraform init
-   terraform workspace new test
+   terraform workspace new test   # or tks-test with HCP Terraform
    ```
 
 6. Create the cluster
