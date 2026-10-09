@@ -8,14 +8,14 @@ One Terraform root builds one cluster. Use a workspace (or a separate state) per
 | --- | --- |
 | `cluster.tf` | The Proxmox resource pool, the Talos machine secrets, the `talos_cluster` that bootstraps etcd and upgrades Kubernetes, and the `kubeconfig` and `talosconfig` outputs |
 | `nodes.tf` | The node pools, by calling the modules below. It renders each node's Talos patches from `configs/` |
-| `modules/talos_image` | A Talos Image Factory schematic and its `nocloud` `qcow2` image, downloaded to a Proxmox datastore as `tks-<cluster>-<pool>-<version>.qcow2` |
+| `modules/talos_image` | A Talos Image Factory schematic and its SecureBoot `nocloud` `qcow2` image, downloaded to a Proxmox datastore as `tks-<cluster>-<pool>-<version>.qcow2` |
 | `modules/node` | For each node in a pool: the VM, its Talos machine configuration, and the `talos_machine` that applies and upgrades it |
 | `bootstrap/` | Optional, and a separate root. The Proxmox role, user and API token TKS runs as |
 
 ## How a node comes up
 
 1. Terraform creates the VM with its disk imported from the pool's image. Cloud-init gives it its static IP, gateway and DNS servers.
-2. Talos boots in maintenance mode.
+2. On first boot, the image enrolls Talos's SecureBoot keys, because the VM's UEFI starts with none. Talos then boots in maintenance mode.
 3. `talos_machine` applies the machine configuration to the node's IP. The patches in `configs/` set the installer image, the hostname, and the control planes' shared virtual IP, plus Flannel and metrics settings when they are switched on.
 4. `talos_cluster` bootstraps etcd on the first control plane, and the others join through the virtual IP.
 

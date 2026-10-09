@@ -9,8 +9,10 @@ mock_provider "talos" {
   mock_data "talos_image_factory_urls" {
     defaults = {
       urls = {
-        disk_image = "https://factory.talos.dev/image/abc123/v1.14.2/nocloud-amd64.qcow2"
-        installer  = "factory.talos.dev/nocloud-installer/abc123:v1.14.2"
+        disk_image            = "https://factory.talos.dev/image/abc123/v1.14.2/nocloud-amd64.qcow2"
+        disk_image_secureboot = "https://factory.talos.dev/image/abc123/v1.14.2/nocloud-amd64-secureboot.qcow2"
+        installer             = "factory.talos.dev/nocloud-installer/abc123:v1.14.2"
+        installer_secureboot  = "factory.talos.dev/nocloud-installer-secureboot/abc123:v1.14.2"
       }
     }
   }
@@ -41,6 +43,15 @@ run "imports_an_uncompressed_qcow2" {
   }
 }
 
+run "downloads_the_secureboot_image" {
+  command = apply
+
+  assert {
+    condition     = proxmox_download_file.this.url == "https://factory.talos.dev/image/abc123/v1.14.2/nocloud-amd64-secureboot.qcow2"
+    error_message = "Nodes boot with SecureBoot, so they need the signed image"
+  }
+}
+
 run "file_name_is_unique_per_cluster_and_pool" {
   command = plan
 
@@ -67,7 +78,7 @@ run "outputs_the_installer" {
   command = apply
 
   assert {
-    condition     = output.installer_image == "factory.talos.dev/nocloud-installer/abc123:v1.14.2"
-    error_message = "The installer output must come from the factory URLs"
+    condition     = output.installer_image == "factory.talos.dev/nocloud-installer-secureboot/abc123:v1.14.2"
+    error_message = "Upgrades must use the SecureBoot installer, or nodes stop booting"
   }
 }

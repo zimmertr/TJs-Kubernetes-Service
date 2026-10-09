@@ -9,6 +9,6 @@ output "schematic_id" {
 }
 
 output "installer_image" {
-  value       = data.talos_image_factory_urls.this.urls.installer
+  value       = data.talos_image_factory_urls.this.urls.installer_secureboot
   description = "Installer image for this pool's nodes, used for in-place upgrades"
 }

@@ -38,6 +38,8 @@ resource "proxmox_virtual_environment_vm" "this" {
     floating  = 0
   }
 
+  # SecureBoot needs the 4m variables store. No keys are pre-enrolled, so UEFI
+  # boots in setup mode and the Talos image enrolls its own on first boot.
   efi_disk {
     datastore_id      = var.proxmox.datastore_id
     type              = "4m"

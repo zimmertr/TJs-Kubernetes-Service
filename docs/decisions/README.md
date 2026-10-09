@@ -40,3 +40,4 @@ The new record says `Supersedes NNNN` in its status line. The old record changes
 | [0021](0021-compat-check-reads-talos-support-matrix.md) | The compatibility check reads the Kubernetes range from Talos's source, not from `talosctl gen config` | 2026-10-09 | Accepted |
 | [0022](0022-secrets-ignore-config-version.md) | The machine secrets ignore later `talos_version` changes instead of refusing to be destroyed | 2026-10-09 | Accepted |
 | [0023](0023-manage-nodes-returns.md) | A slimmed-down `bin/manage_nodes` returns for node removal and rolling reboots | 2026-10-09 | Accepted |
+| [0024](0024-secureboot.md) | Every node boots with UEFI SecureBoot | 2026-10-09 | Accepted |

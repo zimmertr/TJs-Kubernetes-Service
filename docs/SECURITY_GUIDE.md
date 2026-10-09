@@ -24,6 +24,10 @@ Create a dedicated user and token rather than using `root@pam`. The optional `bo
 | `VM.Allocate`, `VM.Audit`, `VM.Config.*`, `VM.PowerMgmt` | Create, configure, start, stop and destroy the VMs |
 | `VM.GuestAgent.Audit` | Read the QEMU guest agent's status |
 
+## SecureBoot
+
+Every node boots with UEFI SecureBoot from Talos's signed image. The VM's UEFI starts with no keys, and the image enrolls Sidero Labs' keys on first boot. After that, the firmware only boots Talos images they signed. The kernel runs in lockdown mode. [0024](decisions/0024-secureboot.md)
+
 ## Secrets in Terraform state
 
 State holds everything needed to control the cluster: the Talos machine secrets (the cluster's certificate authorities and keys), the `talosconfig`, an admin `kubeconfig` and, for `bootstrap/`, the API token. Treat state as a secret:
