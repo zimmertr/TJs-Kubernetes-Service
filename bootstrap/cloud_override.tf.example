@@ -1,0 +1,12 @@
+# Optional: keep bootstrap/ state in HCP Terraform. Copy this file to
+# cloud_override.tf (gitignored). The workspace is named exactly, so this root
+# can never select a cluster's workspace.
+terraform {
+  cloud {
+    organization = "REPLACEME"
+
+    workspaces {
+      name = "tks-bootstrap"
+    }
+  }
+}

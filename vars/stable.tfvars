@@ -1,46 +1,55 @@
 # Proxmox #######################
-proxmox_hostname      = "earth.sol.milkyway"
-proxmox_ssh_key_path  = "~/.ssh/sol.milkyway"
-proxmox_resource_pool = "Kubernetes-Stable"
+proxmox = {
+  node_name     = "earth"
+  resource_pool = "Kubernetes-Stable"
+}
 
 
-# Talos #########################
-talos_image_node_name = "earth"
-talos_virtual_ip      = "192.168.40.10"
-talos_expose_metrics  = true
+# Network #######################
+network = {
+  cidr        = "192.168.40.0/24"
+  gateway     = "192.168.40.1"
+  dns_servers = ["192.168.40.1"]
+  vlan_id     = 40
+}
 
 
-# Kubernetes ####################
-kubernetes_cluster_name = "stable"
+# Cluster #######################
+cluster = {
+  name                 = "stable"
+  vip                  = "192.168.40.10"
+  talos_version        = "v1.14.2"
+  talos_config_version = "v1.14.2"
+  kubernetes_version   = "v1.37.1"
+  expose_metrics       = true
+}
 
 
 # Controlplanes #################
-controlplane_vmid_prefix = "402" # 4011-4019
-controlplane_node_name   = "earth"
-
-controlplane_hostname_prefix    = "k8s-cp"
-controlplane_ip_prefix          = "192.168.40.1"     # 11-19
-controlplane_mac_address_prefix = "00:00:00:00:00:1" # 00:11 - 00:19
-controlplane_vlan_id            = "40"
-
-controlplane_tags = [
-  "app-kubernetes",
-  "clusterid-stable",
-  "type-controlplane"
-]
+controlplanes = {
+  defaults = {
+    cores     = 4
+    memory_mb = 8192
+    tags      = ["app-kubernetes", "clusterid-stable", "type-controlplane"]
+  }
+  nodes = {
+    "k8s-cp-1" = { ip = "192.168.40.11", vm_id = 4011 }
+    "k8s-cp-2" = { ip = "192.168.40.12", vm_id = 4012 }
+    "k8s-cp-3" = { ip = "192.168.40.13", vm_id = 4013 }
+  }
+}
 
 
 # Worker Nodes ##################
-workernode_vmid_prefix = "403" # 4021-4029
-workernode_node_name   = "earth"
-
-workernode_hostname_prefix    = "k8s-node"
-workernode_ip_prefix          = "192.168.40.2"     # 21-29
-workernode_mac_address_prefix = "00:00:00:00:00:2" # 00:21 - 00:29
-workernode_vlan_id            = "40"
-
-workernode_tags = [
-  "app-kubernetes",
-  "clusterid-stable",
-  "type-workernode"
-]
+workers = {
+  defaults = {
+    cores     = 6
+    memory_mb = 24576
+    tags      = ["app-kubernetes", "clusterid-stable", "type-workernode"]
+  }
+  nodes = {
+    "k8s-node-1" = { ip = "192.168.40.21", vm_id = 4021 }
+    "k8s-node-2" = { ip = "192.168.40.22", vm_id = 4022 }
+    "k8s-node-3" = { ip = "192.168.40.23", vm_id = 4023 }
+  }
+}

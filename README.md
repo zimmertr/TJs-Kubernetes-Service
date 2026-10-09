@@ -6,9 +6,10 @@
 * [Post Install](#post-install)
   * [Installing A Different CNI](#installing-a-different-cni)
   * [Scaling the Cluster](#scaling-the-cluster)
+  * [Upgrading the Cluster](#upgrading-the-cluster)
   * [Installing Other Apps](#installing-other-apps)
 * [Troubleshooting](#troubleshooting)
-  * [Terraform is Stuck Deleting](#terraform-is-stuck-deleting)
+  * [Terraform Fails to Destroy the Cluster](#terraform-fails-to-destroy-the-cluster)
 * [Documentation](#documentation)
 
 
@@ -25,68 +26,69 @@ TJ's Kubernetes Service, or *TKS*, is an IaC project that is used to deliver Kub
 | Requirement  | Description                                                  |
 | ------------ | ------------------------------------------------------------ |
 | `terraform`  | Used for creating the cluster                                |
-| `kubectl`    | Used for removing nodes from the cluster |
-| `talosctl`   | Used for removing nodes from the cluster |
-| `ssh-agent`  | Used for connecting to the Proxmox server to bootstrap the Talos image |
+| `kubectl`    | Used for removing and rebooting nodes |
+| `talosctl`   | Used for rebooting nodes |
+| `jq`         | Used by `manage_nodes` |
 | Proxmox      | You already know                                             |
-| DNS Resolver | Used for configuring DHCP reservation during cluster creation and DNS resolution within the cluster |
+| DNS Resolver | Used for DNS resolution within the cluster |
 
 <hr>
 
 ## Instructions
 
-1. Configure SSH access with a private key to your Proxmox server. This is needed to provision the installation image and also for [certain API actions](https://registry.terraform.io/providers/bpg/proxmox/latest/docs#api-token-authentication) executed by the Terraform provider.
-
-2. Create an API token on Proxmox. I use my [create_user](https://github.com/zimmertr/Bootstrap-Proxmox/tree/main/roles/create_user) Ansible role to create mine.
-
-3. Add your SSH key to `ssh-agent`:
+1. Create an API token on Proxmox. I use the [bootstrap](bootstrap) Terraform root in this repo to create mine. It creates a `tks@pve` user and outputs a token with only the privileges TKS needs. See the [Security](docs/SECURITY_GUIDE.md#the-proxmox-user) docs for the list. It needs root credentials to do that, so use a fresh shell and export them just for this step:
 
    ```bash
-   eval "$(ssh-agent -s)"
-   ssh-add --apple-use-keychain ~/.ssh/sol.Milkyway
+   cd bootstrap
+   export PROXMOX_VE_ENDPOINT="https://earth.sol.milkyway:8006"
+   export PROXMOX_VE_INSECURE="true"
+   export PROXMOX_VE_USERNAME="root@pam"
+   export PROXMOX_VE_PASSWORD="REPLACEME"
+
+   terraform init
+   terraform apply
+   terraform output -raw api_token
    ```
 
-4. Set the environment variables required to authenticate to your Proxmox server according to the provider [docs](https://registry.terraform.io/providers/bpg/proxmox/latest/docs#authentication).  I personally use an API Token and define them in `vars/config.env`. Source them into your shell.
+   The output is the whole value for `PROXMOX_VE_API_TOKEN`, so paste it as is in the next step. If zsh shows a `%` at the end, that's just zsh telling you there was no newline, so leave it off. Then close that shell so the root password doesn't stick around.
+
+2. Set the environment variables required to authenticate to your Proxmox server according to the provider [docs](https://registry.terraform.io/providers/bpg/proxmox/latest/docs#authentication).  I personally use an API Token and define them in `vars/config.env`. Source them into your shell. Copy [`vars/config.env.example`](vars/config.env.example) to start, even if you have an old `config.env`. It also makes Terraform upgrade one node at a time, without it all of the nodes upgrade at once.
 
    ```bash
    source vars/config.env
    ```
 
-5. Review `variables.tf` and set any overrides according to your environment in a new [tfvars](https://developer.hashicorp.com/terraform/language/values/variables#variable-definitions-tfvars-files) file.
+3. Review `variables.tf` and set any overrides according to your environment in a new [tfvars](https://developer.hashicorp.com/terraform/language/values/variables#variable-definitions-tfvars-files) file. Nodes are a map keyed by hostname, each with a static IP and VMID. [`vars/test.tfvars`](vars/test.tfvars) is a good example. Set `talos_config_version` to the same version as `talos_version` and then leave it alone.
 
-6. Create DNS records and DHCP reservations for your nodes according to your configured Hostname, MAC address, and IP Address prefixes. Here is how mine is configured for two clusters:
+4. Create DNS records for your nodes. IPs are assigned statically, so there's no need for DHCP reservations anymore. Here is how mine is configured for two clusters:
 
-   | Hostname        | MAC Address       | IP Address    |
-   | --------------- | ----------------- | ------------- |
-   | k8s-vip         | N/A               | 192.168.40.10 |
-   | k8s-cp-1        | 00:00:00:00:00:11 | 192.168.40.11 |
-   | k8s-cp-2        | 00:00:00:00:00:12 | 192.168.40.12 |
-   | k8s-cp-3        | 00:00:00:00:00:13 | 192.168.40.13 |
-   | k8s-node-1      | 00:00:00:00:00:21 | 192.168.40.21 |
-   | k8s-node-2      | 00:00:00:00:00:22 | 192.168.40.22 |
-   | k8s-node-3      | 00:00:00:00:00:23 | 192.168.40.23 |
-   | test-k8s-vip    | N/A               | 192.168.40.50 |
-   | test-k8s-cp-1   | 00:00:00:00:00:51 | 192.168.40.51 |
-   | test-k8s-cp-2   | 00:00:00:00:00:52 | 192.168.40.52 |
-   | test-k8s-cp-3   | 00:00:00:00:00:53 | 192.168.40.53 |
-   | test-k8s-node-1 | 00:00:00:00:00:61 | 192.168.40.61 |
-   | test-k8s-node-2 | 00:00:00:00:00:62 | 192.168.40.62 |
-   | test-k8s-node-3 | 00:00:00:00:00:63 | 192.168.40.63 |
+   | Hostname        | IP Address    |
+   | --------------- | ------------- |
+   | k8s-vip         | 192.168.40.10 |
+   | k8s-cp-1        | 192.168.40.11 |
+   | k8s-cp-2        | 192.168.40.12 |
+   | k8s-cp-3        | 192.168.40.13 |
+   | k8s-node-1      | 192.168.40.21 |
+   | k8s-node-2      | 192.168.40.22 |
+   | k8s-node-3      | 192.168.40.23 |
+   | test-k8s-vip    | 192.168.40.50 |
+   | test-k8s-cp-1   | 192.168.40.51 |
+   | test-k8s-node-1 | 192.168.40.61 |
 
-7. Initialize Terraform and create a workspace for your Terraform state. Or configure a different backend accordingly.
+5. Initialize Terraform and create a workspace for your Terraform state. Or configure a different backend accordingly. If you want to use HCP Terraform, copy `cloud_override.tf.example` to `cloud_override.tf`.
 
    ```bash
    terraform init
    terraform workspace new test
    ```
 
-8. Create the cluster
+6. Create the cluster
 
    ```bash
    terraform apply --var-file="vars/test.tfvars"
    ```
 
-9. Retrieve the Kubernetes and Talos configuration files. Be sure not to overwrite any existing configs you wish to preserve. I use [kubecm](https://github.com/sunny0826/kubecm) to add/merge configs and [kubectx](https://github.com/ahmetb/kubectx) to change contexts.
+7. Retrieve the Kubernetes and Talos configuration files. Be sure not to overwrite any existing configs you wish to preserve. I use [kubecm](https://github.com/sunny0826/kubecm) to add/merge configs and [kubectx](https://github.com/ahmetb/kubectx) to change contexts.
 
    ```bash
    mkdir -p ~/.{kube,talos}
@@ -99,22 +101,22 @@ TJ's Kubernetes Service, or *TKS*, is an IaC project that is used to deliver Kub
    kubectx admin@test
    ```
 
-10. Confirm Kubernetes is bootstrapped and that all of the nodes have joined the cluster. The Controlplane nodes might take a moment to respond. You can confirm the status of each Talos node using `talosctl` or by reviewing the VM consoles in Proxmox.
+8. Confirm Kubernetes is bootstrapped and that all of the nodes have joined the cluster. The Controlplane nodes might take a moment to respond. You can confirm the status of each Talos node using `talosctl` or by reviewing the VM consoles in Proxmox.
 
-    ```bash
-    watch kubectl get nodes,all -A
-    ```
+   ```bash
+   watch kubectl get nodes,all -A
+   ```
 
-11. Kubernetes will only automatically approve certificate signing requests (CSRs) if your nodes use a standard FQDN that matches the cluster’s expected domain. If your nodes have custom or non-standard hostnames, you may need to manually review and approve CSRs to complete cluster bootstrapping:
+9. Kubernetes will only automatically approve certificate signing requests (CSRs) if your nodes use a standard FQDN that matches the cluster’s expected domain. If your nodes have custom or non-standard hostnames, you may need to manually review and approve CSRs to complete cluster bootstrapping:
 
-    ```bash
-    # Review pending CSRs to validate they are as expected
-    kubectl get csr
-    kubectl describe csr csr-foobar
+   ```bash
+   # Review pending CSRs to validate they are as expected
+   kubectl get csr
+   kubectl describe csr csr-foobar
 
-    # Approve all pending CSRs
-    kubectl get csr -o name | xargs kubectl certificate approve
-    ```
+   # Approve all pending CSRs
+   kubectl get csr -o name | xargs kubectl certificate approve
+   ```
 
 <hr>
 
@@ -122,7 +124,7 @@ TJ's Kubernetes Service, or *TKS*, is an IaC project that is used to deliver Kub
 
 ## Installing A Different CNI
 
-By default, Talos uses Flannel. To use a different CNI make sure that `var.talos_disable_flannel` is set to `true` during provisioning. The cluster will not be functional and you will not be able to _upgrade_ the nodes until a CNI is enabled. Cilium can be installed using my project found [here](https://github.com/zimmertr/Kubernetes-Manifests/tree/main/cilium). You will also likely want to install Kubelet CSR Approver to automatically accept the required certificate signing requests. Alternatively, after installing you can accept them manually:
+By default, Talos uses Flannel. To use a different CNI make sure that `cluster.disable_flannel` is set to `true` during provisioning. The cluster will not be functional and you will not be able to _upgrade_ the nodes until a CNI is enabled. Cilium can be installed using my project found [here](https://github.com/zimmertr/Kubernetes-Manifests/tree/main/cilium). You will also likely want to install Kubelet CSR Approver to automatically accept the required certificate signing requests. Alternatively, after installing you can accept them manually:
 
 ```bash
 kubectl get csr
@@ -131,7 +133,7 @@ kubectl certificate approve $CSR
 
 ## Exposing Control Plane Metrics
 
-By default, Talos binds the metrics endpoints for etcd, the scheduler, the controller-manager, and kube-proxy to localhost, so a monitoring stack like [kube-prometheus-stack](https://github.com/zimmertr/Kubernetes-Manifests/tree/main/observability) cannot scrape them. Set `var.talos_expose_metrics` to `true` to bind them to the node addresses instead. The scheduler and controller-manager still authenticate scrapes with TLS and RBAC; etcd's metrics listener (`2381`) and kube-proxy's (`10249`) are plain HTTP, readable by anything that can reach the node network, which is why this is opt-in.
+By default, Talos binds the metrics endpoints for etcd, the scheduler, the controller-manager, and kube-proxy to localhost, so a monitoring stack like [kube-prometheus-stack](https://github.com/zimmertr/Kubernetes-Manifests/tree/main/observability) cannot scrape them. Set `cluster.expose_metrics` to `true` to bind them to the node addresses instead. The scheduler and controller-manager still authenticate scrapes with TLS and RBAC; etcd's metrics listener (`2381`) and kube-proxy's (`10249`) are plain HTTP, readable by anything that can reach the node network, which is why this is opt-in.
 
 On a running cluster, the scheduler, controller-manager, and API server pick the change up on their own when the configuration is applied. etcd does not: Talos refuses API-driven etcd restarts, so reboot each control plane node one at a time with `talosctl -n $NODE reboot`, verifying `talosctl etcd status` between nodes. kube-proxy is a bootstrap manifest and only re-renders on `talosctl upgrade-k8s --to $CURRENT_VERSION`.
 
@@ -140,18 +142,28 @@ On a running cluster, the scheduler, controller-manager, and API server pick the
 
 ## Scaling the Cluster
 
-The Terraform provider makes it quite easy to scale in, out, up, or down. Simply adjust the variables for resources or desired number of nodes and run `terraform plan` again. If the plan looks good, apply it.
+The Terraform provider makes it quite easy to scale in, out, up, or down. Simply add, remove, or resize nodes in your tfvars and run `terraform plan` again. If the plan looks good, apply it.
 
-In the event you scale down a node, terraform will execute a local-provisioner that runs [manage_nodes](https://github.com/zimmertr/TJs-Kubernetes-Service/blob/main/bin/manage_nodes#L25) to remove the node from the cluster for you as well:
+When you remove a node, Talos drains and resets it first so it leaves etcd cleanly, then Terraform deletes the VM. You can remove any node, not just the last one. Kubernetes doesn't clean up the node object on its own, so remove it afterwards with [manage_nodes](bin/manage_nodes):
 
 ```bash
 ./bin/manage_nodes remove $NODE
 ```
 
-Considerations:
+When you change the CPU, memory, or PCI devices of a node, Proxmox needs to restart the VM for it to take effect. Terraform won't do that for you, otherwise it would restart every node at once. Instead, roll through them one at a time with `manage_nodes`. It drains each node, restarts it from Proxmox, and waits for it to come back before moving on. Controlplanes go first. You can also pass specific nodes.
 
-* At this time I don't think it's possible to choose a specific node to remove. You must scale up and down the last node.
-* Due to the way I configure IP Addressing using DHCP reservations, there is a limit of both 9 controlplanes and 9 workernodes.
+```bash
+./bin/manage_nodes reboot
+./bin/manage_nodes reboot $NODE
+```
+
+<hr>
+
+## Upgrading the Cluster
+
+Bump `talos_version` or `kubernetes_version` in your tfvars and apply. Nodes are upgraded in place, one at a time, control planes first. Talos nodes are drained before they're upgraded and Kubernetes upgrades are health checked as they go. Renovate opens PRs for new versions in this repo and checks that the Talos and Kubernetes versions are compatible.
+
+Don't change `talos_config_version`. It's fixed when the cluster is created.
 
 <hr>
 
@@ -163,13 +175,9 @@ You can find my personal collection of manifests [here](https://github.com/zimme
 
 ## Troubleshooting
 
-### Terraform is Stuck Deleting
+### Terraform Fails to Destroy the Cluster
 
-If QEMU Guest Agent is not functional correctly, Proxmox may hang when trying to issue a shutdown to the VMs. This can lead to Terraform trying to destroy nodes unsuccessfully until the API times out the command. In the event this occurs, you can work connect to Proxmox manually and remove the VMs, then proceed with `terraform destroy` as usual. For example:
-
-```bash
-ssh -i ~/.ssh/sol.milkyway root@earth.sol.milkyway "rm /var/lock/qemu-server/lock-*; qm list | grep 40 | awk '{print \$1}' | xargs -L1 qm stop && sleep 5 && qm list | grep 40 | awk '{print \$1}' | xargs -L1 qm destroy"
-```
+Each node is reset before it's deleted so that it leaves the cluster. When you destroy the whole cluster, the last controlplane has no one left to hand etcd to and the reset fails with `not enough started members`. Before you destroy a cluster, set `reset_on_destroy = false` in your `cluster` variable and apply it. Then run `terraform destroy` as usual.
 
 <hr>
 

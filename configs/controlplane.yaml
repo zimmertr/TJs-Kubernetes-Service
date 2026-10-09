@@ -1,0 +1,22 @@
+# Control plane nodes only.
+apiVersion: v1alpha1
+kind: KubeTalosAPIAccessConfig
+allowedRoles:
+  - os:operator
+allowedKubernetesNamespaces:
+  - talos-system
+---
+# Only the VIP is configured: the node address comes from cloud-init
+# network-config (nocloud), so no DHCPv4Config/LinkConfig is added here.
+apiVersion: v1alpha1
+kind: Layer2VIPConfig
+name: ${talos_virtual_ip}
+link: eth0
+---
+# Talos merges enable-admission-plugins additively with its own default
+# (NodeRestriction), so this does not replace it. PodSecurity is on by default in
+# kube-apiserver and keeps its KubeAdmissionControlConfig document.
+apiVersion: v1alpha1
+kind: KubeAPIServerConfig
+extraArgs:
+  enable-admission-plugins: ExtendedResourceToleration

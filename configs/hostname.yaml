@@ -1,0 +1,12 @@
+# The generated config carries `HostnameConfig` with `auto: stable`, and `auto`
+# conflicts with `hostname`. A strategic merge cannot unset `auto` (null is
+# ignored), so the generated document is deleted and a new one added. The
+# delete must come before the new document. Keep both in this one patch: a
+# HostnameConfig delete in any later config_patches entry would remove ours too.
+apiVersion: v1alpha1
+kind: HostnameConfig
+$patch: delete
+---
+apiVersion: v1alpha1
+kind: HostnameConfig
+hostname: ${hostname}

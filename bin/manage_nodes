@@ -1,54 +1,80 @@
 #!/bin/bash
+# Covers the two node chores Terraform can't do safely itself: deleting a
+# removed node from Kubernetes, and restarting nodes one at a time so hardware
+# changes (cores, memory, PCI devices) take effect. Run it from the repo root,
+# in the workspace of the cluster, after `source vars/config.env`.
+set -euo pipefail
 
-# "System extensions are only activated during the installation or upgrade of Talos Linux.
-# With system extensions installed, the Talos root filesystem is still immutable and read-only."
-# https://www.talos.dev/v1.5/talos-guides/configuration/system-extensions/
-upgrade_node(){
-  for node in $(echo $1 | sed "s/,/ /g"); do
-
-    until kubectl get node $node --kubeconfig $tmp_dir/kubeconfig > /dev/null 2>&1 ; do
-      echo "Waiting for node..."
-      sleep 5
-    done
-
-    talosctl upgrade \
-      --nodes $node \
-      --preserve=true \
-      --wait
-
-    sleep 30
-  done
+usage(){
+  echo "Usage: $0 remove NODE"
+  echo "       $0 reboot [NODE...]   (every node, control planes first, if none are given)"
+  exit 1
 }
 
-# Ensure that a node is also removed from the cluster when Terraform destroys it.
-# https://www.talos.dev/v1.5/talos-guides/howto/scaling-down/
+# Talos's reset leaves etcd, but nothing in the cluster deletes the Node
+# object of a VM that no longer exists.
 remove_node(){
-  talosctl reset --nodes $1
-  talosctl shutdown --nodes $1
-  kubectl delete node $1
+  kubectl delete node "$1"
+}
+
+# A reboot from inside Talos keeps the same QEMU process, so pending hardware
+# changes only apply when Proxmox restarts the VM.
+reboot_node(){
+  local node=$1 ip vm_id pve upid
+  ip=$(jq -r --arg n "$node" '.[$n].ip' <<< "$nodes")
+  vm_id=$(jq -r --arg n "$node" '.[$n].vm_id' <<< "$nodes")
+  pve=$(jq -r --arg n "$node" '.[$n].proxmox_node' <<< "$nodes")
+  [ "$vm_id" != "null" ] || { echo "$node is not in this cluster"; exit 1; }
+
+  echo "==> $node"
+  kubectl drain "$node" --ignore-daemonsets --delete-emptydir-data --timeout=10m
+  upid=$(pve_api POST "nodes/$pve/qemu/$vm_id/status/reboot" | jq -r .data)
+  until [ "$(pve_api GET "nodes/$pve/tasks/$upid/status" | jq -r .data.status)" = "stopped" ]; do sleep 5; done
+  # The API is unreachable while the only control plane restarts.
+  until kubectl wait --for=condition=Ready "node/$node" --timeout=10m 2> /dev/null; do sleep 5; done
+  if [ "$(jq -r --arg n "$node" '.[$n].role' <<< "$nodes")" = "controlplane" ]; then
+    # Rebooting the next control plane before etcd is back would cost quorum.
+    until talosctl -n "$ip" etcd status > /dev/null 2>&1; do sleep 5; done
+  fi
+  kubectl uncordon "$node"
+}
+
+pve_api(){
+  local insecure=""
+  [ "${PROXMOX_VE_INSECURE:-}" = "true" ] && insecure=-k
+  # shellcheck disable=SC2086 # $insecure is empty or a single flag
+  curl -fsS $insecure -X "$1" -H "Authorization: PVEAPIToken=$PROXMOX_VE_API_TOKEN" \
+    "$PROXMOX_VE_ENDPOINT/api2/json/$2"
 }
 
 main(){
+  [ $# -ge 1 ] || usage
   tmp_dir=$(mktemp -d)
-  command=$1
-  nodes=$2
+  trap 'rm -rf "$tmp_dir"' EXIT
 
-  terraform output -raw kubeconfig > $tmp_dir/kubeconfig
-  terraform output -raw talosconfig > $tmp_dir/talosconfig
-
+  terraform output -raw kubeconfig > "$tmp_dir/kubeconfig"
+  terraform output -raw talosconfig > "$tmp_dir/talosconfig"
   export KUBECONFIG=$tmp_dir/kubeconfig
   export TALOSCONFIG=$tmp_dir/talosconfig
+  nodes=$(terraform output -json nodes)
 
-  if [ "$command" = "upgrade" ]; then
-    upgrade_node "$nodes"
-  elif [ "$command" = "remove" ]; then
-    remove_node "$nodes"
-  else
-    echo "No command given"
-    exit 1
-  fi
-
-  rm -rf $tmp_dir
+  case "$1" in
+    remove)
+      [ $# -eq 2 ] || usage
+      remove_node "$2"
+      ;;
+    reboot)
+      shift
+      if [ $# -eq 0 ]; then
+        # shellcheck disable=SC2046 # hostnames have no spaces
+        set -- $(jq -r 'to_entries | sort_by(.value.role != "controlplane", .key) | .[].key' <<< "$nodes")
+      fi
+      for node in "$@"; do reboot_node "$node"; done
+      ;;
+    *)
+      usage
+      ;;
+  esac
 }
 
 main "$@"

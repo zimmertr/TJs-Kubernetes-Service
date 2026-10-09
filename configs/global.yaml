@@ -1,0 +1,22 @@
+# Applied to every node (control plane and worker).
+# KubePrism is not set here: Talos 1.14 `gen config` already emits
+# `kind: KubePrismConfig` with port 7445 for both machine types.
+# diskSelector repeats the generated default on purpose: in Talos 1.14.2 a CEL
+# expression field is overwritten by a patch even when the patch leaves it unset
+# (cel.Expression.Merge has no zero-value check), so leaving it out wipes it and
+# validation fails with "provisioning.diskSelector.match is required".
+apiVersion: v1alpha1
+kind: UnattendedInstallConfig
+installer:
+  image: ${talos_installer_image}
+provisioning:
+  diskSelector:
+    match: disk.dev_path == "/dev/sda"
+---
+# serverTLSBootstrap is the kubelet config-file equivalent of the deprecated
+# --rotate-server-certificates flag; the kubelet requests a serving cert via a
+# CSR, which something in-cluster (e.g. kubelet-csr-approver) must approve.
+apiVersion: v1alpha1
+kind: KubeletConfig
+config:
+  serverTLSBootstrap: true

@@ -1,226 +1,144 @@
-# Proxmox
-variable "proxmox_hostname" {
-  # The Talos image is distributed as an XZ archive and the Proxmox API does not allow you to
-  # upload an image with that file format. A remote-exec SSH provisoner is used to manage the
-  # image in talos_image.tf.
-  type        = string
-  description = "IP address or hostname of the Proxmox server"
-}
-variable "proxmox_username" {
-  # A remote-exec SSH provisoner is used to download the image in talos_image.tf.
-  type        = string
-  default     = "root"
-  description = "IP address or hostname of the Proxmox server"
-}
-variable "proxmox_ssh_key_path" {
-  type        = string
-  description = "Path to an SSH key used to connect to the Proxmox server"
-}
-variable "proxmox_resource_pool" {
-  type        = string
-  default     = "Kubernetes"
-  description = "Resource Pool to create on Proxmox for the cluster"
+variable "proxmox" {
+  type = object({
+    node_name          = string
+    datastore_id       = optional(string, "FlashPool")
+    image_datastore_id = optional(string, "local")
+    resource_pool      = string
+  })
+  description = "Where the cluster runs: the Proxmox node, the datastore for VM disks, the datastore for Talos images (it must allow the Import content type), and the resource pool to create"
 }
 
-
-# Talos Image
-variable "talos_image_datastore" {
-  type        = string
-  default     = "local"
-  description = "DataStore to use on Proxmox for the Talos image"
-}
-variable "talos_image_node_name" {
-  type        = string
-  description = "Proxmox node used for storing the Talos image"
-}
-
-
-# Kubernetes Cluster
-variable "talos_version" {
-  type        = string
-  default     = "v1.12.4"
-  description = "Identify here: https://github.com/siderolabs/talos/releases"
-}
-variable "kubernetes_version" {
-  type        = string
-  default     = "v1.35.2"
-  description = "Identify here: https://github.com/siderolabs/kubelet/pkgs/container/kubelet"
-}
-variable "kubernetes_cluster_name" {
-  type        = string
-  default     = "kubernetes"
-  description = "Kubernetes cluster name you wish for Talos to use"
-}
-variable "talos_virtual_ip" {
-  type        = string
-  description = "Virtual IP address you wish for Talos to use"
-  validation {
-    condition     = can(regex("^([0-9]{1,3}\\.){3}[0-9]{1,3}$", var.talos_virtual_ip))
-    error_message = "Must be a valid IPv4 address."
-  }
-}
-variable "talos_disable_flannel" {
-  type        = bool
-  default     = false
-  description = "Whether or not the Flannel CNI & Kube Proxy should be disabled for Cilium"
-}
-variable "talos_expose_metrics" {
-  type        = bool
-  default     = false
-  description = "Whether or not etcd, the scheduler, the controller-manager, and kube-proxy should serve Prometheus metrics on the node addresses instead of localhost"
-}
-variable "controlplane_ip_prefix" {
-  # While I use DHCP reservation to assign IP Addresses to each virtual machine, talos must know
-  # the IP Address of a node in order to apply configuration and bootstrap it. This prefix is used
-  # in combination with the VM count integer to form the dynamic IP Address of each node. As a
-  # consequence, only 9 of each ControlPlane and workernode are supported: 101-109
-  type        = string
-  description = "IP address prefix (less the last digit) of the controlplane nodes"
-}
-variable "workernode_ip_prefix" {
-  # While I use DHCP reservation to assign IP Addresses to each virtual machine, talos must know
-  # the IP Address of a node in order to apply configuration and bootstrap it. This prefix is used
-  # in combination with the VM count integer to form the dynamic IP Address of each node. As a
-  # consequence, only 9 of each ControlPlane and workernode are supported: 151-159
-  type        = string
-  description = "IP address prefix (less the last digit) of the Worker Nodes"
-}
-
-
-# controlplanes
-variable "controlplane_vmid_prefix" {
-  # I set my VMIDs according to my IP Addressing.
-  # This prefix has the last digit set to the Terraform Count.
-  type        = number
-  description = "VMID prefix (less the last digit) of the controlplane nodes"
-}
-variable "controlplane_num" {
-  type        = number
-  default     = 3
-  description = "Quantity of controlplane nodes to provision"
-  validation {
-    condition     = var.controlplane_num >= 1 && var.controlplane_num <= 9
-    error_message = "Control plane count must be between 1 and 9 due to IP/MAC addressing schema"
-  }
-}
-variable "controlplane_hostname_prefix" {
-  type        = string
-  default     = "k8s-cp"
-  description = "Hostname prefix (less the last digit) of the controlplane nodes"
-}
-variable "controlplane_node_name" {
-  type        = string
-  description = "Proxmox node used for provisioning the workernodes"
-}
-variable "controlplane_tags" {
-  type        = list(string)
-  default     = ["app-kubernetes", "type-controlplane"]
-  description = "Tags to apply to the controlplane virtual machines"
-}
-variable "controlplane_cpu_cores" {
-  type        = number
-  default     = 4
-  description = "Quantity of CPU cores to apply to the controlplane virtual machines"
-}
-variable "controlplane_memory" {
-  type        = number
-  default     = 10240
-  description = "Quantity of memory (megabytes) to apply to the controlplane virtual machines"
-}
-variable "controlplane_datastore" {
-  type        = string
-  default     = "FlashPool"
-  description = "Datastore used for the controlplane virtual machines"
-}
-variable "controlplane_disk_size" {
-  # Talos recommends 100Gb
-  type        = number
-  default     = "50"
-  description = "Quantity of disk space (gigabytes) to apply to the controlplane virtual machines"
-}
-variable "controlplane_network_device" {
-  type        = string
-  default     = "vmbr0"
-  description = "Network device used for the controlplane virtual machines"
-}
-variable "controlplane_mac_address_prefix" {
-  # I use DHCP reservation for assigning static IPs.
-  # This prefix has the last digit set to the Terraform Count.
-  type        = string
-  description = "MAC address (less the last digit) of the controlplane nodes"
-}
-variable "controlplane_vlan_id" {
-  type        = number
-  default     = null
-  description = "VLAN ID used for the controlplane nodes"
-}
-
-
-# Worker Nodes
-variable "workernode_vmid_prefix" {
-  # I set my VMIDs according to my IP Addressing.
-  # This prefix has the last digit set to the Terraform Count.
-  type        = number
-  description = "The VMID Prefix (less the last digit) of the workernode nodes"
-}
-variable "workernode_num" {
-  type        = number
-  default     = 3
-  description = "Quantity of workernode nodes to provision"
+variable "network" {
+  type = object({
+    cidr        = string
+    gateway     = string
+    dns_servers = list(string)
+    bridge      = optional(string, "vmbr0")
+    vlan_id     = optional(number)
+  })
+  description = "The network every node is attached to. Node IPs are assigned statically from it through cloud-init"
 
   validation {
-    condition     = var.workernode_num >= 1 && var.workernode_num <= 9
-    error_message = "Worker node count must be between 1 and 9 due to IP/MAC addressing schema"
+    condition     = can(cidrhost(var.network.cidr, 0))
+    error_message = "network.cidr must be a valid IPv4 CIDR, e.g. 192.168.40.0/24."
+  }
+  validation {
+    condition     = can(cidrhost("${var.network.gateway}/${split("/", var.network.cidr)[1]}", 0)) && cidrhost("${var.network.gateway}/${split("/", var.network.cidr)[1]}", 0) == cidrhost(var.network.cidr, 0)
+    error_message = "network.gateway must be inside network.cidr."
   }
 }
-variable "workernode_hostname_prefix" {
-  type        = string
-  default     = "k8s-node"
-  description = "Hostname prefix (less the last digit) of the workernode nodes"
+
+variable "cluster" {
+  type = object({
+    name = string
+    vip  = string
+    # The installed Talos OS. Renovate bumps it, and changing it upgrades
+    # nodes in place.
+    talos_version = optional(string, "v1.14.2")
+    # The provider's config-generation contract, pinned when the cluster is
+    # created. Raising it later changes the generated machine config, not the
+    # cluster's secrets.
+    talos_config_version = string
+    kubernetes_version   = optional(string, "v1.37.1")
+    disable_flannel      = optional(bool, false)
+    expose_metrics       = optional(bool, false)
+    # Nodes leave etcd and wipe themselves when removed. Turn off and apply
+    # before destroying a whole cluster: the last control plane can't leave
+    # etcd, so its reset fails.
+    reset_on_destroy = optional(bool, true)
+  })
+  description = "Cluster identity, versions and feature switches"
+
+  validation {
+    condition     = can(regex("^v\\d+\\.\\d+\\.\\d+$", var.cluster.talos_version)) && can(regex("^v\\d+\\.\\d+\\.\\d+$", var.cluster.talos_config_version)) && can(regex("^v\\d+\\.\\d+\\.\\d+$", var.cluster.kubernetes_version))
+    error_message = "Versions must look like v1.2.3."
+  }
+  validation {
+    condition = alltrue([for i, part in split(".", trimprefix(var.cluster.talos_config_version, "v")) :
+      tonumber(part) <= tonumber(split(".", trimprefix(var.cluster.talos_version, "v"))[i])
+      if i < 2
+    ])
+    error_message = "cluster.talos_config_version can't be newer than cluster.talos_version."
+  }
+  validation {
+    condition     = can(cidrhost("${var.cluster.vip}/${split("/", var.network.cidr)[1]}", 0)) && cidrhost("${var.cluster.vip}/${split("/", var.network.cidr)[1]}", 0) == cidrhost(var.network.cidr, 0)
+    error_message = "cluster.vip must be inside network.cidr."
+  }
+  validation {
+    condition     = !contains([for n in merge(var.controlplanes.nodes, var.workers.nodes) : n.ip], var.cluster.vip)
+    error_message = "cluster.vip must not be a node IP."
+  }
 }
-variable "workernode_node_name" {
-  type        = string
-  description = "Proxmox node used for provisioning the workernodes"
+
+variable "controlplanes" {
+  type = object({
+    defaults = optional(object({
+      cores     = optional(number, 4)
+      memory_mb = optional(number, 8192)
+      disk_gb   = optional(number, 50)
+      tags      = optional(list(string), [])
+    }), {})
+    nodes = map(object({
+      ip        = string
+      vm_id     = number
+      cores     = optional(number)
+      memory_mb = optional(number)
+      disk_gb   = optional(number)
+      tags      = optional(list(string))
+    }))
+  })
+  description = "Control plane nodes keyed by hostname, with defaults any node can override"
+
+  validation {
+    condition     = length(var.controlplanes.nodes) >= 1
+    error_message = "At least one control plane is required."
+  }
 }
-variable "workernode_tags" {
-  type        = list(string)
-  default     = ["app-kubernetes", "type-workernode"]
-  description = "Tags to apply to the workernode virtual machines"
-}
-variable "workernode_cpu_cores" {
-  type        = number
-  default     = 10
-  description = "Quantity of CPU cores to apply to the workernode virtual machines"
-}
-variable "workernode_memory" {
-  type        = number
-  default     = 51200
-  description = "Quantity of memory (megabytes) to apply to the workernode virtual machines"
-}
-variable "workernode_datastore" {
-  type        = string
-  default     = "FlashPool"
-  description = "Datastore used for the workernode virtual machines"
-}
-variable "workernode_disk_size" {
-  # Talos recommends 100Gb
-  type        = number
-  default     = "50"
-  description = "Quantity of disk space (gigabytes) to apply to the workernode virtual machines"
-}
-variable "workernode_network_device" {
-  type        = string
-  default     = "vmbr0"
-  description = "Network device used for the workernode virtual machines"
-}
-variable "workernode_mac_address_prefix" {
-  # I use DHCP reservation for assigning static IPs.
-  # This prefix has the last digit set to the Terraform Count.
-  type        = string
-  description = "MAC address (less the last digit) of the workernode nodes"
-}
-variable "workernode_vlan_id" {
-  type        = number
-  default     = null
-  description = "VLAN ID used for the workernode nodes"
+
+variable "workers" {
+  type = object({
+    defaults = optional(object({
+      cores     = optional(number, 4)
+      memory_mb = optional(number, 8192)
+      disk_gb   = optional(number, 50)
+      tags      = optional(list(string), [])
+    }), {})
+    nodes = optional(map(object({
+      ip        = string
+      vm_id     = number
+      cores     = optional(number)
+      memory_mb = optional(number)
+      disk_gb   = optional(number)
+      tags      = optional(list(string))
+    })), {})
+  })
+  default     = {}
+  description = "Worker nodes keyed by hostname, with defaults any node can override"
+
+  # Cross-pool checks live here because every pool is in scope of this rule.
+  validation {
+    condition = alltrue([
+      for n in merge(var.controlplanes.nodes, var.workers.nodes) :
+      can(cidrhost("${n.ip}/${split("/", var.network.cidr)[1]}", 0)) && cidrhost("${n.ip}/${split("/", var.network.cidr)[1]}", 0) == cidrhost(var.network.cidr, 0)
+    ])
+    error_message = "Every node IP must be inside network.cidr."
+  }
+  validation {
+    condition = (
+      length(distinct([for n in merge(var.controlplanes.nodes, var.workers.nodes) : n.ip])) ==
+      length(merge(var.controlplanes.nodes, var.workers.nodes))
+    )
+    error_message = "Node IPs must be unique."
+  }
+  validation {
+    condition = (
+      length(distinct([for n in merge(var.controlplanes.nodes, var.workers.nodes) : n.vm_id])) ==
+      length(merge(var.controlplanes.nodes, var.workers.nodes))
+    )
+    error_message = "Node VMIDs must be unique."
+  }
+  validation {
+    condition     = length(setintersection(keys(var.controlplanes.nodes), keys(var.workers.nodes))) == 0
+    error_message = "A hostname can only belong to one pool."
+  }
 }

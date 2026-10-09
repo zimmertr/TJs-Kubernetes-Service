@@ -7,8 +7,7 @@ Every input variable, generated from the code by `make docs`. Set them in a tfva
 
 | Name | Version |
 | ---- | ------- |
-| terraform | >= 1.14.6 |
-| http | ~> 3.6 |
+| terraform | >= 1.16 |
 | proxmox | ~> 0.116.0 |
 | talos | ~> 0.12.0 |
 
@@ -16,79 +15,42 @@ Every input variable, generated from the code by `make docs`. Set them in a tfva
 
 | Name | Version |
 | ---- | ------- |
-| http | 3.6.2 |
 | proxmox | 0.116.0 |
 | talos | 0.12.0 |
 
 ## Modules
 
-No modules.
+| Name | Source | Version |
+| ---- | ------ | ------- |
+| controlplanes | ./modules/node | n/a |
+| image | ./modules/talos_image | n/a |
+| workers | ./modules/node | n/a |
 
 ## Resources
 
 | Name | Type |
 | ---- | ---- |
-| [proxmox_virtual_environment_file.talos_image](https://registry.terraform.io/providers/bpg/proxmox/latest/docs/resources/virtual_environment_file) | resource |
-| [proxmox_virtual_environment_pool.proxmox_resource_pool](https://registry.terraform.io/providers/bpg/proxmox/latest/docs/resources/virtual_environment_pool) | resource |
-| [proxmox_virtual_environment_vm.controlplane](https://registry.terraform.io/providers/bpg/proxmox/latest/docs/resources/virtual_environment_vm) | resource |
-| [proxmox_virtual_environment_vm.workernode](https://registry.terraform.io/providers/bpg/proxmox/latest/docs/resources/virtual_environment_vm) | resource |
+| [proxmox_virtual_environment_pool.this](https://registry.terraform.io/providers/bpg/proxmox/latest/docs/resources/virtual_environment_pool) | resource |
+| [talos_cluster.this](https://registry.terraform.io/providers/siderolabs/talos/latest/docs/resources/cluster) | resource |
 | [talos_cluster_kubeconfig.this](https://registry.terraform.io/providers/siderolabs/talos/latest/docs/resources/cluster_kubeconfig) | resource |
-| [talos_machine_bootstrap.this](https://registry.terraform.io/providers/siderolabs/talos/latest/docs/resources/machine_bootstrap) | resource |
-| [talos_machine_configuration_apply.controlplane](https://registry.terraform.io/providers/siderolabs/talos/latest/docs/resources/machine_configuration_apply) | resource |
-| [talos_machine_configuration_apply.workernode](https://registry.terraform.io/providers/siderolabs/talos/latest/docs/resources/machine_configuration_apply) | resource |
 | [talos_machine_secrets.this](https://registry.terraform.io/providers/siderolabs/talos/latest/docs/resources/machine_secrets) | resource |
-| [http_http.talos_schematic](https://registry.terraform.io/providers/hashicorp/http/latest/docs/data-sources/http) | data source |
 | [talos_client_configuration.this](https://registry.terraform.io/providers/siderolabs/talos/latest/docs/data-sources/client_configuration) | data source |
-| [talos_machine_configuration.controlplane](https://registry.terraform.io/providers/siderolabs/talos/latest/docs/data-sources/machine_configuration) | data source |
-| [talos_machine_configuration.workernode](https://registry.terraform.io/providers/siderolabs/talos/latest/docs/data-sources/machine_configuration) | data source |
 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
 | ---- | ----------- | ---- | ------- | :------: |
-| controlplane\_ip\_prefix | IP address prefix (less the last digit) of the controlplane nodes | `string` | n/a | yes |
-| controlplane\_mac\_address\_prefix | MAC address (less the last digit) of the controlplane nodes | `string` | n/a | yes |
-| controlplane\_node\_name | Proxmox node used for provisioning the workernodes | `string` | n/a | yes |
-| controlplane\_vmid\_prefix | VMID prefix (less the last digit) of the controlplane nodes | `number` | n/a | yes |
-| proxmox\_hostname | IP address or hostname of the Proxmox server | `string` | n/a | yes |
-| proxmox\_ssh\_key\_path | Path to an SSH key used to connect to the Proxmox server | `string` | n/a | yes |
-| talos\_image\_node\_name | Proxmox node used for storing the Talos image | `string` | n/a | yes |
-| talos\_virtual\_ip | Virtual IP address you wish for Talos to use | `string` | n/a | yes |
-| workernode\_ip\_prefix | IP address prefix (less the last digit) of the Worker Nodes | `string` | n/a | yes |
-| workernode\_mac\_address\_prefix | MAC address (less the last digit) of the workernode nodes | `string` | n/a | yes |
-| workernode\_node\_name | Proxmox node used for provisioning the workernodes | `string` | n/a | yes |
-| workernode\_vmid\_prefix | The VMID Prefix (less the last digit) of the workernode nodes | `number` | n/a | yes |
-| controlplane\_cpu\_cores | Quantity of CPU cores to apply to the controlplane virtual machines | `number` | `4` | no |
-| controlplane\_datastore | Datastore used for the controlplane virtual machines | `string` | `"FlashPool"` | no |
-| controlplane\_disk\_size | Quantity of disk space (gigabytes) to apply to the controlplane virtual machines | `number` | `"50"` | no |
-| controlplane\_hostname\_prefix | Hostname prefix (less the last digit) of the controlplane nodes | `string` | `"k8s-cp"` | no |
-| controlplane\_memory | Quantity of memory (megabytes) to apply to the controlplane virtual machines | `number` | `10240` | no |
-| controlplane\_network\_device | Network device used for the controlplane virtual machines | `string` | `"vmbr0"` | no |
-| controlplane\_num | Quantity of controlplane nodes to provision | `number` | `3` | no |
-| controlplane\_tags | Tags to apply to the controlplane virtual machines | `list(string)` | <pre>[<br/>  "app-kubernetes",<br/>  "type-controlplane"<br/>]</pre> | no |
-| controlplane\_vlan\_id | VLAN ID used for the controlplane nodes | `number` | `null` | no |
-| kubernetes\_cluster\_name | Kubernetes cluster name you wish for Talos to use | `string` | `"kubernetes"` | no |
-| kubernetes\_version | Identify here: https://github.com/siderolabs/kubelet/pkgs/container/kubelet | `string` | `"v1.35.2"` | no |
-| proxmox\_resource\_pool | Resource Pool to create on Proxmox for the cluster | `string` | `"Kubernetes"` | no |
-| proxmox\_username | IP address or hostname of the Proxmox server | `string` | `"root"` | no |
-| talos\_disable\_flannel | Whether or not the Flannel CNI & Kube Proxy should be disabled for Cilium | `bool` | `false` | no |
-| talos\_expose\_metrics | Whether or not etcd, the scheduler, the controller-manager, and kube-proxy should serve Prometheus metrics on the node addresses instead of localhost | `bool` | `false` | no |
-| talos\_image\_datastore | DataStore to use on Proxmox for the Talos image | `string` | `"local"` | no |
-| talos\_version | Identify here: https://github.com/siderolabs/talos/releases | `string` | `"v1.12.4"` | no |
-| workernode\_cpu\_cores | Quantity of CPU cores to apply to the workernode virtual machines | `number` | `10` | no |
-| workernode\_datastore | Datastore used for the workernode virtual machines | `string` | `"FlashPool"` | no |
-| workernode\_disk\_size | Quantity of disk space (gigabytes) to apply to the workernode virtual machines | `number` | `"50"` | no |
-| workernode\_hostname\_prefix | Hostname prefix (less the last digit) of the workernode nodes | `string` | `"k8s-node"` | no |
-| workernode\_memory | Quantity of memory (megabytes) to apply to the workernode virtual machines | `number` | `51200` | no |
-| workernode\_network\_device | Network device used for the workernode virtual machines | `string` | `"vmbr0"` | no |
-| workernode\_num | Quantity of workernode nodes to provision | `number` | `3` | no |
-| workernode\_tags | Tags to apply to the workernode virtual machines | `list(string)` | <pre>[<br/>  "app-kubernetes",<br/>  "type-workernode"<br/>]</pre> | no |
-| workernode\_vlan\_id | VLAN ID used for the workernode nodes | `number` | `null` | no |
+| cluster | Cluster identity, versions and feature switches | <pre>object({<br/>    name = string<br/>    vip  = string<br/>    # The installed Talos OS. Renovate bumps it, and changing it upgrades<br/>    # nodes in place.<br/>    talos_version = optional(string, "v1.14.2")<br/>    # The provider's config-generation contract, pinned when the cluster is<br/>    # created. Raising it later changes the generated machine config, not the<br/>    # cluster's secrets.<br/>    talos_config_version = string<br/>    kubernetes_version   = optional(string, "v1.37.1")<br/>    disable_flannel      = optional(bool, false)<br/>    expose_metrics       = optional(bool, false)<br/>    # Nodes leave etcd and wipe themselves when removed. Turn off and apply<br/>    # before destroying a whole cluster: the last control plane can't leave<br/>    # etcd, so its reset fails.<br/>    reset_on_destroy = optional(bool, true)<br/>  })</pre> | n/a | yes |
+| controlplanes | Control plane nodes keyed by hostname, with defaults any node can override | <pre>object({<br/>    defaults = optional(object({<br/>      cores     = optional(number, 4)<br/>      memory_mb = optional(number, 8192)<br/>      disk_gb   = optional(number, 50)<br/>      tags      = optional(list(string), [])<br/>    }), {})<br/>    nodes = map(object({<br/>      ip        = string<br/>      vm_id     = number<br/>      cores     = optional(number)<br/>      memory_mb = optional(number)<br/>      disk_gb   = optional(number)<br/>      tags      = optional(list(string))<br/>    }))<br/>  })</pre> | n/a | yes |
+| network | The network every node is attached to. Node IPs are assigned statically from it through cloud-init | <pre>object({<br/>    cidr        = string<br/>    gateway     = string<br/>    dns_servers = list(string)<br/>    bridge      = optional(string, "vmbr0")<br/>    vlan_id     = optional(number)<br/>  })</pre> | n/a | yes |
+| proxmox | Where the cluster runs: the Proxmox node, the datastore for VM disks, the datastore for Talos images (it must allow the Import content type), and the resource pool to create | <pre>object({<br/>    node_name          = string<br/>    datastore_id       = optional(string, "FlashPool")<br/>    image_datastore_id = optional(string, "local")<br/>    resource_pool      = string<br/>  })</pre> | n/a | yes |
+| workers | Worker nodes keyed by hostname, with defaults any node can override | <pre>object({<br/>    defaults = optional(object({<br/>      cores     = optional(number, 4)<br/>      memory_mb = optional(number, 8192)<br/>      disk_gb   = optional(number, 50)<br/>      tags      = optional(list(string), [])<br/>    }), {})<br/>    nodes = optional(map(object({<br/>      ip        = string<br/>      vm_id     = number<br/>      cores     = optional(number)<br/>      memory_mb = optional(number)<br/>      disk_gb   = optional(number)<br/>      tags      = optional(list(string))<br/>    })), {})<br/>  })</pre> | `{}` | no |
 
 ## Outputs
 
 | Name | Description |
 | ---- | ----------- |
-| kubeconfig | n/a |
-| talosconfig | n/a |
+| kubeconfig | Admin kubeconfig |
+| nodes | Every node's IP, VMID, Proxmox node and role, keyed by hostname. bin/manage\_nodes reads it |
+| talosconfig | talosctl config for every node |
 <!-- END_TF_DOCS -->
