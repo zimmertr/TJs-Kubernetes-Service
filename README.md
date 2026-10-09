@@ -40,6 +40,7 @@ TJ's Kubernetes Service, or *TKS*, is an IaC project that is used to deliver Kub
 
    ```bash
    cd bootstrap
+   unset PROXMOX_VE_API_TOKEN # the provider prefers a token over a password
    export PROXMOX_VE_ENDPOINT="https://earth.sol.milkyway:8006"
    export PROXMOX_VE_INSECURE="true"
    export PROXMOX_VE_USERNAME="root@pam"
