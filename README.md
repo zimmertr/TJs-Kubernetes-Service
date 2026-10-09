@@ -25,7 +25,7 @@ TJ's Kubernetes Service, or *TKS*, is an IaC project that is used to deliver Kub
 
 | Requirement  | Description                                                  |
 | ------------ | ------------------------------------------------------------ |
-| `terraform`  | Used for creating the cluster                                |
+| `terraform`  | Used for creating the cluster. Version 1.16 or newer          |
 | `kubectl`    | Used for removing and rebooting nodes |
 | `talosctl`   | Used for rebooting nodes |
 | `jq`         | Used by `manage_nodes` |
@@ -86,8 +86,10 @@ TJ's Kubernetes Service, or *TKS*, is an IaC project that is used to deliver Kub
 
    ```bash
    terraform init
-   terraform workspace new test   # or tks-test with HCP Terraform
+   terraform workspace new test
    ```
+
+   With HCP Terraform, the first `terraform init` asks you to name a workspace because none have the tag yet. Enter `tks-test` there and skip `terraform workspace new`. For later clusters, use `terraform workspace new tks-stable` as usual.
 
 6. Create the cluster
 
