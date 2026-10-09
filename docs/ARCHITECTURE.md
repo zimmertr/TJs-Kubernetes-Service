@@ -32,4 +32,4 @@ Nothing in an upgrade replaces a VM. The VM reads its image only when it is crea
 
 ## Removing a node
 
-Delete it from the tfvars and apply. `talos_machine` resets the node first, so it leaves etcd and Kubernetes, and then the VM is destroyed. Workers are removed before control planes.
+Delete it from the tfvars and apply. `talos_machine` drains and resets the node first, so a control plane leaves etcd, and then the VM is destroyed. Workers are removed before control planes. The Kubernetes Node object stays until it is deleted with `kubectl delete node`, because nothing in the cluster removes Nodes whose VMs are gone.

@@ -26,6 +26,7 @@ TJ's Kubernetes Service, or *TKS*, is an IaC project that is used to deliver Kub
 | Requirement  | Description                                                  |
 | ------------ | ------------------------------------------------------------ |
 | `terraform`  | Used for creating the cluster                                |
+| `kubectl`    | Used for removing nodes from the cluster |
 | Proxmox      | You already know                                             |
 | DNS Resolver | Used for DNS resolution within the cluster |
 
@@ -134,7 +135,11 @@ On a running cluster, the scheduler, controller-manager, and API server pick the
 
 The Terraform provider makes it quite easy to scale in, out, up, or down. Simply add, remove, or resize nodes in your tfvars and run `terraform plan` again. If the plan looks good, apply it.
 
-When you remove a node, Talos resets it first so it leaves etcd and Kubernetes cleanly, then Terraform deletes the VM. You can remove any node, not just the last one.
+When you remove a node, Talos drains and resets it first so it leaves etcd cleanly, then Terraform deletes the VM. You can remove any node, not just the last one. Kubernetes doesn't clean up the node object on its own, so delete it afterwards:
+
+```bash
+kubectl delete node $NODE
+```
 
 <hr>
 
