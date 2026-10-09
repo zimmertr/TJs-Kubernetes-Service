@@ -76,12 +76,8 @@ module "controlplanes" {
   kubeconfig           = ephemeral.talos_cluster_kubeconfig.drain.kubeconfig_raw
 }
 
-# Workers wait for the control planes, so creates and upgrades roll control
-# planes first (Kubernetes' version-skew order) and destroys remove workers
-# while the API they drain through still exists.
 module "workers" {
-  source     = "./modules/node"
-  depends_on = [module.controlplanes]
+  source = "./modules/node"
 
   machine_type         = "worker"
   nodes                = local.workers
@@ -92,4 +88,10 @@ module "workers" {
   machine_secrets      = talos_machine_secrets.this.machine_secrets
   client_configuration = talos_machine_secrets.this.client_configuration
   kubeconfig           = ephemeral.talos_cluster_kubeconfig.drain.kubeconfig_raw
+  # Workers wait for the control planes, so creates and upgrades roll control
+  # planes first (Kubernetes' version-skew order) and destroys remove workers
+  # while the API they drain through still exists. This is not depends_on on
+  # the module, which would defer the workers' config reads to apply time
+  # whenever a control plane changes and show changes that aren't there.
+  wait_for = module.controlplanes.machines
 }

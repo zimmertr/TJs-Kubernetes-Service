@@ -87,3 +87,9 @@ variable "pci_devices" {
   default     = []
   description = "PCI resource mappings to pass through to every node in the pool"
 }
+
+variable "wait_for" {
+  type        = any
+  default     = null
+  description = "Anything this pool's VMs and machines must be created and upgraded after, and destroyed before"
+}

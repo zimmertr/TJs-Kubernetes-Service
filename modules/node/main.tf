@@ -3,7 +3,8 @@ locals {
 }
 
 resource "proxmox_virtual_environment_vm" "this" {
-  for_each = var.nodes
+  for_each   = var.nodes
+  depends_on = [var.wait_for]
 
   name      = each.key
   vm_id     = each.value.vm_id
@@ -104,7 +105,7 @@ data "talos_machine_configuration" "this" {
 
 resource "talos_machine" "this" {
   for_each   = var.nodes
-  depends_on = [proxmox_virtual_environment_vm.this]
+  depends_on = [proxmox_virtual_environment_vm.this, var.wait_for]
 
   node                  = each.value.ip
   client_configuration  = var.client_configuration
