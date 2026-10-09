@@ -30,7 +30,7 @@ TJ's Kubernetes Service, or *TKS*, is an IaC project that is used to deliver Kub
 | `talosctl`   | Used for rebooting nodes |
 | `jq`         | Used by `manage_nodes` |
 | Proxmox      | You already know                                             |
-| DNS Resolver | Used for DNS resolution within the cluster |
+| DNS Resolver | Used for DNS resolution within the cluster. Set it in `network.dns_servers` |
 
 <hr>
 
@@ -67,7 +67,7 @@ TJ's Kubernetes Service, or *TKS*, is an IaC project that is used to deliver Kub
 
 3. Review `variables.tf` and set any overrides according to your environment in a new [tfvars](https://developer.hashicorp.com/terraform/language/values/variables#variable-definitions-tfvars-files) file. Nodes are a map keyed by hostname, each with a static IP and VMID. [`vars/test.tfvars`](vars/test.tfvars) is a good example. Set `talos_config_version` to the same version as `talos_version` and then leave it alone.
 
-4. Create DNS records for your nodes. IPs are assigned statically, so there's no need for DHCP reservations anymore. Here is how mine is configured for two clusters:
+4. Optionally, create DNS records for your nodes so you can reach them by name. TKS itself only uses IP addresses. Here is how mine is configured for two clusters:
 
    | Hostname        | IP Address    |
    | --------------- | ------------- |
