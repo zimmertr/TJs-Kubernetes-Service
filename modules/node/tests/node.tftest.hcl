@@ -92,6 +92,15 @@ run "no_balloon_and_trim_reaches_the_datastore" {
   }
 }
 
+run "disks_get_their_own_iothread" {
+  command = plan
+
+  assert {
+    condition     = proxmox_virtual_environment_vm.this["k8s-node-1"].scsi_hardware == "virtio-scsi-single" && proxmox_virtual_environment_vm.this["k8s-node-1"].disk[0].iothread
+    error_message = "iothread is ignored unless the SCSI controller is virtio-scsi-single"
+  }
+}
+
 run "no_pci_devices_by_default" {
   command = plan
 

@@ -13,6 +13,8 @@ resource "proxmox_virtual_environment_vm" "this" {
 
   machine = "q35"
   bios    = "ovmf"
+  # iothread on the disk only takes effect with one controller per disk.
+  scsi_hardware = "virtio-scsi-single"
 
   # A removed node is reset and halted by Talos first, and a guest-agent
   # shutdown of a halted VM hangs until the API times out.
