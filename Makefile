@@ -7,7 +7,7 @@
 TERRAFORM_VERSION := 1.16.5
 # renovate: datasource=docker depName=ghcr.io/terraform-linters/tflint
 TFLINT_VERSION := v0.64.0
-# renovate: datasource=docker depName=aquasec/trivy
+# renovate: datasource=docker depName=ghcr.io/aquasecurity/trivy
 TRIVY_VERSION := 0.75.0
 # renovate: datasource=docker depName=rhysd/actionlint
 ACTIONLINT_VERSION := 1.7.12
@@ -23,7 +23,7 @@ DOCKER := docker run --rm -v $(CURDIR):/src -w /src --user $(shell id -u):$(shel
 TERRAFORM := $(DOCKER) -v $(CACHE)/plugins:/plugins -e TF_PLUGIN_CACHE_DIR=/plugins -e TF_IN_AUTOMATION=1 hashicorp/terraform:$(TERRAFORM_VERSION)
 # GITHUB_TOKEN, when set, lifts the GitHub API rate limit for plugin downloads.
 TFLINT := $(DOCKER) -v $(CACHE)/tflint:/tflint -e TFLINT_PLUGIN_DIR=/tflint -e GITHUB_TOKEN --entrypoint tflint ghcr.io/terraform-linters/tflint:$(TFLINT_VERSION)
-TRIVY := $(DOCKER) -v $(CACHE)/trivy:/trivy-cache aquasec/trivy:$(TRIVY_VERSION) --cache-dir /trivy-cache
+TRIVY := $(DOCKER) -v $(CACHE)/trivy:/trivy-cache ghcr.io/aquasecurity/trivy:$(TRIVY_VERSION) --cache-dir /trivy-cache
 ACTIONLINT := $(DOCKER) rhysd/actionlint:$(ACTIONLINT_VERSION)
 TFDOCS := $(DOCKER) quay.io/terraform-docs/terraform-docs:$(TFDOCS_VERSION)-$(TFDOCS_ARCH)
 
