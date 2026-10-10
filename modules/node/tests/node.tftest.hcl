@@ -141,7 +141,7 @@ run "no_pci_devices_by_default" {
 
   assert {
     condition     = length(proxmox_virtual_environment_vm.this["k8s-node-1"].hostpci) == 0
-    error_message = "A pool without PCI devices must not pass any through"
+    error_message = "A node without PCI devices must not pass any through"
   }
 }
 
@@ -149,12 +149,19 @@ run "pci_devices_are_passed_through_as_pcie" {
   command = plan
 
   variables {
-    pci_devices = [{ mapping = "tks-test-gpu" }]
+    nodes = {
+      "k8s-node-1" = { ip = "192.168.40.21", vm_id = 4021, cores = 6, memory_mb = 24576, disk_gb = 50, tags = [], config_patches = [], pci_devices = [{ mapping = "test-k8s-node-1-gpu" }] }
+      "k8s-node-2" = { ip = "192.168.40.22", vm_id = 4022, cores = 8, memory_mb = 32768, disk_gb = 100, tags = [], config_patches = [] }
+    }
   }
 
   assert {
-    condition     = proxmox_virtual_environment_vm.this["k8s-node-1"].hostpci[0].mapping == "tks-test-gpu" && proxmox_virtual_environment_vm.this["k8s-node-1"].hostpci[0].pcie
+    condition     = proxmox_virtual_environment_vm.this["k8s-node-1"].hostpci[0].mapping == "test-k8s-node-1-gpu" && proxmox_virtual_environment_vm.this["k8s-node-1"].hostpci[0].pcie
     error_message = "Mapped devices must be attached as PCIe"
+  }
+  assert {
+    condition     = length(proxmox_virtual_environment_vm.this["k8s-node-2"].hostpci) == 0
+    error_message = "A node's PCI devices must not reach the other nodes in its pool"
   }
 }
 

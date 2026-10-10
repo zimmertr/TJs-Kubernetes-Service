@@ -23,14 +23,14 @@ TJ's Kubernetes Service, or *TKS*, is a collection of Terraform configurations t
 
 ## Requirements
 
-| Requirement | Description                                                                                               |
-| ----------- | --------------------------------------------------------------------------------------------------------- |
-| `terraform` | Creates and manages the cluster. Version 1.16 or newer                                                    |
-| `kubectl`   | Used by `manage_nodes`                                                                                    |
-| `talosctl`  | Used by `manage_nodes`                                                                                    |
-| `jq`        | Used by `manage_nodes` and to read the bootstrap tokens                                                   |
-| Proxmox VE  | A host or cluster to run the nodes on                                                                     |
-| IOMMU       | Only for a [GPU worker](#adding-a-gpu-worker). Enabled on the host, with the GPU alone in its IOMMU group |
+| Requirement | Description                                                                                                                                                                              |
+| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `terraform` | Creates and manages the cluster. Version 1.16 or newer                                                                                                                                   |
+| `kubectl`   | Used by `manage_nodes`                                                                                                                                                                   |
+| `talosctl`  | Used by `manage_nodes`                                                                                                                                                                   |
+| `jq`        | Used by `manage_nodes` and to read the bootstrap tokens                                                                                                                                  |
+| Proxmox VE  | A host or cluster to run the nodes on                                                                                                                                                    |
+| IOMMU       | Only for a [GPU worker](#adding-a-gpu-worker). Enabled on the host, with each GPU alone in its IOMMU group. Binding the GPUs to `vfio-pci` at boot keeps the host from initializing them |
 
 <hr>
 
@@ -144,22 +144,22 @@ On a running cluster, the scheduler, controller-manager and API server apply the
 
 ### Adding a GPU Worker
 
-Set `gpu_workers` to add worker nodes with a GPU from the Proxmox host passed through:
+Set `gpu_workers` to add worker nodes that each have a GPU from the Proxmox host passed through. Each node names its GPU by the PCI address `lspci` shows for it, so identical cards are told apart:
 
 ```hcl
 gpu_workers = {
-  defaults = { cores = 16, memory_mb = 196608 }
   nodes = {
-    "test-k8s-node-gpu-1" = { ip = "192.168.40.71", vm_id = 4071 }
+    "k8s-node-gpu-1" = { ip = "192.168.40.31", vm_id = 4031, cores = 16, memory_mb = 196608, pci_address = "05:00.0" }
+    "k8s-node-gpu-2" = { ip = "192.168.40.32", vm_id = 4032, cores = 16, memory_mb = 196608, pci_address = "06:00.0" }
   }
 }
 ```
 
-The GPU is found through the Proxmox API by its PCI vendor and class, AMD display controllers by default, and the plan fails unless exactly one device matches. When several do, `gpu_workers.pci_address` chooses one. TKS creates a PCI resource mapping named `<cluster>-gpu` for the device, and builds GPU nodes from their own Talos image with the `siderolabs/amdgpu` extension.
+TKS reads the rest of what it needs about each card from the Proxmox API, and creates a PCI resource mapping named `<cluster>-<hostname>-gpu` that holds only that card. The plan fails if nothing is at an address, if a card has no IOMMU group, or if two nodes name the same card. If a card moves to another slot, set its new address and apply again. GPU nodes are built from their own Talos image with the `siderolabs/amdgpu` extension.
 
 GPU nodes carry the `amd.com/gpu:NoSchedule` taint and the `tks.io/pool=gpu` label. Every TKS cluster enables the `ExtendedResourceToleration` admission plugin, so pods that request `amd.com/gpu` get the matching toleration without declaring it. Anything else that should run on a GPU node needs its own toleration, including the AMD device plugin that advertises `amd.com/gpu` to Kubernetes, which is deployed separately.
 
-The mapping holds one GPU, and Proxmox starts only one VM per device, so one GPU node can run at a time. Two clusters on the same host cannot run GPU nodes at once.
+Proxmox starts only one VM per card, so two clusters on the same host cannot run GPU nodes with the same card at once.
 
 <hr>
 

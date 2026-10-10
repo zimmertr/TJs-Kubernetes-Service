@@ -151,18 +151,27 @@ variable "gpu_workers" {
       tags      = optional(list(string), [])
     }), {})
     nodes = optional(map(object({
-      ip        = string
-      vm_id     = number
-      cores     = optional(number)
-      memory_mb = optional(number)
-      disk_gb   = optional(number)
-      tags      = optional(list(string))
+      ip    = string
+      vm_id = number
+      # Where the node's GPU sits on the Proxmox host, as lspci shows it. The
+      # 0000: domain is optional.
+      pci_address = string
+      cores       = optional(number)
+      memory_mb   = optional(number)
+      disk_gb     = optional(number)
+      tags        = optional(list(string))
     })), {})
-    pci_vendor_id = optional(string, "0x1002")
-    pci_class     = optional(string, "0x03")
-    pci_address   = optional(string)
-    extensions    = optional(list(string), ["siderolabs/qemu-guest-agent", "siderolabs/amdgpu"])
+    extensions = optional(list(string), ["siderolabs/qemu-guest-agent", "siderolabs/amdgpu"])
   })
   default     = {}
-  description = "Worker nodes with the host's GPU passed through, keyed by hostname. The GPU is found by PCI vendor and class (AMD display controllers by default); pci_address chooses one when several match. The mapping holds one GPU and Proxmox starts only one VM per device, so one GPU node can run at a time"
+  description = "Worker nodes keyed by hostname, each with the GPU at its pci_address on the Proxmox host passed through, and the Talos extensions for the GPU nodes' image"
+
+  validation {
+    condition     = alltrue([for n in var.gpu_workers.nodes : can(regex("^([0-9a-fA-F]{4}:)?[0-9a-fA-F]{2}:[0-9a-fA-F]{2}\\.[0-7]$", n.pci_address))])
+    error_message = "gpu_workers.nodes[*].pci_address must be a PCI address, e.g. 05:00.0 or 0000:05:00.0."
+  }
+  validation {
+    condition     = length(distinct([for n in var.gpu_workers.nodes : lower(length(split(":", n.pci_address)) == 2 ? "0000:${n.pci_address}" : n.pci_address)])) == length(var.gpu_workers.nodes)
+    error_message = "Each GPU node needs its own GPU: two nodes have the same pci_address."
+  }
 }

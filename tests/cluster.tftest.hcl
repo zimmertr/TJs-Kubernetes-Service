@@ -134,7 +134,7 @@ run "gpu_workers_get_their_own_image_taint_and_label" {
     gpu_workers = {
       defaults = { cores = 16, memory_mb = 196608 }
       nodes = {
-        "test-k8s-node-gpu-1" = { ip = "192.168.40.71", vm_id = 4071 }
+        "test-k8s-node-gpu-1" = { ip = "192.168.40.71", vm_id = 4071, pci_address = "05:00.0" }
       }
     }
   }
@@ -152,10 +152,14 @@ run "gpu_workers_get_their_own_image_taint_and_label" {
     outputs = {
       nodes    = { "test-k8s-node-gpu-1" = { ip = "192.168.40.71", vm_id = 4071, proxmox_node = "earth" } }
       machines = {}
-      mapping  = "test-gpu"
+      mappings = { "test-k8s-node-gpu-1" = "test-k8s-node-gpu-1-gpu" }
     }
   }
 
+  assert {
+    condition     = local.gpu_workers["test-k8s-node-gpu-1"].pci_address == "0000:05:00.0"
+    error_message = "An address without its domain must get the 0000: that Proxmox reports"
+  }
   assert {
     condition     = local.gpu_workers["test-k8s-node-gpu-1"].cores == 16 && local.gpu_workers["test-k8s-node-gpu-1"].memory_mb == 196608
     error_message = "GPU nodes must get the GPU pool's defaults"
@@ -194,7 +198,7 @@ run "rejects_a_gpu_node_ip_in_another_pool" {
   command = plan
 
   variables {
-    gpu_workers = { nodes = { "test-k8s-node-gpu-1" = { ip = "192.168.40.61", vm_id = 4071 } } }
+    gpu_workers = { nodes = { "test-k8s-node-gpu-1" = { ip = "192.168.40.61", vm_id = 4071, pci_address = "0000:05:00.0" } } }
   }
 
   expect_failures = [var.workers]
@@ -204,7 +208,7 @@ run "rejects_a_gpu_hostname_in_another_pool" {
   command = plan
 
   variables {
-    gpu_workers = { nodes = { "test-k8s-node-1" = { ip = "192.168.40.71", vm_id = 4071 } } }
+    gpu_workers = { nodes = { "test-k8s-node-1" = { ip = "192.168.40.71", vm_id = 4071, pci_address = "0000:05:00.0" } } }
   }
 
   expect_failures = [var.workers]
@@ -214,10 +218,50 @@ run "rejects_a_vip_that_is_a_gpu_node_ip" {
   command = plan
 
   variables {
-    gpu_workers = { nodes = { "test-k8s-node-gpu-1" = { ip = "192.168.40.50", vm_id = 4071 } } }
+    gpu_workers = { nodes = { "test-k8s-node-gpu-1" = { ip = "192.168.40.50", vm_id = 4071, pci_address = "0000:05:00.0" } } }
   }
 
   expect_failures = [var.cluster]
+}
+
+run "rejects_two_gpu_nodes_on_one_gpu" {
+  command = plan
+
+  variables {
+    gpu_workers = {
+      nodes = {
+        "test-k8s-node-gpu-1" = { ip = "192.168.40.71", vm_id = 4071, pci_address = "0000:05:00.0" }
+        "test-k8s-node-gpu-2" = { ip = "192.168.40.72", vm_id = 4072, pci_address = "0000:05:00.0" }
+      }
+    }
+  }
+
+  expect_failures = [var.gpu_workers]
+}
+
+run "rejects_a_malformed_pci_address" {
+  command = plan
+
+  variables {
+    gpu_workers = { nodes = { "test-k8s-node-gpu-1" = { ip = "192.168.40.71", vm_id = 4071, pci_address = "05:00" } } }
+  }
+
+  expect_failures = [var.gpu_workers]
+}
+
+run "rejects_one_gpu_written_two_ways" {
+  command = plan
+
+  variables {
+    gpu_workers = {
+      nodes = {
+        "test-k8s-node-gpu-1" = { ip = "192.168.40.71", vm_id = 4071, pci_address = "05:00.0" }
+        "test-k8s-node-gpu-2" = { ip = "192.168.40.72", vm_id = 4072, pci_address = "0000:05:00.0" }
+      }
+    }
+  }
+
+  expect_failures = [var.gpu_workers]
 }
 
 run "the_first_control_plane_bootstraps" {

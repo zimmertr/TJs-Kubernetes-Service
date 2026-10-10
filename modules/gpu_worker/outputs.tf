@@ -8,7 +8,7 @@ output "machines" {
   description = "Hostname to talos_machine ID for every GPU node"
 }
 
-output "mapping" {
-  value       = proxmox_hardware_mapping_pci.gpu.name
-  description = "Name of the PCI resource mapping the GPU is attached through"
+output "mappings" {
+  value       = { for name, m in proxmox_hardware_mapping_pci.gpu : name => m.name }
+  description = "Hostname to the name of the PCI resource mapping its GPU is attached through"
 }

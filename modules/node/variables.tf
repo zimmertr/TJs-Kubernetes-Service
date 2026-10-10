@@ -17,8 +17,13 @@ variable "nodes" {
     disk_gb        = number
     tags           = list(string)
     config_patches = list(string)
+    # PCI resource mappings to pass through to this node.
+    pci_devices = optional(list(object({
+      mapping = string
+      pcie    = optional(bool, true)
+    })), [])
   }))
-  description = "Nodes keyed by hostname, with pool defaults already merged in, and each node's rendered Talos patches"
+  description = "Nodes keyed by hostname, with pool defaults already merged in, each node's rendered Talos patches, and any PCI resource mappings to pass through"
 }
 
 variable "image" {
@@ -76,15 +81,6 @@ variable "kubeconfig" {
   sensitive   = true
   ephemeral   = true
   description = "Admin kubeconfig used to drain nodes before an upgrade. Ephemeral, so it never reaches state"
-}
-
-variable "pci_devices" {
-  type = list(object({
-    mapping = string
-    pcie    = optional(bool, true)
-  }))
-  default     = []
-  description = "PCI resource mappings to pass through to every node in the pool"
 }
 
 variable "wait_for" {

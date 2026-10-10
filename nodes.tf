@@ -50,6 +50,8 @@ locals {
       memory_mb = coalesce(n.memory_mb, var.gpu_workers.defaults.memory_mb)
       disk_gb   = coalesce(n.disk_gb, var.gpu_workers.defaults.disk_gb)
       tags      = n.tags != null ? n.tags : var.gpu_workers.defaults.tags
+      # Proxmox always reports the domain, and lspci leaves it out.
+      pci_address = lower(length(split(":", n.pci_address)) == 2 ? "0000:${n.pci_address}" : n.pci_address)
       # Rendered with the GPU image's installer, so upgrades keep the drivers.
       config_patches = concat(
         [templatefile("${path.module}/configs/global.yaml", { talos_installer_image = one(module.gpu_image[*].installer_image) })],
@@ -142,9 +144,6 @@ module "gpu_workers" {
   machine_secrets      = talos_machine_secrets.this.machine_secrets
   client_configuration = talos_machine_secrets.this.client_configuration
   kubeconfig           = ephemeral.talos_cluster_kubeconfig.drain.kubeconfig_raw
-  pci_vendor_id        = var.gpu_workers.pci_vendor_id
-  pci_class            = var.gpu_workers.pci_class
-  pci_address          = var.gpu_workers.pci_address
   # Same ordering as the general workers, for the same reasons.
   wait_for = module.controlplanes.machines
 }

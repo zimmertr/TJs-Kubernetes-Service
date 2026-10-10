@@ -7,16 +7,21 @@ output "map" {
     subsystem_id = "${trimprefix(local.device.subsystem_vendor, "0x")}:${trimprefix(local.device.subsystem_device, "0x")}"
     iommu_group  = local.device.iommu_group
   }
-  description = "The chosen device as an entry for a proxmox_hardware_mapping_pci map"
+  description = "The device as an entry for a proxmox_hardware_mapping_pci map"
 
   precondition {
-    condition     = length(local.matches) == 1
-    error_message = "Expected exactly one of the ${var.description}${var.pci_address == null ? "" : " at ${var.pci_address}"} on ${var.node_name}, found ${length(local.matches)}: [${join(", ", [for d in local.matches : d.id])}]. Set ${var.address_input} to choose one."
+    condition     = local.device != null
+    error_message = "There is no PCI device at ${var.address} on ${var.node_name}. If the card moved, set its new address."
   }
   precondition {
-    # Only judged once a single device is chosen, so it never adds noise to the
+    # Only judged once the device is found, so it never adds noise to the
     # error above.
     condition     = local.device == null || try(local.device.iommu_group >= 0, false)
-    error_message = "${try(local.device.id, "")} is not in an IOMMU group. Enable IOMMU on ${var.node_name}."
+    error_message = "${var.address} on ${var.node_name} is not in an IOMMU group. Enable IOMMU on the host."
   }
+}
+
+output "name" {
+  value       = try(local.device.device_name, "")
+  description = "The device's name as Proxmox reports it, so a different device at the address shows up in a plan"
 }

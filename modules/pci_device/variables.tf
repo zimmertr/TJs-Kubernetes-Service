@@ -3,31 +3,20 @@ variable "devices" {
     id               = string
     vendor           = string
     device           = string
+    device_name      = string
     subsystem_vendor = string
     subsystem_device = string
     iommu_group      = number
   }))
-  description = "Candidate devices, as data.proxmox_hardware_pci returns them"
+  description = "The host's PCI devices, as data.proxmox_hardware_pci returns them"
 }
 
-variable "pci_address" {
+variable "address" {
   type        = string
-  default     = null
-  description = "PCI address that chooses one device when several are candidates"
+  description = "PCI address of the device to use, e.g. 0000:05:00.0"
 }
 
 variable "node_name" {
   type        = string
   description = "Proxmox node the devices are on"
-}
-
-variable "description" {
-  type        = string
-  description = "What the candidates are, for error messages, e.g. \"PCI devices with vendor 0x1002 and class 0x03\""
-}
-
-variable "address_input" {
-  type        = string
-  default     = "pci_address"
-  description = "Name of the input a user sets to choose a device, for error messages"
 }

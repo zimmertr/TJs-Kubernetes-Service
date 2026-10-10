@@ -1,15 +1,12 @@
 variables {
-  node_name   = "earth"
-  description = "PCI devices with vendor 0x1002 and class 0x03"
-  # An R9700 as Proxmox reports it.
-  devices = [{
-    id               = "0000:05:00.0"
-    vendor           = "0x1002"
-    device           = "0x7551"
-    subsystem_vendor = "0x1002"
-    subsystem_device = "0x0603"
-    iommu_group      = 61
-  }]
+  node_name = "earth"
+  address   = "0000:05:00.0"
+  # Two identical R9700s and a NIC, as Proxmox reports them.
+  devices = [
+    { id = "0000:05:00.0", vendor = "0x1002", device = "0x7551", device_name = "Navi 48 [Radeon AI PRO R9700]", subsystem_vendor = "0x1849", subsystem_device = "0x5413", iommu_group = 61 },
+    { id = "0000:06:00.0", vendor = "0x1002", device = "0x7551", device_name = "Navi 48 [Radeon AI PRO R9700]", subsystem_vendor = "0x1849", subsystem_device = "0x5413", iommu_group = 63 },
+    { id = "0000:0a:00.0", vendor = "0x8086", device = "0x1533", device_name = "I210 Gigabit Network Connection", subsystem_vendor = "0x8086", subsystem_device = "0x0000", iommu_group = 20 },
+  ]
 }
 
 run "builds_the_map_entry_without_0x" {
@@ -20,58 +17,35 @@ run "builds_the_map_entry_without_0x" {
       node         = "earth"
       path         = "0000:05:00.0"
       id           = "1002:7551"
-      subsystem_id = "1002:0603"
+      subsystem_id = "1849:5413"
       iommu_group  = 61
     }
     error_message = "The entry must carry the node, address, IDs without 0x, and IOMMU group"
   }
-}
-
-run "two_matches_need_an_address" {
-  command = plan
-
-  variables {
-    devices = [
-      { id = "0000:05:00.0", vendor = "0x1002", device = "0x7551", subsystem_vendor = "0x1002", subsystem_device = "0x0603", iommu_group = 61 },
-      { id = "0000:0e:00.0", vendor = "0x1002", device = "0x13c0", subsystem_vendor = "0x1002", subsystem_device = "0x0123", iommu_group = 30 },
-    ]
+  assert {
+    condition     = output.name == "Navi 48 [Radeon AI PRO R9700]"
+    error_message = "The device's name must be reported"
   }
-
-  expect_failures = [output.map]
 }
 
-run "an_address_chooses_between_matches" {
+run "tells_identical_cards_apart_by_address" {
   command = plan
 
   variables {
-    pci_address = "0000:0e:00.0"
-    devices = [
-      { id = "0000:05:00.0", vendor = "0x1002", device = "0x7551", subsystem_vendor = "0x1002", subsystem_device = "0x0603", iommu_group = 61 },
-      { id = "0000:0e:00.0", vendor = "0x1002", device = "0x13c0", subsystem_vendor = "0x1002", subsystem_device = "0x0123", iommu_group = 30 },
-    ]
+    address = "0000:06:00.0"
   }
 
   assert {
-    condition     = output.map.path == "0000:0e:00.0" && output.map.id == "1002:13c0"
-    error_message = "pci_address must choose the device"
+    condition     = output.map.path == "0000:06:00.0" && output.map.iommu_group == 63
+    error_message = "The address must choose between identical cards"
   }
 }
 
-run "an_address_that_matches_nothing_fails" {
+run "an_address_with_no_device_fails" {
   command = plan
 
   variables {
-    pci_address = "0000:09:00.0"
-  }
-
-  expect_failures = [output.map]
-}
-
-run "no_device_fails" {
-  command = plan
-
-  variables {
-    devices = []
+    address = "0000:09:00.0"
   }
 
   expect_failures = [output.map]
@@ -81,7 +55,7 @@ run "a_device_without_an_iommu_group_fails" {
   command = plan
 
   variables {
-    devices = [{ id = "0000:05:00.0", vendor = "0x1002", device = "0x7551", subsystem_vendor = "0x1002", subsystem_device = "0x0603", iommu_group = -1 }]
+    devices = [{ id = "0000:05:00.0", vendor = "0x1002", device = "0x7551", device_name = "Navi 48 [Radeon AI PRO R9700]", subsystem_vendor = "0x1849", subsystem_device = "0x5413", iommu_group = -1 }]
   }
 
   expect_failures = [output.map]

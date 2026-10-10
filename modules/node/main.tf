@@ -80,7 +80,7 @@ resource "proxmox_virtual_environment_vm" "this" {
   }
 
   dynamic "hostpci" {
-    for_each = var.pci_devices
+    for_each = each.value.pci_devices
     content {
       device  = "hostpci${hostpci.key}"
       mapping = hostpci.value.mapping

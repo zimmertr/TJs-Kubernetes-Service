@@ -7,8 +7,9 @@ variable "nodes" {
     disk_gb        = number
     tags           = list(string)
     config_patches = list(string)
+    pci_address    = string
   }))
-  description = "GPU nodes keyed by hostname, with pool defaults already merged in, and each node's rendered Talos patches"
+  description = "GPU nodes keyed by hostname, with pool defaults already merged in, each node's rendered Talos patches, and the PCI address of its GPU"
 }
 
 variable "image" {
@@ -66,24 +67,6 @@ variable "kubeconfig" {
   sensitive   = true
   ephemeral   = true
   description = "Admin kubeconfig used to drain nodes before an upgrade. Ephemeral, so it never reaches state"
-}
-
-variable "pci_vendor_id" {
-  type        = string
-  default     = "0x1002"
-  description = "PCI vendor ID of the GPU, matched by prefix. The default is AMD"
-}
-
-variable "pci_class" {
-  type        = string
-  default     = "0x03"
-  description = "PCI class of the GPU, matched by prefix. The default matches every display controller"
-}
-
-variable "pci_address" {
-  type        = string
-  default     = null
-  description = "PCI address of the GPU, e.g. 0000:05:00.0. Only needed when more than one device matches the vendor and class"
 }
 
 variable "wait_for" {
