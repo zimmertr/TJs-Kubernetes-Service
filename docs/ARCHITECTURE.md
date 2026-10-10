@@ -18,7 +18,7 @@ One Terraform root builds one cluster. Use a workspace (or a separate state) per
 
 1. Terraform creates the VM with its disk imported from the pool's image. Cloud-init gives it its static IP, gateway and DNS servers. Without `network.dns_servers`, Proxmox supplies its host's resolvers.
 2. On first boot, the image enrolls Talos's SecureBoot keys, because the VM's UEFI starts with none. Talos then boots in maintenance mode.
-3. `talos_machine` applies the machine configuration to the node's IP. The patches in `configs/` set the installer image, the hostname, and the control planes' shared virtual IP, plus Flannel, metrics and external cloud provider settings when they are switched on.
+3. `talos_machine` applies the machine configuration to the node's IP. The patches in `configs/` set the installer image, the hostname, host DNS that resolves cluster members' hostnames ([0035](decisions/0035-nodes-resolve-member-names.md)), and the control planes' shared virtual IP, plus Flannel, metrics and external cloud provider settings when they are switched on.
 4. `talos_cluster` bootstraps etcd on the first control plane, and the others join through the virtual IP.
 
 Control planes come up before workers. GPU nodes are workers built from their own image, with the GPU driver extension, and an extra patch that registers them with the `amd.com/gpu:NoSchedule` taint and the `tks.io/pool=gpu` label. [0002](decisions/0002-gpu-worker-module.md), [0034](decisions/0034-each-gpu-node-names-its-gpu-by-address.md), [0017](decisions/0017-gpu-taint-extended-resource-toleration.md)

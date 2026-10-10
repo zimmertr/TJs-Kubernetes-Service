@@ -4,7 +4,10 @@ locals {
 
   # Every node gets these. global.yaml is rendered per pool instead, because it
   # names the pool's installer image.
-  shared_patches = var.cluster.external_cloud_provider ? [file("${path.module}/configs/external_cloud_provider.yaml")] : []
+  shared_patches = concat(
+    [file("${path.module}/configs/resolver.yaml")],
+    var.cluster.external_cloud_provider ? [file("${path.module}/configs/external_cloud_provider.yaml")] : [],
+  )
   global_patches = concat(
     [templatefile("${path.module}/configs/global.yaml", { talos_installer_image = module.image.installer_image })],
     local.shared_patches,

@@ -68,8 +68,8 @@ run "feature_patches_are_off_by_default" {
   command = plan
 
   assert {
-    condition     = length(local.controlplanes["test-k8s-cp-1"].config_patches) == 3 && length(local.workers["test-k8s-node-1"].config_patches) == 2
-    error_message = "Without disable_flannel, expose_metrics or external_cloud_provider, only the global, VIP and hostname patches apply"
+    condition     = length(local.controlplanes["test-k8s-cp-1"].config_patches) == 4 && length(local.workers["test-k8s-node-1"].config_patches) == 3
+    error_message = "Without disable_flannel, expose_metrics or external_cloud_provider, only the global, resolver, VIP and hostname patches apply"
   }
 }
 
@@ -81,7 +81,7 @@ run "feature_patches_apply_when_switched_on" {
   }
 
   assert {
-    condition     = length(local.controlplanes["test-k8s-cp-1"].config_patches) == 5 && length(local.workers["test-k8s-node-1"].config_patches) == 2
+    condition     = length(local.controlplanes["test-k8s-cp-1"].config_patches) == 6 && length(local.workers["test-k8s-node-1"].config_patches) == 3
     error_message = "disable_flannel and expose_metrics apply to control planes only"
   }
 }
@@ -94,12 +94,12 @@ run "external_cloud_provider_applies_to_every_node" {
   }
 
   assert {
-    condition     = length(local.controlplanes["test-k8s-cp-1"].config_patches) == 4 && length(local.workers["test-k8s-node-1"].config_patches) == 3
+    condition     = length(local.controlplanes["test-k8s-cp-1"].config_patches) == 5 && length(local.workers["test-k8s-node-1"].config_patches) == 4
     error_message = "external_cloud_provider must reach the kubelet on control planes and workers alike"
   }
 
   assert {
-    condition     = strcontains(local.workers["test-k8s-node-1"].config_patches[1], "externalCloudProvider")
+    condition     = strcontains(local.workers["test-k8s-node-1"].config_patches[2], "externalCloudProvider")
     error_message = "The worker's extra patch must be the external cloud provider one"
   }
 }
@@ -114,6 +114,31 @@ run "workers_are_optional" {
   assert {
     condition     = length(local.workers) == 0
     error_message = "A cluster can be control planes only"
+  }
+}
+
+run "every_node_resolves_member_names" {
+  command = plan
+
+  variables {
+    gpu_workers = { nodes = { "test-k8s-node-gpu-1" = { ip = "192.168.40.71", vm_id = 4071, pci_address = "05:00.0" } } }
+  }
+
+  override_module {
+    target  = module.gpu_image
+    outputs = { file_id = "local:import/tks-test-gpu-v1.14.2.qcow2", installer_image = "factory.talos.dev/nocloud-installer/def456:v1.14.2" }
+  }
+  override_module {
+    target  = module.gpu_workers
+    outputs = { nodes = {}, machines = {}, mappings = {} }
+  }
+
+  assert {
+    condition = alltrue([
+      for n in merge(local.controlplanes, local.workers, local.gpu_workers) :
+      anytrue([for p in n.config_patches : strcontains(p, "kind: ResolverConfig") && strcontains(p, "resolveMemberNames: true")])
+    ])
+    error_message = "Every node must resolve cluster members' hostnames, so node names resolve without DNS records"
   }
 }
 
@@ -169,7 +194,7 @@ run "gpu_workers_get_their_own_image_taint_and_label" {
     error_message = "GPU nodes must install and upgrade from the GPU image, which carries the driver"
   }
   assert {
-    condition     = strcontains(local.gpu_workers["test-k8s-node-gpu-1"].config_patches[1], "externalCloudProvider")
+    condition     = strcontains(local.gpu_workers["test-k8s-node-gpu-1"].config_patches[2], "externalCloudProvider")
     error_message = "Cluster-wide patches must reach GPU nodes too"
   }
   assert {

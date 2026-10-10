@@ -1,0 +1,10 @@
+# Applied to every node. Talos's host DNS, which CoreDNS forwards to, answers
+# cluster members' bare hostnames from member discovery. kubelet-serving CSR
+# approvers that check a node's DNS name then work without any DNS records.
+# Only hostDNS is set, so nameservers still come from cloud-init.
+apiVersion: v1alpha1
+kind: ResolverConfig
+hostDNS:
+  enabled: true
+  forwardKubeDNSToHost: true
+  resolveMemberNames: true
