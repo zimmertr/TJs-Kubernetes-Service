@@ -1,13 +1,15 @@
 #!/bin/bash
-# Covers the two node chores Terraform can't do safely itself: taking a node
-# out of the cluster when it's removed, and restarting nodes one at a time so
-# hardware changes (cores, memory, PCI devices) take effect. Run it from the
+# Covers the node chores Terraform can't do safely itself: taking a node out of
+# the cluster when it's removed, restarting nodes one at a time so hardware
+# changes (cores, memory, PCI devices) take effect, and registering nodes again
+# after cluster.external_cloud_provider is turned on. Run it from the
 # repo root, in the workspace of the cluster, after `source vars/config.env`.
 set -euo pipefail
 
 usage(){
   echo "Usage: $0 remove NODE         (before or after deleting it from the tfvars)"
   echo "       $0 reboot [NODE...]   (every node, control planes first, if none are given)"
+  echo "       $0 reregister [NODE...]   (same order, once after turning on external_cloud_provider)"
   exit 1
 }
 
@@ -64,6 +66,27 @@ reboot_node(){
   kubectl uncordon "$node"
 }
 
+# A cloud controller manager only initializes a node as it registers, so nodes
+# that joined before external_cloud_provider was on have to register again.
+reregister_node(){
+  local node=$1 ip deadline
+  ip=$(jq -r --arg n "$node" '.[$n].ip' <<< "$nodes")
+  [ "$ip" != "null" ] || { echo "$node is not in this cluster"; exit 1; }
+
+  echo "==> $node"
+  kubectl drain "$node" --ignore-daemonsets --delete-emptydir-data --timeout=10m
+  kubectl delete node "$node"
+  talosctl -n "$ip" service kubelet restart
+  # The new Node isn't cordoned, so it's done once the CCM has given it a
+  # providerID and it's Ready.
+  deadline=$((SECONDS + 600))
+  until [ -n "$(kubectl get node "$node" -o jsonpath='{.spec.providerID}' 2> /dev/null)" ]; do
+    [ "$SECONDS" -lt "$deadline" ] || { echo "$node has no providerID after 10 minutes. Is the cloud controller manager running?"; exit 1; }
+    sleep 5
+  done
+  until kubectl wait --for=condition=Ready "node/$node" --timeout=10m 2> /dev/null; do sleep 5; done
+}
+
 pve_api(){
   local insecure=""
   [ "${PROXMOX_VE_INSECURE:-}" = "true" ] && insecure=-k
@@ -88,13 +111,14 @@ main(){
       [ $# -eq 2 ] || usage
       remove_node "$2"
       ;;
-    reboot)
+    reboot | reregister)
+      command=$1
       shift
       if [ $# -eq 0 ]; then
         # shellcheck disable=SC2046 # hostnames have no spaces
         set -- $(jq -r 'to_entries | sort_by(.value.role != "controlplane", .key) | .[].key' <<< "$nodes")
       fi
-      for node in "$@"; do reboot_node "$node"; done
+      for node in "$@"; do "${command}_node" "$node"; done
       ;;
     *)
       usage

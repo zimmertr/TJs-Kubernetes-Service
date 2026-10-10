@@ -145,7 +145,11 @@ Set `cluster.external_cloud_provider` to `true` to hand nodes to a cloud control
 
 New nodes join with the `node.cloudprovider.kubernetes.io/uninitialized` taint and keep it until the CCM is running. Flannel, CoreDNS and kube-proxy tolerate it, but nothing else will schedule, so install the CCM before anything else.
 
-It's best turned on when the cluster is created. Nodes that joined before it was on are left alone by the CCM until they register again: drain each one, then `kubectl delete node $NODE` and `talosctl -n $IP service kubelet restart`.
+It's best turned on when the cluster is created. Nodes that joined before it was on are left alone by the CCM until they register again, so after turning it on for an existing cluster, run `manage_nodes` once. It drains each node, deletes it from Kubernetes, restarts its kubelet and waits for the CCM, one node at a time, controlplanes first.
+
+```bash
+./bin/manage_nodes reregister
+```
 
 ## Exposing Control Plane Metrics
 
