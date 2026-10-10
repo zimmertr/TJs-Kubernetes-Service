@@ -37,19 +37,21 @@ TJ's Kubernetes Service, or *TKS*, is a collection of Terraform configurations t
 1. Create a Proxmox API token. The optional [bootstrap](bootstrap) Terraform root creates the users listed in [`vars/bootstrap.tfvars`](vars/bootstrap.tfvars), each with its own role and token. The example file defines a `tks@pve` user with only the privileges TKS needs (listed in the [Security](docs/SECURITY_GUIDE.md#the-proxmox-user) guide), plus users for the [Proxmox CSI Plugin](https://github.com/sergelogvinov/proxmox-csi-plugin) and the [Proxmox Cloud Controller Manager](https://github.com/sergelogvinov/proxmox-cloud-controller-manager). To use an existing user instead, remove `tks@pve` from the file or skip this step. The bootstrap root needs root credentials, so export them in a separate shell used only for this step:
 
    ```bash
-   cd bootstrap
-   unset PROXMOX_VE_API_TOKEN # the provider prefers a token over a password
+   # The provider prefers a token over a password, so ensure it won't interfere if it's set
+   unset PROXMOX_VE_API_TOKEN 
+   
    export PROXMOX_VE_ENDPOINT="https://earth.sol.milkyway:8006"
    export PROXMOX_VE_INSECURE="true"
    export PROXMOX_VE_USERNAME="root@pam"
    export PROXMOX_VE_PASSWORD="REPLACEME"
-
+   
+   cd bootstrap
    terraform init
    terraform apply -var-file=../vars/bootstrap.tfvars
    terraform output -json api_tokens | jq
    ```
 
-   Each user's token is printed as `<id>=<secret>`. The TKS user's token is the complete value for `PROXMOX_VE_API_TOKEN` in the next step. Close the shell afterwards so the root password does not persist.
+   After running `output`, each user's token is printed as `<id>=<secret>`. The TKS user's token is the complete value for `PROXMOX_VE_API_TOKEN` in the next step.
 
    To keep the state in [HCP Terraform](https://app.terraform.io), complete the following before running `terraform init`:
 
@@ -57,7 +59,7 @@ TJ's Kubernetes Service, or *TKS*, is a collection of Terraform configurations t
    * Run `terraform login`.
    * Copy `bootstrap/cloud_override.tf.example` to `bootstrap/cloud_override.tf` and set the organization. It uses a workspace named `tks-bootstrap`. If `bootstrap` was previously applied with local state, `terraform init` offers to migrate it.
 
-2. Set the environment variables the provider uses to authenticate to Proxmox, as described in its [documentation](https://registry.terraform.io/providers/bpg/proxmox/latest/docs#authentication). Copy [`vars/config.env.example`](vars/config.env.example) to `vars/config.env`, fill it in, and source it. The example also limits Terraform to upgrading one node at a time; without it, every node upgrades at once.
+2. Copy [`vars/config.env.example`](vars/config.env.example) to `vars/config.env`, configure it, and source it as per the provider's [documentation](https://registry.terraform.io/providers/bpg/proxmox/latest/docs#authentication). 
 
    ```bash
    source vars/config.env
@@ -120,7 +122,7 @@ TJ's Kubernetes Service, or *TKS*, is a collection of Terraform configurations t
    # Review pending CSRs to validate they are as expected
    kubectl get csr
    kubectl describe csr csr-foobar
-
+   
    # Approve all pending CSRs
    kubectl get csr -o name | xargs kubectl certificate approve
    ```
