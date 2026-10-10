@@ -27,7 +27,7 @@ TJ's Kubernetes Service, or *TKS*, is a collection of Terraform configurations t
 | `terraform`  | Creates and manages the cluster. Version 1.16 or newer       |
 | `kubectl`    | Used by `manage_nodes`                                       |
 | `talosctl`   | Used by `manage_nodes`                                       |
-| `jq`         | Used by `manage_nodes`                                       |
+| `jq`         | Used by `manage_nodes` and to read the bootstrap tokens      |
 | Proxmox VE   | A host or cluster to run the nodes on                        |
 | DNS Resolver | Used by the nodes to pull images and reach time servers. Set it in `network.dns_servers`. DNS records for the nodes are not required |
 
@@ -35,9 +35,11 @@ TJ's Kubernetes Service, or *TKS*, is a collection of Terraform configurations t
 
 ## Instructions
 
-1. If you don't already have one. create a Proxmox API token for the Terraform provider to use. The [bootstrap](bootstrap) Terraform root can be used to create the users listed in [`vars/bootstrap.tfvars`](vars/bootstrap.tfvars), each of which comes with its own role and token. 
+1. If you don't already have one, create a Proxmox API token for the Terraform provider to use. The [bootstrap](bootstrap) Terraform root can be used to create the users listed in [`vars/bootstrap.tfvars`](vars/bootstrap.tfvars), each of which comes with its own role and token. 
 
    The example file defines a user with only the privileges TKS needs (listed in the [Security](docs/SECURITY_GUIDE.md#the-proxmox-user) guide), plus users for the [Proxmox CSI Plugin](https://github.com/sergelogvinov/proxmox-csi-plugin) and the [Proxmox Cloud Controller Manager](https://github.com/sergelogvinov/proxmox-cloud-controller-manager). 
+
+   The bootstrap root's state is stored locally by default. To store it in HCP Terraform instead, follow [Storing State in HCP Terraform](#storing-state-in-hcp-terraform) before running `terraform init`.
 
    The bootstrap root needs root credentials, so export them in a separate shell used only for this step:
 
@@ -68,7 +70,7 @@ TJ's Kubernetes Service, or *TKS*, is a collection of Terraform configurations t
 
    `talos_version` is the Talos release installed on the nodes, and raising it upgrades them in place. `talos_config_version` is the release whose machine configuration format TKS generates. Set it to `talos_version` when the cluster is created and leave it there: keeping it pinned means a Talos upgrade changes the installed OS without also rewriting every node's configuration to a newer format. Raising it later is possible, but it changes the configuration of every node, and lowering it is not supported.
 
-4. Initialize Terraform and create a workspace for the cluster. State is stored locally by default; to store it in HCP Terraform instead, see [Storing State in HCP Terraform](#storing-state-in-hcp-terraform).
+4. Initialize Terraform and create a workspace for the cluster. State is stored locally by default. To store it in HCP Terraform instead, follow [Storing State in HCP Terraform](#storing-state-in-hcp-terraform) before running `terraform init`.
 
    ```bash
    terraform init
@@ -117,13 +119,13 @@ TJ's Kubernetes Service, or *TKS*, is a collection of Terraform configurations t
 
 ### Storing State in HCP Terraform
 
-Both Terraform roots use local state by default. To store state in [HCP Terraform](https://app.terraform.io) instead:
+Both Terraform roots store state locally by default. State holds the cluster's secrets and, for the bootstrap root, the Proxmox API tokens; the [Security](docs/SECURITY_GUIDE.md#secrets-in-terraform-state) guide covers keeping it safe. To store it in [HCP Terraform](https://app.terraform.io) instead, complete these steps before the first `terraform init` in each root:
 
-* In the HCP Terraform organization, set the *Default Execution Mode* to *Local* under *Settings > General*, so plans run locally where Proxmox is reachable.
-* Run `terraform login`.
-* Copy `cloud_override.tf.example` to `cloud_override.tf`, and `bootstrap/cloud_override.tf.example` to `bootstrap/cloud_override.tf`, and set the organization in both. `bootstrap/` uses a workspace named `tks-bootstrap`, and cluster workspaces are tagged `tks-cluster`.
+1. In the HCP Terraform organization, set the *Default Execution Mode* to *Local* under *Settings > General*, so plans run locally where Proxmox is reachable.
+2. Run `terraform login`.
+3. Copy `cloud_override.tf.example` to `cloud_override.tf`, and `bootstrap/cloud_override.tf.example` to `bootstrap/cloud_override.tf`, and set the organization in both.
 
-HCP Terraform uses the workspace name as is, so a `tks-` prefix is recommended. The first `terraform init` prompts for a workspace name because no workspace has the `tks-cluster` tag yet; enter it there instead of running `terraform workspace new`. Existing local state is offered for migration on the next `terraform init`.
+The bootstrap root uses a workspace named `tks-bootstrap`. Cluster workspaces are tagged `tks-cluster`, and HCP Terraform uses each workspace's name as is, so a `tks-` prefix is recommended. The first `terraform init` in the repository root prompts for a workspace name, because no workspace has the tag yet; enter the cluster's workspace name there instead of running `terraform workspace new`. If a root already has local state, `terraform init` offers to migrate it.
 
 ### Using a Different CNI
 
@@ -147,7 +149,7 @@ On a running cluster, the scheduler, controller-manager and API server apply the
 
 ## Managing the Cluster
 
-Scaling and upgrades are driven by the tfvars file. Add, remove or resize nodes, or change `talos_version` or `kubernetes_version`, then run `terraform plan` and apply. Upgrades happen in place, one node at a time with control planes first; nodes are drained before a Talos upgrade, and Kubernetes upgrades are health checked. Renovate opens pull requests for new versions and checks that the Talos and Kubernetes versions are compatible. `talos_config_version` is fixed when the cluster is created and must not change.
+Scaling and upgrades are driven by the tfvars file. Add, remove or resize nodes, or change `talos_version` or `kubernetes_version`, then run `terraform plan` and apply. Upgrades happen in place, one node at a time with control planes first; nodes are drained before a Talos upgrade, and Kubernetes upgrades are health checked. Renovate opens pull requests for new versions and checks that the Talos and Kubernetes versions are compatible. `talos_config_version` stays at the version the cluster was created with, as described in step 3 of the [Instructions](#instructions).
 
 Some operations need more than an apply. [`bin/manage_nodes`](bin/manage_nodes) handles them, one node at a time, from the repository root in the cluster's workspace after `source vars/config.env`:
 

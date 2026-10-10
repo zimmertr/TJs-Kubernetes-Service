@@ -37,7 +37,7 @@ Every node boots with UEFI SecureBoot from Talos's signed image. The VM's UEFI s
 State holds everything needed to control the cluster: the Talos machine secrets (the cluster's certificate authorities and keys), the `talosconfig`, an admin `kubeconfig` and, for `bootstrap/`, the API tokens. Treat state as a secret:
 
 - Never commit it. `.gitignore` excludes `*.tfstate*`.
-- Keep it somewhere that is backed up and access-controlled. A remote backend with encryption and locking is better than a laptop. `cloud_override.tf.example` sets up HCP Terraform.
+- Keep it somewhere that is backed up and access-controlled. A remote backend with encryption and locking is better than a laptop. [Storing State in HCP Terraform](../README.md#storing-state-in-hcp-terraform) sets it up for both roots.
 - Anyone who can read the state is a cluster administrator.
 
 The `kubeconfig` and `talosconfig` outputs are marked sensitive, so Terraform does not print them unless asked with `terraform output -raw`. The kubeconfig used to drain nodes during upgrades is ephemeral and never written to state.
