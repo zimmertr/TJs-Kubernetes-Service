@@ -162,7 +162,7 @@ Proxmox starts only one VM per card, so two clusters on the same host cannot run
 
 Scaling and upgrades are driven by the tfvars file. Add, remove or resize nodes, or change `talos_version` or `kubernetes_version`, then run `terraform plan` and apply. Upgrades happen in place, one node at a time with control planes first; nodes are drained before a Talos upgrade, and Kubernetes upgrades are health checked. Renovate opens pull requests for new versions and checks that the Talos and Kubernetes versions are compatible. `talos_config_version` stays at the version the cluster was created with, as described in step 3 of the [Instructions](#instructions).
 
-Some operations need more than an apply. [`bin/tks`](bin/tks) handles them from the repository root in the cluster's workspace after `source vars/config.env`. It acts on the cluster of the selected Terraform workspace, using the configuration files in that workspace's outputs, not the current `kubectl` or `talosctl` context:
+Some operations need more than an apply. [`bin/tks`](bin/tks) handles them from the repository root in the cluster's workspace. `doctor` and `reboot` also call the Proxmox API, so they need `PROXMOX_VE_ENDPOINT` and `PROXMOX_VE_API_TOKEN` exported, as `vars/config.env` does. It acts on the cluster of the selected Terraform workspace, using the configuration files in that workspace's outputs, not the current `kubectl` or `talosctl` context:
 
 | Command                       | Use                                                          |
 | ----------------------------- | ------------------------------------------------------------ |
