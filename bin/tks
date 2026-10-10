@@ -4,7 +4,8 @@
 # cluster when it's removed, restarting nodes one at a time so hardware changes
 # (cores, memory, PCI devices) take effect, and registering nodes again after
 # cluster.external_cloud_provider is turned on. Run it from the repo root, in
-# the workspace of the cluster, after `source vars/config.env`.
+# the workspace of the cluster. doctor and reboot also need the Proxmox
+# provider's environment variables, which vars/config.env can set.
 set -euo pipefail
 
 usage(){
@@ -24,6 +25,22 @@ fact(){ awk -v k="$1" '$1 == k { print $2 }' <<< "$facts"; }
 node_info(){ awk -v n="$1" '$1 == "node" && $2 == n { print $3, $4, $5, $6, $7 }' <<< "$facts"; }
 node_ip(){ node_info "$1" | awk '{ print $2 }'; }
 node_names(){ awk -v r="${1:-}" '$1 == "node" && (r == "" || $3 == r) { print $2 }' <<< "$facts"; }
+
+# Names everything missing at once, rather than failing on whichever line
+# first needs it. PROXMOX_* entries are environment variables, the rest are
+# commands.
+need(){
+  local commands="" variables="" item
+  for item in "$@"; do
+    case "$item" in
+      PROXMOX_*) [ -n "${!item:-}" ] || variables="$variables $item" ;;
+      *) command -v "$item" > /dev/null || commands="$commands $item" ;;
+    esac
+  done
+  [ -z "$commands" ] || echo "Missing commands:$commands" >&2
+  [ -z "$variables" ] || echo "Missing environment variables:$variables. Export them, for example with \`source vars/config.env\`." >&2
+  [ -z "$commands$variables" ] || exit 1
+}
 
 # Proxmox's responses are flat enough to read a field without a JSON parser.
 json_field(){ sed -n "s/.*\"$1\":\"\{0,1\}\([^\",}]*\).*/\1/p"; }
@@ -222,51 +239,56 @@ reregister_node(){
 }
 
 main(){
+  local proxmox=(curl PROXMOX_VE_ENDPOINT PROXMOX_VE_API_TOKEN)
   [ $# -ge 1 ] || usage
-  if [ "$1" = "token" ]; then
-    [ $# -eq 2 ] || usage
-    token "$2"
-    return
-  fi
+  case "$1" in
+    token) [ $# -eq 2 ] || usage; need terraform; token "$2"; return ;;
+    config | doctor | approve-csrs) [ $# -eq 1 ] || usage ;;
+    remove) [ $# -eq 2 ] || usage ;;
+    reboot | reregister) ;;
+    *) usage ;;
+  esac
+  case "$1" in
+    approve-csrs) need terraform kubectl openssl base64 ;;
+    doctor | reboot) need terraform kubectl talosctl "${proxmox[@]}" ;;
+    *) need terraform kubectl talosctl ;;
+  esac
 
   tmp_dir=$(mktemp -d)
   trap 'rm -rf "$tmp_dir"' EXIT
   # Without its backend, Terraform quietly falls back to an empty local state,
   # so a missing cloud_override.tf shows up here rather than as a new cluster.
-  facts=$(terraform output -raw tks 2> /dev/null || true)
+  if ! facts=$(terraform output -raw tks 2> "$tmp_dir/error"); then
+    if grep -q 'Output "tks" not found' "$tmp_dir/error"; then
+      echo "Workspace $(terraform workspace show) has no tks output yet. Apply it once to add the output." >&2
+    else
+      cat "$tmp_dir/error" >&2
+    fi
+    exit 1
+  fi
   [ -n "$facts" ] ||
     { echo "Workspace $(terraform workspace show) has no TKS cluster. Is its backend configured, and has it been applied?" >&2; exit 1; }
+  # The cluster comes from the Terraform workspace, not the current kubectl or
+  # talosctl context, so say which one it is.
+  echo "==> Cluster $(fact cluster), from Terraform workspace $(terraform workspace show)" >&2
   terraform output -raw kubeconfig > "$tmp_dir/kubeconfig"
   terraform output -raw talosconfig > "$tmp_dir/talosconfig"
   export KUBECONFIG=$tmp_dir/kubeconfig
   export TALOSCONFIG=$tmp_dir/talosconfig
 
   case "$1" in
-    config)
-      [ $# -eq 1 ] || usage
-      config
-      ;;
-    doctor)
-      [ $# -eq 1 ] || usage
-      doctor
-      ;;
+    config) config ;;
+    doctor) doctor ;;
     approve-csrs)
-      [ $# -eq 1 ] || usage
       for node in $(node_names); do approve_csrs "$node" "$(node_ip "$node")"; done
       ;;
-    remove)
-      [ $# -eq 2 ] || usage
-      remove_node "$2"
-      ;;
+    remove) remove_node "$2" ;;
     reboot | reregister)
       command=$1
       shift
       # shellcheck disable=SC2046 # hostnames have no spaces
       [ $# -gt 0 ] || set -- $(node_names)
       for node in "$@"; do "${command}_node" "$node"; done
-      ;;
-    *)
-      usage
       ;;
   esac
 }
