@@ -1,0 +1,9 @@
+# Applied to every node when cluster.external_cloud_provider is on.
+# The kubelet then runs with --cloud-provider=external and registers each new
+# node with the node.cloudprovider.kubernetes.io/uninitialized taint, which a
+# cloud controller manager (such as the Proxmox CCM) removes once it has set
+# the node's providerID and topology labels. Talos 1.14 still configures this
+# through the v1alpha1 cluster document.
+cluster:
+  externalCloudProvider:
+    enabled: true

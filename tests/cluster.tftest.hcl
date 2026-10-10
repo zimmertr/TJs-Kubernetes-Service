@@ -69,7 +69,7 @@ run "feature_patches_are_off_by_default" {
 
   assert {
     condition     = length(local.controlplanes["test-k8s-cp-1"].config_patches) == 3 && length(local.workers["test-k8s-node-1"].config_patches) == 2
-    error_message = "Without disable_flannel or expose_metrics, only the global, VIP and hostname patches apply"
+    error_message = "Without disable_flannel, expose_metrics or external_cloud_provider, only the global, VIP and hostname patches apply"
   }
 }
 
@@ -83,6 +83,24 @@ run "feature_patches_apply_when_switched_on" {
   assert {
     condition     = length(local.controlplanes["test-k8s-cp-1"].config_patches) == 5 && length(local.workers["test-k8s-node-1"].config_patches) == 2
     error_message = "disable_flannel and expose_metrics apply to control planes only"
+  }
+}
+
+run "external_cloud_provider_applies_to_every_node" {
+  command = plan
+
+  variables {
+    cluster = { name = "test", vip = "192.168.40.50", talos_config_version = "v1.14.2", external_cloud_provider = true }
+  }
+
+  assert {
+    condition     = length(local.controlplanes["test-k8s-cp-1"].config_patches) == 4 && length(local.workers["test-k8s-node-1"].config_patches) == 3
+    error_message = "external_cloud_provider must reach the kubelet on control planes and workers alike"
+  }
+
+  assert {
+    condition     = strcontains(local.workers["test-k8s-node-1"].config_patches[1], "externalCloudProvider")
+    error_message = "The worker's extra patch must be the external cloud provider one"
   }
 }
 

@@ -2,9 +2,10 @@ locals {
   cluster_endpoint = "https://${var.cluster.vip}:6443"
   bootstrap_node   = var.controlplanes.nodes[sort(keys(var.controlplanes.nodes))[0]].ip
 
-  global_patches = [
-    templatefile("${path.module}/configs/global.yaml", { talos_installer_image = module.image.installer_image }),
-  ]
+  global_patches = concat(
+    [templatefile("${path.module}/configs/global.yaml", { talos_installer_image = module.image.installer_image })],
+    var.cluster.external_cloud_provider ? [file("${path.module}/configs/external_cloud_provider.yaml")] : [],
+  )
   # Flannel, kube-proxy and the metrics listeners are configured through
   # control-plane-only documents; workers get them as DaemonSets.
   controlplane_patches = concat(

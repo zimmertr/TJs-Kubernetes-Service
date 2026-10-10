@@ -16,7 +16,7 @@ One Terraform root builds one cluster. Use a workspace (or a separate state) per
 
 1. Terraform creates the VM with its disk imported from the pool's image. Cloud-init gives it its static IP, gateway and DNS servers.
 2. On first boot, the image enrolls Talos's SecureBoot keys, because the VM's UEFI starts with none. Talos then boots in maintenance mode.
-3. `talos_machine` applies the machine configuration to the node's IP. The patches in `configs/` set the installer image, the hostname, and the control planes' shared virtual IP, plus Flannel and metrics settings when they are switched on.
+3. `talos_machine` applies the machine configuration to the node's IP. The patches in `configs/` set the installer image, the hostname, and the control planes' shared virtual IP, plus Flannel, metrics and external cloud provider settings when they are switched on.
 4. `talos_cluster` bootstraps etcd on the first control plane, and the others join through the virtual IP.
 
 Control planes come up before workers.
@@ -32,7 +32,7 @@ Nothing in an upgrade replaces a VM. The VM reads its image only when it is crea
 
 ## Removing a node
 
-Terraform only deletes a removed node's VM. It doesn't reset the node, so `terraform destroy` of a whole cluster never waits on etcd or on draining. `bin/manage_nodes remove` takes a single node out of the cluster: run before the apply, it drains the node, resets it gracefully (so a control plane leaves etcd) and deletes the Node object. Run after, it removes the dead etcd member from another control plane and deletes the Node object. It refuses to remove the last control plane.
+Terraform only deletes a removed node's VM. It doesn't reset the node, so `terraform destroy` of a whole cluster never waits on etcd or on draining. `bin/manage_nodes remove` takes a single node out of the cluster: run before the apply, it drains the node, resets it gracefully (so a control plane leaves etcd) and deletes the Node object. Run after, it removes the dead etcd member from another control plane and deletes the Node object. It refuses to remove the last control plane. With `cluster.external_cloud_provider` on, a cloud controller manager also deletes the Node object of any VM that's gone, so a worker needs nothing more than the apply. [0027](decisions/0027-optional-external-cloud-provider.md)
 
 ## Changing a node's hardware
 

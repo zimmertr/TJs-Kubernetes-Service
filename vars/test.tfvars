@@ -16,11 +16,12 @@ network = {
 
 # Cluster #######################
 cluster = {
-  name                 = "test"
-  vip                  = "192.168.40.50"
-  talos_version        = "v1.14.2"
-  talos_config_version = "v1.14.2"
-  kubernetes_version   = "v1.37.1"
+  name                    = "test"
+  vip                     = "192.168.40.50"
+  talos_version           = "v1.14.2"
+  talos_config_version    = "v1.14.2"
+  kubernetes_version      = "v1.37.1"
+  external_cloud_provider = true
 }
 
 
