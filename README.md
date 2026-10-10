@@ -46,10 +46,10 @@ TJ's Kubernetes Service, or *TKS*, is an IaC project that is used to deliver Kub
 
    terraform init
    terraform apply -var-file=../vars/bootstrap.tfvars
-   terraform output -json api_tokens | jq -r '."tks@pve"'
+   terraform output -json api_tokens | jq
    ```
 
-   The output is the whole value for `PROXMOX_VE_API_TOKEN`, so paste it as is in the next step. The other users' tokens are in `api_tokens` too, in the same `<id>=<secret>` form. Then close that shell so the root password doesn't stick around.
+   It prints each user's token as `<id>=<secret>`. The one for your TKS user is the whole value for `PROXMOX_VE_API_TOKEN`, so paste it as is in the next step. Then close that shell so the root password doesn't stick around.
 
    I keep my Terraform state in [HCP Terraform](https://app.terraform.io). If you want to as well, do this before running `terraform init` above:
 
