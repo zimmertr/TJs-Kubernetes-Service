@@ -173,7 +173,7 @@ Some operations need more than an apply. [`bin/manage_nodes`](bin/manage_nodes) 
 | ----------------------------- | ------------------------------------------------------------ |
 | `remove NODE`                 | Takes a node out of the cluster: drains it, removes it from etcd if it is a control plane, resets it and deletes it from Kubernetes. Run it before removing the node from the tfvars. If it runs afterwards, it removes the dead etcd member instead, which requires at least three control planes. It refuses to remove the last control plane. With a cloud controller manager, workers can be removed with only the apply, but draining first is still recommended |
 | `reboot [NODE...]`            | Restarts nodes through Proxmox after a change to cores, memory or PCI devices, which Terraform does not apply to running VMs. Each node is drained, restarted, and waited on before the next |
-| `reregister [NODE...]`        | Registers nodes again after `cluster.external_cloud_provider` is enabled on an existing cluster. Each node is drained, deleted from Kubernetes, rebooted onto its new pod network, and waited on until the CCM has initialized it. Needed once per cluster |
+| `reregister [NODE...]`        | Registers nodes again after `cluster.external_cloud_provider` is enabled on an existing cluster. Each node is drained, deleted from Kubernetes with its remaining pods, rebooted onto its new pod network, and waited on until the CCM has initialized it. Needed once per cluster |
 
 Without node names, `reboot` and `reregister` process every node, control planes first.
 
