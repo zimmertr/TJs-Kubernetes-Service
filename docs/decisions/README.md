@@ -51,3 +51,4 @@ The new record says `Supersedes NNNN` in its status line. The old record changes
 | [0032](0032-gpu-image-built-in-the-root.md) | The GPU pool's Talos image is built in the root, beside the general one | 2026-10-10 | Accepted |
 | [0033](0033-pci-device-chosen-in-its-own-module.md) | The PCI device is looked up in its own module, so the lookup can be tested | 2026-10-10 | Accepted |
 | [0034](0034-each-gpu-node-names-its-gpu-by-address.md) | Each GPU node names its GPU by PCI address in the tfvars, and gets a mapping of its own | 2026-10-10 | Accepted |
+| [0035](0035-nodes-resolve-member-names.md) | Every node resolves cluster members' hostnames through Talos's host DNS | 2026-10-10 | Accepted |
