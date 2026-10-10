@@ -1,6 +1,6 @@
 # 0028. `manage_nodes reregister` registers existing nodes again after the external cloud provider is turned on
 
-- Status: Accepted
+- Status: Superseded by [0029](0029-reregister-reboots-the-node.md)
 - Date: 2026-10-10
 - Decider: TJ
 - Issues and PRs: #96

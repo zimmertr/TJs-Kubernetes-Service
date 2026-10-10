@@ -76,7 +76,10 @@ reregister_node(){
   echo "==> $node"
   kubectl drain "$node" --ignore-daemonsets --delete-emptydir-data --timeout=10m
   kubectl delete node "$node"
-  talosctl -n "$ip" service kubelet restart
+  # The new Node gets a new pod CIDR, and Flannel and the CNI bridge only take
+  # it up on a fresh boot. A kubelet restart leaves pods on the old CIDR with
+  # no routes to them from the other nodes.
+  talosctl -n "$ip" reboot
   # The new Node isn't cordoned, so it's done once the CCM has given it a
   # providerID and it's Ready.
   deadline=$((SECONDS + 600))
@@ -85,6 +88,9 @@ reregister_node(){
     sleep 5
   done
   until kubectl wait --for=condition=Ready "node/$node" --timeout=10m 2> /dev/null; do sleep 5; done
+  if [ "$(jq -r --arg n "$node" '.[$n].role' <<< "$nodes")" = "controlplane" ]; then
+    until talosctl -n "$ip" etcd status > /dev/null 2>&1; do sleep 5; done
+  fi
 }
 
 pve_api(){
