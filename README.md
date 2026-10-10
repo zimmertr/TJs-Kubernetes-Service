@@ -4,6 +4,7 @@
 * [Requirements](#requirements)
 * [Instructions](#instructions)
 * [Configuration Options](#configuration-options)
+  * [Storing State in HCP Terraform](#storing-state-in-hcp-terraform)
   * [Using a Different CNI](#using-a-different-cni)
   * [Using a Cloud Controller Manager](#using-a-cloud-controller-manager)
   * [Exposing Control Plane Metrics](#exposing-control-plane-metrics)
@@ -34,15 +35,7 @@ TJ's Kubernetes Service, or *TKS*, is a collection of Terraform configurations t
 
 ## Instructions
 
-1. Configure Terraform state. TKS has two Terraform roots: the optional `bootstrap/` root, applied once per Proxmox cluster, and the repository root, applied once per Kubernetes cluster in its own workspace. Both use local state unless a backend is configured. To store state in [HCP Terraform](https://app.terraform.io):
-
-   * In the HCP Terraform organization, set the *Default Execution Mode* to *Local* under *Settings > General*, so plans run locally where Proxmox is reachable.
-   * Run `terraform login`.
-   * Copy `cloud_override.tf.example` to `cloud_override.tf`, and `bootstrap/cloud_override.tf.example` to `bootstrap/cloud_override.tf`, and set the organization in both. `bootstrap/` uses a workspace named `tks-bootstrap`, and cluster workspaces are tagged `tks-cluster`.
-
-   Existing local state is offered for migration on the next `terraform init`.
-
-2. Create a Proxmox API token. The optional [bootstrap](bootstrap) Terraform root creates the users listed in [`vars/bootstrap.tfvars`](vars/bootstrap.tfvars), each with its own role and token. The example file defines a `tks@pve` user with only the privileges TKS needs (listed in the [Security](docs/SECURITY_GUIDE.md#the-proxmox-user) guide), plus users for the [Proxmox CSI Plugin](https://github.com/sergelogvinov/proxmox-csi-plugin) and the [Proxmox Cloud Controller Manager](https://github.com/sergelogvinov/proxmox-cloud-controller-manager). To use an existing user instead, remove `tks@pve` from the file or skip this step. The bootstrap root needs root credentials, so export them in a separate shell used only for this step:
+1. Create a Proxmox API token. The optional [bootstrap](bootstrap) Terraform root creates the users listed in [`vars/bootstrap.tfvars`](vars/bootstrap.tfvars), each with its own role and token. The example file defines a `tks@pve` user with only the privileges TKS needs (listed in the [Security](docs/SECURITY_GUIDE.md#the-proxmox-user) guide), plus users for the [Proxmox CSI Plugin](https://github.com/sergelogvinov/proxmox-csi-plugin) and the [Proxmox Cloud Controller Manager](https://github.com/sergelogvinov/proxmox-cloud-controller-manager). To use an existing user instead, remove `tks@pve` from the file or skip this step. The bootstrap root needs root credentials, so export them in a separate shell used only for this step:
 
    ```bash
    # The provider prefers a token over a password, so ensure it won't interfere if it's set
@@ -61,32 +54,30 @@ TJ's Kubernetes Service, or *TKS*, is a collection of Terraform configurations t
 
    After running `output`, each user's token is printed as `<id>=<secret>`. The TKS user's token is the complete value for `PROXMOX_VE_API_TOKEN` in the next step.
 
-3. Copy [`vars/config.env.example`](vars/config.env.example) to `vars/config.env`, configure it, and source it as per the provider's [documentation](https://registry.terraform.io/providers/bpg/proxmox/latest/docs#authentication). 
+2. Copy [`vars/config.env.example`](vars/config.env.example) to `vars/config.env`, configure it, and source it as per the provider's [documentation](https://registry.terraform.io/providers/bpg/proxmox/latest/docs#authentication). 
 
    ```bash
    source vars/config.env
    ```
 
-4. Create a [tfvars](https://developer.hashicorp.com/terraform/language/values/variables#variable-definitions-tfvars-files) file for the cluster. Every input is described in [Configuration](docs/CONFIGURATION.md), and [`vars/test.tfvars`](vars/test.tfvars) is a complete example. Nodes are a map keyed by hostname, each with a static IP and VMID. Nodes are addressed by IP, so DNS records for them are optional.
+3. Create a [tfvars](https://developer.hashicorp.com/terraform/language/values/variables#variable-definitions-tfvars-files) file for the cluster. Every input is described in [Configuration](docs/CONFIGURATION.md), and [`vars/test.tfvars`](vars/test.tfvars) is a complete example. Nodes are a map keyed by hostname, each with a static IP and VMID. Nodes are addressed by IP, so DNS records for them are optional.
 
    `talos_version` is the Talos release installed on the nodes, and raising it upgrades them in place. `talos_config_version` is the release whose machine configuration format TKS generates. Set it to `talos_version` when the cluster is created and leave it there: keeping it pinned means a Talos upgrade changes the installed OS without also rewriting every node's configuration to a newer format. Raising it later is possible, but it changes the configuration of every node, and lowering it is not supported.
 
-5. Initialize Terraform and create a workspace for the cluster. HCP Terraform uses the workspace name as is, so a `tks-` prefix is recommended.
+4. Initialize Terraform and create a workspace for the cluster. State is stored locally by default; to store it in HCP Terraform instead, see [Storing State in HCP Terraform](#storing-state-in-hcp-terraform).
 
    ```bash
    terraform init
    terraform workspace new tks-test
    ```
 
-   With HCP Terraform, the first `terraform init` prompts for a workspace name because no workspace has the `tks-cluster` tag yet. Enter `tks-test` there and skip `terraform workspace new`.
-
-6. Create the cluster:
+5. Create the cluster:
 
    ```bash
    terraform apply --var-file="vars/test.tfvars"
    ```
 
-7. Retrieve the Kubernetes and Talos configuration files, taking care not to overwrite existing ones. [kubecm](https://github.com/sunny0826/kubecm) and [kubectx](https://github.com/ahmetb/kubectx) can merge kubeconfigs and switch contexts.
+6. Retrieve the Kubernetes and Talos configuration files, taking care not to overwrite existing ones. [kubecm](https://github.com/sunny0826/kubecm) and [kubectx](https://github.com/ahmetb/kubectx) can merge kubeconfigs and switch contexts.
 
    ```bash
    mkdir -p ~/.{kube,talos}
@@ -99,13 +90,13 @@ TJ's Kubernetes Service, or *TKS*, is a collection of Terraform configurations t
    kubectx admin@test
    ```
 
-8. Confirm that Kubernetes is bootstrapped and that every node has joined. The control plane can take a moment to respond. Each node's status is also visible through `talosctl` or the VM console in Proxmox.
+7. Confirm that Kubernetes is bootstrapped and that every node has joined. The control plane can take a moment to respond. Each node's status is also visible through `talosctl` or the VM console in Proxmox.
 
    ```bash
    watch kubectl get nodes,all -A
    ```
 
-9. Kubelet serving certificates require their certificate signing requests (CSRs) to be approved. Without an approver such as [Kubelet CSR Approver](https://github.com/postfinance/kubelet-csr-approver), review and approve them manually:
+8. Kubelet serving certificates require their certificate signing requests (CSRs) to be approved. Without an approver such as [Kubelet CSR Approver](https://github.com/postfinance/kubelet-csr-approver), review and approve them manually:
 
    ```bash
    # Review pending CSRs to validate they are as expected
@@ -119,6 +110,16 @@ TJ's Kubernetes Service, or *TKS*, is a collection of Terraform configurations t
 <hr>
 
 ## Configuration Options
+
+### Storing State in HCP Terraform
+
+Both Terraform roots use local state by default. To store state in [HCP Terraform](https://app.terraform.io) instead:
+
+* In the HCP Terraform organization, set the *Default Execution Mode* to *Local* under *Settings > General*, so plans run locally where Proxmox is reachable.
+* Run `terraform login`.
+* Copy `cloud_override.tf.example` to `cloud_override.tf`, and `bootstrap/cloud_override.tf.example` to `bootstrap/cloud_override.tf`, and set the organization in both. `bootstrap/` uses a workspace named `tks-bootstrap`, and cluster workspaces are tagged `tks-cluster`.
+
+HCP Terraform uses the workspace name as is, so a `tks-` prefix is recommended. The first `terraform init` prompts for a workspace name because no workspace has the `tks-cluster` tag yet; enter it there instead of running `terraform workspace new`. Existing local state is offered for migration on the next `terraform init`.
 
 ### Using a Different CNI
 
