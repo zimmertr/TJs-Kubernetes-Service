@@ -39,7 +39,7 @@ The new record says `Supersedes NNNN` in its status line. The old record changes
 | [0020](0020-readme-is-tjs.md) | The README stays in TJ's own voice and remains the main guide, and `docs/` holds the reference pages | 2026-10-09 | Accepted |
 | [0021](0021-compat-check-reads-talos-support-matrix.md) | The compatibility check reads the Kubernetes range from Talos's source, not from `talosctl gen config` | 2026-10-09 | Accepted |
 | [0022](0022-secrets-ignore-config-version.md) | The machine secrets ignore later `talos_version` changes instead of refusing to be destroyed | 2026-10-09 | Accepted |
-| [0023](0023-manage-nodes-returns.md) | A slimmed-down `bin/manage_nodes` returns for node removal and rolling reboots | 2026-10-09 | Accepted |
+| [0023](0023-manage-nodes-returns.md) | A slimmed-down `bin/manage_nodes` returns for node removal and rolling reboots | 2026-10-09 | Superseded by 0037 |
 | [0024](0024-secureboot.md) | Every node boots with UEFI SecureBoot | 2026-10-09 | Accepted |
 | [0025](0025-destroy-does-not-reset.md) | Destroying a node only deletes its VM, and `manage_nodes remove` takes a single node out of the cluster | 2026-10-09 | Accepted |
 | [0026](0026-bootstrap-creates-integration-users.md) | `bootstrap/` creates every Proxmox user from a `users` map in `vars/bootstrap.tfvars`, including the one TKS runs as | 2026-10-09 | Accepted |
@@ -53,3 +53,4 @@ The new record says `Supersedes NNNN` in its status line. The old record changes
 | [0034](0034-each-gpu-node-names-its-gpu-by-address.md) | Each GPU node names its GPU by PCI address in the tfvars, and gets a mapping of its own | 2026-10-10 | Accepted |
 | [0035](0035-nodes-resolve-member-names.md) | Every node resolves cluster members' hostnames through Talos's host DNS | 2026-10-10 | Accepted |
 | [0036](0036-reregister-deletes-the-nodes-pods.md) | `manage_nodes reregister` deletes the node's remaining pods along with its Node | 2026-10-10 | Accepted |
+| [0037](0037-tks-helper.md) | `bin/manage_nodes` becomes `bin/tks`, which also handles client configs, CSRs, health checks and tokens, without `jq` | 2026-10-10 | Accepted |

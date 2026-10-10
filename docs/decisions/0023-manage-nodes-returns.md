@@ -1,6 +1,6 @@
 # 0023. A slimmed-down `bin/manage_nodes` returns for node removal and rolling reboots
 
-- Status: Accepted
+- Status: Superseded by 0037
 - Date: 2026-10-09
 - Decider: TJ
 - Issues and PRs: T23, the TKS v2 PR

@@ -29,6 +29,22 @@ variables {
   }
 }
 
+run "tks_output_lists_the_cluster_and_control_planes_first" {
+  command = plan
+
+  assert {
+    condition = output.tks == join("\n", [
+      "cluster test",
+      "talos_version v1.14.2",
+      "kubernetes_version v1.37.1",
+      "node test-k8s-cp-1 controlplane 192.168.40.51 4051 earth controlplanes",
+      "node test-k8s-cp-2 controlplane 192.168.40.52 4052 earth controlplanes",
+      "node test-k8s-node-1 worker 192.168.40.61 4061 earth workers",
+    ])
+    error_message = "bin/tks reads the cluster's facts line by line and reboots nodes in this order"
+  }
+}
+
 run "pool_defaults_fill_in_what_a_node_does_not_set" {
   command = plan
 
@@ -211,7 +227,11 @@ run "gpu_workers_get_their_own_image_taint_and_label" {
   }
   assert {
     condition     = output.nodes["test-k8s-node-gpu-1"].role == "worker"
-    error_message = "GPU nodes must be listed for manage_nodes as workers"
+    error_message = "GPU nodes must be listed as workers"
+  }
+  assert {
+    condition     = contains(split("\n", output.tks), "node test-k8s-node-gpu-1 worker 192.168.40.71 4071 earth gpu")
+    error_message = "bin/tks must see GPU nodes as workers in the gpu pool"
   }
   assert {
     condition     = contains(data.talos_client_configuration.this.nodes, "192.168.40.71")
