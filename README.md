@@ -28,13 +28,21 @@ TJ's Kubernetes Service, or *TKS*, is a collection of Terraform configurations t
 | `talosctl`   | Used by `manage_nodes`                                       |
 | `jq`         | Used by `manage_nodes`                                       |
 | Proxmox VE   | A host or cluster to run the nodes on                        |
-| DNS Resolver | Resolves names for the nodes. Set it in `network.dns_servers` |
+| DNS Resolver | Used by the nodes to pull images and reach time servers. Set it in `network.dns_servers`. DNS records for the nodes are not required |
 
 <hr>
 
 ## Instructions
 
-1. Create a Proxmox API token. The optional [bootstrap](bootstrap) Terraform root creates the users listed in [`vars/bootstrap.tfvars`](vars/bootstrap.tfvars), each with its own role and token. The example file defines a `tks@pve` user with only the privileges TKS needs (listed in the [Security](docs/SECURITY_GUIDE.md#the-proxmox-user) guide), plus users for the [Proxmox CSI Plugin](https://github.com/sergelogvinov/proxmox-csi-plugin) and the [Proxmox Cloud Controller Manager](https://github.com/sergelogvinov/proxmox-cloud-controller-manager). To use an existing user instead, remove `tks@pve` from the file or skip this step. The bootstrap root needs root credentials, so export them in a separate shell used only for this step:
+1. Configure Terraform state. TKS has two Terraform roots: the optional `bootstrap/` root, applied once per Proxmox cluster, and the repository root, applied once per Kubernetes cluster in its own workspace. Both use local state unless a backend is configured. To store state in [HCP Terraform](https://app.terraform.io):
+
+   * In the HCP Terraform organization, set the *Default Execution Mode* to *Local* under *Settings > General*, so plans run locally where Proxmox is reachable.
+   * Run `terraform login`.
+   * Copy `cloud_override.tf.example` to `cloud_override.tf`, and `bootstrap/cloud_override.tf.example` to `bootstrap/cloud_override.tf`, and set the organization in both. `bootstrap/` uses a workspace named `tks-bootstrap`, and cluster workspaces are tagged `tks-cluster`.
+
+   Existing local state is offered for migration on the next `terraform init`.
+
+2. Create a Proxmox API token. The optional [bootstrap](bootstrap) Terraform root creates the users listed in [`vars/bootstrap.tfvars`](vars/bootstrap.tfvars), each with its own role and token. The example file defines a `tks@pve` user with only the privileges TKS needs (listed in the [Security](docs/SECURITY_GUIDE.md#the-proxmox-user) guide), plus users for the [Proxmox CSI Plugin](https://github.com/sergelogvinov/proxmox-csi-plugin) and the [Proxmox Cloud Controller Manager](https://github.com/sergelogvinov/proxmox-cloud-controller-manager). To use an existing user instead, remove `tks@pve` from the file or skip this step. The bootstrap root needs root credentials, so export them in a separate shell used only for this step:
 
    ```bash
    # The provider prefers a token over a password, so ensure it won't interfere if it's set
@@ -53,43 +61,24 @@ TJ's Kubernetes Service, or *TKS*, is a collection of Terraform configurations t
 
    After running `output`, each user's token is printed as `<id>=<secret>`. The TKS user's token is the complete value for `PROXMOX_VE_API_TOKEN` in the next step.
 
-   To keep the state in [HCP Terraform](https://app.terraform.io), complete the following before running `terraform init`:
-
-   * In the HCP Terraform organization, set the *Default Execution Mode* to *Local* under *Settings > General*. Otherwise HCP runs the plan remotely, where Proxmox is unreachable.
-   * Run `terraform login`.
-   * Copy `bootstrap/cloud_override.tf.example` to `bootstrap/cloud_override.tf` and set the organization. It uses a workspace named `tks-bootstrap`. If `bootstrap` was previously applied with local state, `terraform init` offers to migrate it.
-
-2. Copy [`vars/config.env.example`](vars/config.env.example) to `vars/config.env`, configure it, and source it as per the provider's [documentation](https://registry.terraform.io/providers/bpg/proxmox/latest/docs#authentication). 
+3. Copy [`vars/config.env.example`](vars/config.env.example) to `vars/config.env`, configure it, and source it as per the provider's [documentation](https://registry.terraform.io/providers/bpg/proxmox/latest/docs#authentication). 
 
    ```bash
    source vars/config.env
    ```
 
-3. Create a [tfvars](https://developer.hashicorp.com/terraform/language/values/variables#variable-definitions-tfvars-files) file for the cluster. Every input is described in [Configuration](docs/CONFIGURATION.md), and [`vars/test.tfvars`](vars/test.tfvars) is a complete example. Nodes are a map keyed by hostname, each with a static IP and VMID. Set `talos_config_version` to the same version as `talos_version`, and do not change it afterwards.
+4. Create a [tfvars](https://developer.hashicorp.com/terraform/language/values/variables#variable-definitions-tfvars-files) file for the cluster. Every input is described in [Configuration](docs/CONFIGURATION.md), and [`vars/test.tfvars`](vars/test.tfvars) is a complete example. Nodes are a map keyed by hostname, each with a static IP and VMID. Nodes are addressed by IP, so DNS records for them are optional.
 
-4. Optionally, create DNS records for the nodes. TKS only uses IP addresses, so these are for convenience. For example, for two clusters:
+   `talos_version` is the Talos release installed on the nodes, and raising it upgrades them in place. `talos_config_version` is the release whose machine configuration format TKS generates. Set it to `talos_version` when the cluster is created and leave it there: keeping it pinned means a Talos upgrade changes the installed OS without also rewriting every node's configuration to a newer format. Raising it later is possible, but it changes the configuration of every node, and lowering it is not supported.
 
-   | Hostname        | IP Address    |
-   | --------------- | ------------- |
-   | k8s-vip         | 192.168.40.10 |
-   | k8s-cp-1        | 192.168.40.11 |
-   | k8s-cp-2        | 192.168.40.12 |
-   | k8s-cp-3        | 192.168.40.13 |
-   | k8s-node-1      | 192.168.40.21 |
-   | k8s-node-2      | 192.168.40.22 |
-   | k8s-node-3      | 192.168.40.23 |
-   | test-k8s-vip    | 192.168.40.50 |
-   | test-k8s-cp-1   | 192.168.40.51 |
-   | test-k8s-node-1 | 192.168.40.61 |
-
-5. Initialize Terraform and create a workspace for the cluster's state, or configure a different backend. For HCP Terraform, first copy `cloud_override.tf.example` to `cloud_override.tf` and set the organization. HCP uses the workspace name as is, so a `tks-` prefix is recommended. Workspaces are tagged `tks-cluster`, so `terraform workspace list` shows only clusters.
+5. Initialize Terraform and create a workspace for the cluster. HCP Terraform uses the workspace name as is, so a `tks-` prefix is recommended.
 
    ```bash
    terraform init
-   terraform workspace new test
+   terraform workspace new tks-test
    ```
 
-   With HCP Terraform, the first `terraform init` prompts for a workspace name because no workspace has the tag yet. Enter `tks-test` and skip `terraform workspace new`. For later clusters, use `terraform workspace new tks-stable`.
+   With HCP Terraform, the first `terraform init` prompts for a workspace name because no workspace has the `tks-cluster` tag yet. Enter `tks-test` there and skip `terraform workspace new`.
 
 6. Create the cluster:
 
@@ -137,7 +126,7 @@ Talos uses Flannel by default. To use a different CNI, set `cluster.disable_flan
 
 ### Using a Cloud Controller Manager
 
-Set `cluster.external_cloud_provider` to `true` to hand node initialization and cleanup to a cloud controller manager such as the [Proxmox CCM](https://github.com/sergelogvinov/proxmox-cloud-controller-manager). It sets each node's `providerID` and its `topology.kubernetes.io/zone` and `region` labels, and deletes a node from Kubernetes once its VM is gone. TKS does not deploy the CCM. Its Proxmox user is defined in [`vars/bootstrap.tfvars`](vars/bootstrap.tfvars).
+Set `cluster.external_cloud_provider` to `true` to hand node initialization and cleanup to a cloud controller manager such as the [Proxmox CCM](https://github.com/sergelogvinov/proxmox-cloud-controller-manager). It sets each node's `providerID` and its `topology.kubernetes.io/zone` and `region` labels, and deletes a node from Kubernetes once its VM is gone. The CCM is deployed separately; an example deployment, including where it fits in a cluster's bootstrap order, is available in [Kubernetes-Manifests](https://github.com/zimmertr/Kubernetes-Manifests/tree/main/misc/proxmox-cloud-controller-manager). Its Proxmox user is defined in [`vars/bootstrap.tfvars`](vars/bootstrap.tfvars).
 
 New nodes join with the `node.cloudprovider.kubernetes.io/uninitialized` taint and keep it until the CCM initializes them. Flannel, CoreDNS and kube-proxy tolerate the taint, but other workloads do not schedule, so install the CCM first.
 
