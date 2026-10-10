@@ -51,6 +51,20 @@ TJ's Kubernetes Service, or *TKS*, is an IaC project that is used to deliver Kub
 
    The output is the whole value for `PROXMOX_VE_API_TOKEN`, so paste it as is in the next step. If zsh shows a `%` at the end, that's just zsh telling you there was no newline, so leave it off. Then close that shell so the root password doesn't stick around.
 
+   It can also create users for things running in the cluster that need to talk to Proxmox, like the [Proxmox CSI Plugin](https://github.com/sergelogvinov/proxmox-csi-plugin). List them in `bootstrap/terraform.tfvars` before you apply. Each one gets its own role with only the privileges you list, and a token. This is what the CSI plugin needs:
+
+   ```hcl
+   users = {
+     "kubernetes-csi@pve" = {
+       role       = "CSI"
+       privileges = ["VM.Audit", "VM.Config.Disk", "Datastore.Allocate", "Datastore.AllocateSpace", "Datastore.Audit"]
+       token_name = "csi"
+     }
+   }
+   ```
+
+   `terraform output -json api_tokens` prints the ID and secret for each of them.
+
    I keep my Terraform state in [HCP Terraform](https://app.terraform.io). If you want to as well, do this before running `terraform init` above:
 
    * In your HCP Terraform organization, set the *Default Execution Mode* to *Local* under *Settings > General*. Otherwise HCP tries to run the plan itself and it can't reach Proxmox.

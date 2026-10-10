@@ -7,6 +7,7 @@ How TKS handles credentials and secrets, and what CI scans. To report a vulnerab
 | Credential | Where it lives | Used for |
 | --- | --- | --- |
 | Proxmox API token | `vars/config.env` (gitignored) as `PROXMOX_VE_API_TOKEN` | Every provider API call |
+| Other users' API tokens | `bootstrap/` state, as the `api_tokens` output | Whatever you created them for, such as the Proxmox CSI plugin |
 
 TKS needs no SSH access to the Proxmox host.
 
@@ -25,13 +26,15 @@ Create a dedicated user and token rather than using `root@pam`. The optional `bo
 | `VM.Allocate`, `VM.Audit`, `VM.Config.*`, `VM.PowerMgmt` | Create, configure, start, stop and destroy the VMs |
 | `VM.GuestAgent.Audit` | Read the QEMU guest agent's status |
 
+`bootstrap/` can also create users for things running in the cluster, such as the Proxmox CSI plugin, from its `users` map. Each gets its own role with only the privileges listed for it, granted on `/`, and a token that is not privilege-separated. The TKS user is always created, and the map can't replace it or share its role. [0026](decisions/0026-bootstrap-creates-integration-users.md)
+
 ## SecureBoot
 
 Every node boots with UEFI SecureBoot from Talos's signed image. The VM's UEFI starts with no keys, and the image enrolls Sidero Labs' keys on first boot. After that, the firmware only boots Talos images they signed. The kernel runs in lockdown mode. [0024](decisions/0024-secureboot.md)
 
 ## Secrets in Terraform state
 
-State holds everything needed to control the cluster: the Talos machine secrets (the cluster's certificate authorities and keys), the `talosconfig`, an admin `kubeconfig` and, for `bootstrap/`, the API token. Treat state as a secret:
+State holds everything needed to control the cluster: the Talos machine secrets (the cluster's certificate authorities and keys), the `talosconfig`, an admin `kubeconfig` and, for `bootstrap/`, the API tokens. Treat state as a secret:
 
 - Never commit it. `.gitignore` excludes `*.tfstate*`.
 - Keep it somewhere that is backed up and access-controlled. A remote backend with encryption and locking is better than a laptop. `cloud_override.tf.example` sets up HCP Terraform.

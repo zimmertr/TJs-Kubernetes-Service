@@ -45,29 +45,73 @@ locals {
   ]
 }
 
-resource "proxmox_virtual_environment_role" "tks" {
-  role_id    = var.role_id
-  privileges = local.privileges
+locals {
+  # TKS's own user is always present and always wins, so a users entry can't
+  # drop it or weaken its privileges.
+  users = merge(var.users, {
+    (var.user_id) = {
+      role       = var.role_id
+      privileges = local.privileges
+      token_name = var.token_name
+      comment    = "Terraform user for TJ's Kubernetes Service"
+    }
+  })
 }
 
-resource "proxmox_virtual_environment_user" "tks" {
-  user_id = var.user_id
-  comment = "Terraform user for TJ's Kubernetes Service"
+resource "proxmox_virtual_environment_role" "this" {
+  for_each = local.users
+
+  role_id    = each.value.role
+  privileges = each.value.privileges
+}
+
+resource "proxmox_virtual_environment_user" "this" {
+  for_each = local.users
+
+  user_id = each.key
+  comment = each.value.comment
   enabled = true
 }
 
-resource "proxmox_acl" "tks" {
+resource "proxmox_acl" "this" {
+  for_each = local.users
+
   path      = "/"
-  role_id   = proxmox_virtual_environment_role.tks.role_id
-  user_id   = proxmox_virtual_environment_user.tks.user_id
+  role_id   = proxmox_virtual_environment_role.this[each.key].role_id
+  user_id   = proxmox_virtual_environment_user.this[each.key].user_id
   propagate = true
 }
 
 # Without privilege separation the token carries the user's ACL, so there is
 # one grant to reason about instead of two.
-resource "proxmox_user_token" "tks" {
-  user_id               = proxmox_virtual_environment_user.tks.user_id
-  token_name            = var.token_name
-  comment               = "TKS clusters"
+resource "proxmox_user_token" "this" {
+  for_each = local.users
+
+  user_id               = proxmox_virtual_environment_user.this[each.key].user_id
+  token_name            = each.value.token_name
+  comment               = each.value.comment
   privileges_separation = false
+}
+
+# Without these, applying over an older bootstrap creates the new TKS role and
+# user while the old ones still exist under their old addresses, and Proxmox
+# refuses the duplicate IDs.
+moved {
+  from = proxmox_virtual_environment_role.tks
+  to   = proxmox_virtual_environment_role.this["tks@pve"]
+}
+
+moved {
+  from = proxmox_virtual_environment_user.tks
+  to   = proxmox_virtual_environment_user.this["tks@pve"]
+}
+
+moved {
+  from = proxmox_acl.tks
+  to   = proxmox_acl.this["tks@pve"]
+}
+
+moved {
+  from = proxmox_user_token.tks
+  to   = proxmox_user_token.this["tks@pve"]
 }

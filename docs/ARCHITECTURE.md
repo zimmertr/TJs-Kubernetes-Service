@@ -10,7 +10,7 @@ One Terraform root builds one cluster. Use a workspace (or a separate state) per
 | `nodes.tf` | The node pools, by calling the modules below. It renders each node's Talos patches from `configs/` |
 | `modules/talos_image` | A Talos Image Factory schematic and its SecureBoot `nocloud` `qcow2` image, downloaded to a Proxmox datastore as `tks-<cluster>-<pool>-<version>.qcow2` |
 | `modules/node` | For each node in a pool: the VM, its Talos machine configuration, and the `talos_machine` that applies and upgrades it |
-| `bootstrap/` | Optional, and a separate root. The Proxmox role, user and API token TKS runs as |
+| `bootstrap/` | Optional, and a separate root. The Proxmox role, user and API token TKS runs as, plus any users listed in its `users` map for things running in the cluster |
 
 ## How a node comes up
 
