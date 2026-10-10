@@ -70,8 +70,12 @@ resource "proxmox_virtual_environment_vm" "this" {
         gateway = var.network.gateway
       }
     }
-    dns {
-      servers = var.network.dns_servers
+    # Without a dns block, Proxmox hands the VM its host's resolvers from /etc/resolv.conf.
+    dynamic "dns" {
+      for_each = var.network.dns_servers == null ? [] : [var.network.dns_servers]
+      content {
+        servers = dns.value
+      }
     }
   }
 
