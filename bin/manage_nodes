@@ -1,20 +1,45 @@
 #!/bin/bash
-# Covers the two node chores Terraform can't do safely itself: deleting a
-# removed node from Kubernetes, and restarting nodes one at a time so hardware
-# changes (cores, memory, PCI devices) take effect. Run it from the repo root,
-# in the workspace of the cluster, after `source vars/config.env`.
+# Covers the two node chores Terraform can't do safely itself: taking a node
+# out of the cluster when it's removed, and restarting nodes one at a time so
+# hardware changes (cores, memory, PCI devices) take effect. Run it from the
+# repo root, in the workspace of the cluster, after `source vars/config.env`.
 set -euo pipefail
 
 usage(){
-  echo "Usage: $0 remove NODE"
+  echo "Usage: $0 remove NODE         (before or after deleting it from the tfvars)"
   echo "       $0 reboot [NODE...]   (every node, control planes first, if none are given)"
   exit 1
 }
 
-# Talos's reset leaves etcd, but nothing in the cluster deletes the Node
-# object of a VM that no longer exists.
+# Terraform only deletes a removed node's VM, so a full destroy never waits on
+# the cluster. This does the rest, whichever side of the apply it runs on.
 remove_node(){
-  kubectl delete node "$1"
+  local node=$1 ip cp_ip="" candidate member_id
+  ip=$(jq -r --arg n "$node" '.[$n].ip // empty' <<< "$nodes")
+  [ -n "$ip" ] || ip=$(kubectl get node "$node" -o jsonpath='{.status.addresses[?(@.type=="InternalIP")].address}' 2> /dev/null || true)
+
+  # etcd is read and changed through another control plane, so the last one
+  # can never be removed.
+  for candidate in $(jq -r --arg n "$node" 'to_entries[] | select(.value.role == "controlplane" and .key != $n) | .value.ip' <<< "$nodes"); do
+    if talosctl -n "$candidate" version > /dev/null 2>&1; then cp_ip=$candidate; break; fi
+  done
+  [ -n "$cp_ip" ] || { echo "$node is the last reachable control plane, so it can't be removed safely"; exit 1; }
+  member_id=$(talosctl -n "$cp_ip" etcd members | awk -v n="$node" '$3 == n { print $2 }')
+
+  if [ -n "$ip" ] && talosctl -n "$ip" version > /dev/null 2>&1; then
+    echo "==> $node is running: draining it and resetting it"
+    kubectl drain "$node" --ignore-daemonsets --delete-emptydir-data --timeout=10m
+    # A graceful reset leaves etcd before it wipes the node.
+    talosctl -n "$ip" reset --graceful=true --reboot=false --wait=false
+    if [ -n "$member_id" ]; then
+      # grep reads all its input: -q would let pipefail end the wait early.
+      while talosctl -n "$cp_ip" etcd members | awk '{ print $3 }' | grep -x "$node" > /dev/null; do sleep 5; done
+    fi
+  elif [ -n "$member_id" ]; then
+    echo "==> $node is gone: removing its etcd member"
+    talosctl -n "$cp_ip" etcd remove-member "$member_id"
+  fi
+  kubectl delete node "$node" --ignore-not-found
 }
 
 # A reboot from inside Talos keeps the same QEMU process, so pending hardware

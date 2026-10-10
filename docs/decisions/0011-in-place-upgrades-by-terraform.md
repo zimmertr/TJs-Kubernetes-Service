@@ -1,6 +1,6 @@
 # 0011. Version bumps upgrade nodes in place through `talos_machine` and `talos_cluster`, and never replace VMs
 
-- Status: Accepted. The guard on the machine secrets is amended by 0022, and the removal of `bin/` by 0023
+- Status: Accepted. The guard on the machine secrets is amended by 0022, the removal of `bin/` by 0023, and the reset on destroy by 0025
 - Date: 2026-10-09
 - Decider: TJ (planning interview)
 - Issues and PRs: the v2 planning PR

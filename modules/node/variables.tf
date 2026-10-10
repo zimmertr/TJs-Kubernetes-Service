@@ -55,7 +55,6 @@ variable "cluster" {
     endpoint             = string
     talos_config_version = string
     kubernetes_version   = string
-    reset_on_destroy     = bool
   })
   description = "Cluster identity and versions"
 }

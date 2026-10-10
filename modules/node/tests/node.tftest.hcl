@@ -35,7 +35,6 @@ variables {
     endpoint             = "https://192.168.40.50:6443"
     talos_config_version = "v1.14.2"
     kubernetes_version   = "v1.37.1"
-    reset_on_destroy     = true
   }
   machine_secrets = {
     certs = {
@@ -132,7 +131,7 @@ run "pci_devices_are_passed_through_as_pcie" {
   }
 }
 
-run "upgrades_drain_and_removal_resets" {
+run "upgrades_drain_and_destroy_only_deletes" {
   command = plan
 
   assert {
@@ -140,8 +139,8 @@ run "upgrades_drain_and_removal_resets" {
     error_message = "The installer image drives in-place upgrades, which must drain first"
   }
   assert {
-    condition     = talos_machine.this["k8s-node-1"].on_destroy.reset
-    error_message = "A removed node must be reset so it leaves the cluster"
+    condition     = talos_machine.this["k8s-node-1"].on_destroy.reset == false
+    error_message = "Destroy must not reset nodes, or a full destroy hangs on the last control plane and worker"
   }
 }
 

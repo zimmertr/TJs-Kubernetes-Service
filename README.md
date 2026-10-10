@@ -8,8 +8,6 @@
   * [Scaling the Cluster](#scaling-the-cluster)
   * [Upgrading the Cluster](#upgrading-the-cluster)
   * [Installing Other Apps](#installing-other-apps)
-* [Troubleshooting](#troubleshooting)
-  * [Terraform Fails to Destroy the Cluster](#terraform-fails-to-destroy-the-cluster)
 * [Documentation](#documentation)
 
 
@@ -153,7 +151,7 @@ On a running cluster, the scheduler, controller-manager, and API server pick the
 
 The Terraform provider makes it quite easy to scale in, out, up, or down. Simply add, remove, or resize nodes in your tfvars and run `terraform plan` again. If the plan looks good, apply it.
 
-When you remove a node, Talos drains and resets it first so it leaves etcd cleanly, then Terraform deletes the VM. You can remove any node, not just the last one. Kubernetes doesn't clean up the node object on its own, so remove it afterwards with [manage_nodes](bin/manage_nodes):
+To remove a node, run [manage_nodes](bin/manage_nodes) on it first so it leaves the cluster cleanly. It drains the node, takes it out of etcd if it's a controlplane, resets it, and deletes it from Kubernetes. Then remove it from your tfvars and apply to delete the VM. You can remove any node, not just the last one. If you apply first by mistake, run it afterwards anyway and it will clean up after the node. That only works for a controlplane if you had at least three, because etcd needs a majority to remove the dead one. It won't let you remove the last controlplane.
 
 ```bash
 ./bin/manage_nodes remove $NODE
@@ -179,14 +177,6 @@ Don't change `talos_config_version`. It's fixed when the cluster is created.
 ## Installing Other Apps
 
 You can find my personal collection of manifests [here](https://github.com/zimmertr/Application-Manifests).
-
-<hr>
-
-## Troubleshooting
-
-### Terraform Fails to Destroy the Cluster
-
-Each node is reset before it's deleted so that it leaves the cluster. When you destroy the whole cluster, the last controlplane has no one left to hand etcd to and the reset fails with `not enough started members`. Before you destroy a cluster, set `reset_on_destroy = false` in your `cluster` variable and apply it. Then run `terraform destroy` as usual.
 
 <hr>
 

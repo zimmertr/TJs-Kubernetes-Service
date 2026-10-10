@@ -43,7 +43,6 @@ locals {
     endpoint             = local.cluster_endpoint
     talos_config_version = var.cluster.talos_config_version
     kubernetes_version   = var.cluster.kubernetes_version
-    reset_on_destroy     = var.cluster.reset_on_destroy
   }
   node_proxmox = {
     node_name    = var.proxmox.node_name
