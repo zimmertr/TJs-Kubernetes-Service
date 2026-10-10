@@ -35,7 +35,11 @@ TJ's Kubernetes Service, or *TKS*, is a collection of Terraform configurations t
 
 ## Instructions
 
-1. Create a Proxmox API token. The optional [bootstrap](bootstrap) Terraform root creates the users listed in [`vars/bootstrap.tfvars`](vars/bootstrap.tfvars), each with its own role and token. The example file defines a `tks@pve` user with only the privileges TKS needs (listed in the [Security](docs/SECURITY_GUIDE.md#the-proxmox-user) guide), plus users for the [Proxmox CSI Plugin](https://github.com/sergelogvinov/proxmox-csi-plugin) and the [Proxmox Cloud Controller Manager](https://github.com/sergelogvinov/proxmox-cloud-controller-manager). To use an existing user instead, remove `tks@pve` from the file or skip this step. The bootstrap root needs root credentials, so export them in a separate shell used only for this step:
+1. If you don't already have one. create a Proxmox API token for the Terraform provider to use. The [bootstrap](bootstrap) Terraform root can be used to create the users listed in [`vars/bootstrap.tfvars`](vars/bootstrap.tfvars), each of which comes with its own role and token. 
+
+   The example file defines a user with only the privileges TKS needs (listed in the [Security](docs/SECURITY_GUIDE.md#the-proxmox-user) guide), plus users for the [Proxmox CSI Plugin](https://github.com/sergelogvinov/proxmox-csi-plugin) and the [Proxmox Cloud Controller Manager](https://github.com/sergelogvinov/proxmox-cloud-controller-manager). 
+
+   The bootstrap root needs root credentials, so export them in a separate shell used only for this step:
 
    ```bash
    # The provider prefers a token over a password, so ensure it won't interfere if it's set
@@ -52,7 +56,7 @@ TJ's Kubernetes Service, or *TKS*, is a collection of Terraform configurations t
    terraform output -json api_tokens | jq
    ```
 
-   After running `output`, each user's token is printed as `<id>=<secret>`. The TKS user's token is the complete value for `PROXMOX_VE_API_TOKEN` in the next step.
+   After running `terraform output`, each user's token is printed as `<id>=<secret>`. 
 
 2. Copy [`vars/config.env.example`](vars/config.env.example) to `vars/config.env`, configure it, and source it as per the provider's [documentation](https://registry.terraform.io/providers/bpg/proxmox/latest/docs#authentication). 
 
@@ -82,10 +86,10 @@ TJ's Kubernetes Service, or *TKS*, is a collection of Terraform configurations t
    ```bash
    mkdir -p ~/.{kube,talos}
    touch ~/.kube/config
-
+   
    terraform output -raw talosconfig > ~/.talos/config-test
    terraform output -raw kubeconfig > ~/.kube/config-test
-
+   
    kubecm add -f ~/.kube/config-test
    kubectx admin@test
    ```
