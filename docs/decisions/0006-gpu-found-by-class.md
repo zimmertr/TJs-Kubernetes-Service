@@ -1,6 +1,6 @@
 # 0006. The GPU is found by vendor and device class, never by PCI address
 
-- Status: Accepted
+- Status: Superseded by 0034
 - Date: 2026-10-09
 - Decider: TJ (planning interview)
 - Issues and PRs: the v2 planning PR

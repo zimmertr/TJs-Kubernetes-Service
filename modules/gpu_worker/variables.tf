@@ -1,13 +1,3 @@
-variable "machine_type" {
-  type        = string
-  description = "Talos machine type for every node in this pool"
-
-  validation {
-    condition     = contains(["controlplane", "worker"], var.machine_type)
-    error_message = "machine_type must be controlplane or worker."
-  }
-}
-
 variable "nodes" {
   type = map(object({
     ip             = string
@@ -17,13 +7,9 @@ variable "nodes" {
     disk_gb        = number
     tags           = list(string)
     config_patches = list(string)
-    # PCI resource mappings to pass through to this node.
-    pci_devices = optional(list(object({
-      mapping = string
-      pcie    = optional(bool, true)
-    })), [])
+    pci_address    = string
   }))
-  description = "Nodes keyed by hostname, with pool defaults already merged in, each node's rendered Talos patches, and any PCI resource mappings to pass through"
+  description = "GPU nodes keyed by hostname, with pool defaults already merged in, each node's rendered Talos patches, and the PCI address of its GPU"
 }
 
 variable "image" {
@@ -31,7 +17,7 @@ variable "image" {
     file_id         = string
     installer_image = string
   })
-  description = "The pool's Talos image from modules/talos_image"
+  description = "The GPU pool's Talos image from modules/talos_image"
 }
 
 variable "proxmox" {
@@ -86,5 +72,5 @@ variable "kubeconfig" {
 variable "wait_for" {
   type        = any
   default     = null
-  description = "Anything this pool's VMs and machines must be created and upgraded after, and destroyed before"
+  description = "Anything the GPU nodes must be created and upgraded after, and destroyed before"
 }

@@ -22,7 +22,7 @@ The new record says `Supersedes NNNN` in its status line. The old record changes
 | [0003](0003-v2-breaking-rebuild.md) | v2 is a breaking rewrite, and clusters are rebuilt rather than migrated | 2026-10-09 | Accepted |
 | [0004](0004-ready-hypervisor.md) | TKS assumes a ready hypervisor, and host configuration stays out of it | 2026-10-09 | Accepted |
 | [0005](0005-bootstrap-root-for-terraform-user.md) | An optional `bootstrap/` root module creates the Terraform user, and every cluster shares it | 2026-10-09 | Superseded by 0026 |
-| [0006](0006-gpu-found-by-class.md) | The GPU is found by vendor and device class, never by PCI address | 2026-10-09 | Accepted |
+| [0006](0006-gpu-found-by-class.md) | The GPU is found by vendor and device class, never by PCI address | 2026-10-09 | Superseded by 0034 |
 | [0007](0007-local-state-default-hcp-opt-in.md) | Local state stays the default, and HCP Terraform is opt-in through a gitignored override file | 2026-10-09 | Accepted |
 | [0008](0008-static-ips-via-cloud-init.md) | Nodes get static IPs through cloud-init, not DHCP reservations | 2026-10-09 | Accepted |
 | [0009](0009-nodes-as-maps.md) | Nodes are maps keyed by hostname, with defaults for each pool | 2026-10-09 | Accepted |
@@ -48,3 +48,6 @@ The new record says `Supersedes NNNN` in its status line. The old record changes
 | [0029](0029-reregister-reboots-the-node.md) | `manage_nodes reregister` reboots each node after deleting it, so it comes back on its new pod CIDR | 2026-10-10 | Accepted |
 | [0030](0030-readme-neutral-voice.md) | The README is written in neutral, professional prose and doesn't advertise TJ's other repositories | 2026-10-10 | Accepted |
 | [0031](0031-dns-servers-default-to-the-host.md) | Nodes use the Proxmox host's resolvers unless `network.dns_servers` is set | 2026-10-10 | Accepted |
+| [0032](0032-gpu-image-built-in-the-root.md) | The GPU pool's Talos image is built in the root, beside the general one | 2026-10-10 | Accepted |
+| [0033](0033-pci-device-chosen-in-its-own-module.md) | The PCI device is looked up in its own module, so the lookup can be tested | 2026-10-10 | Accepted |
+| [0034](0034-each-gpu-node-names-its-gpu-by-address.md) | Each GPU node names its GPU by PCI address in the tfvars, and gets a mapping of its own | 2026-10-10 | Accepted |

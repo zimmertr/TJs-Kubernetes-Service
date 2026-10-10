@@ -1,0 +1,10 @@
+# GPU nodes only. The kubelet registers the Node with the taint, which matters
+# because NodeRestriction stops a worker from adding taints to itself later.
+# Pods that request amd.com/gpu get the toleration from the API server's
+# ExtendedResourceToleration admission plugin (configs/controlplane.yaml).
+apiVersion: v1alpha1
+kind: KubeNodeConfig
+labels:
+  tks.io/pool: gpu
+taints:
+  amd.com/gpu: NoSchedule
