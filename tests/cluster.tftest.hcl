@@ -152,7 +152,7 @@ run "gpu_workers_get_their_own_image_taint_and_label" {
     outputs = {
       nodes    = { "test-k8s-node-gpu-1" = { ip = "192.168.40.71", vm_id = 4071, proxmox_node = "earth" } }
       machines = {}
-      mappings = { "test-k8s-node-gpu-1" = "test-k8s-node-gpu-1-gpu" }
+      mappings = { "test-k8s-node-gpu-1" = "test-gpu-4071" }
     }
   }
 

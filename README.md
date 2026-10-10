@@ -23,14 +23,14 @@ TJ's Kubernetes Service, or *TKS*, is a collection of Terraform configurations t
 
 ## Requirements
 
-| Requirement | Description                                                                                                                                                                              |
-| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `terraform` | Creates and manages the cluster. Version 1.16 or newer                                                                                                                                   |
-| `kubectl`   | Used by `manage_nodes`                                                                                                                                                                   |
-| `talosctl`  | Used by `manage_nodes`                                                                                                                                                                   |
-| `jq`        | Used by `manage_nodes` and to read the bootstrap tokens                                                                                                                                  |
-| Proxmox VE  | A host or cluster to run the nodes on                                                                                                                                                    |
-| IOMMU       | Only for a [GPU worker](#adding-a-gpu-worker). Enabled on the host, with each GPU alone in its IOMMU group. Binding the GPUs to `vfio-pci` at boot keeps the host from initializing them |
+| Requirement | Description                                                                                                |
+| ----------- | ---------------------------------------------------------------------------------------------------------- |
+| `terraform` | Creates and manages the cluster. Version 1.16 or newer                                                     |
+| `kubectl`   | Used by `manage_nodes`                                                                                     |
+| `talosctl`  | Used by `manage_nodes`                                                                                     |
+| `jq`        | Used by `manage_nodes` and to read the bootstrap tokens                                                    |
+| Proxmox VE  | A host or cluster to run the nodes on                                                                      |
+| IOMMU       | Only for a [GPU worker](#adding-a-gpu-worker). Enabled on the host, with each GPU alone in its IOMMU group |
 
 <hr>
 
@@ -155,7 +155,7 @@ gpu_workers = {
 }
 ```
 
-TKS reads the rest of what it needs about each card from the Proxmox API, and creates a PCI resource mapping named `<cluster>-<hostname>-gpu` that holds only that card. The plan fails if nothing is at an address, if a card has no IOMMU group, or if two nodes name the same card. If a card moves to another slot, set its new address and apply again. GPU nodes are built from their own Talos image with the `siderolabs/amdgpu` extension.
+TKS reads the rest of what it needs about each card from the Proxmox API, and creates a PCI resource mapping named `<cluster>-gpu-<vmid>` that holds only that card. The plan fails if nothing is at an address, if a card has no IOMMU group, or if two nodes name the same card. If a card moves to another slot, set its new address and apply again. GPU nodes are built from their own Talos image with the `siderolabs/amdgpu` extension.
 
 GPU nodes carry the `amd.com/gpu:NoSchedule` taint and the `tks.io/pool=gpu` label. Every TKS cluster enables the `ExtendedResourceToleration` admission plugin, so pods that request `amd.com/gpu` get the matching toleration without declaring it. Anything else that should run on a GPU node needs its own toleration, including the AMD device plugin that advertises `amd.com/gpu` to Kubernetes, which is deployed separately.
 

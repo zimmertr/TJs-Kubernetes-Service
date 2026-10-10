@@ -23,8 +23,21 @@ run "builds_the_map_entry_without_0x" {
     error_message = "The entry must carry the node, address, IDs without 0x, and IOMMU group"
   }
   assert {
-    condition     = output.name == "Navi 48 [Radeon AI PRO R9700]"
-    error_message = "The device's name must be reported"
+    condition     = output.label == "1002:7551 Navi 48 [Radeon AI PRO R9700]"
+    error_message = "The label must carry the model ID and the device's name"
+  }
+}
+
+run "a_device_proxmox_has_no_name_for_is_labeled_by_its_id" {
+  command = plan
+
+  variables {
+    devices = [{ id = "0000:05:00.0", vendor = "0x1002", device = "0x7551", device_name = null, subsystem_vendor = "0x1849", subsystem_device = "0x5413", iommu_group = 61 }]
+  }
+
+  assert {
+    condition     = output.label == "1002:7551"
+    error_message = "Without a name, the label must be the model ID alone"
   }
 }
 

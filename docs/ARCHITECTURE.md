@@ -10,7 +10,7 @@ One Terraform root builds one cluster. Use a workspace (or a separate state) per
 | `nodes.tf` | The node pools, by calling the modules below. It renders each node's Talos patches from `configs/` |
 | `modules/talos_image` | A Talos Image Factory schematic and its SecureBoot `nocloud` `qcow2` image, downloaded to a Proxmox datastore as `tks-<cluster>-<pool>-<version>.qcow2` |
 | `modules/node` | For each node in a pool: the VM, its Talos machine configuration, and the `talos_machine` that applies and upgrades it |
-| `modules/gpu_worker` | Optional. For each GPU node: reads the device at its `pci_address` from the host, creates a PCI resource mapping `<cluster>-<hostname>-gpu` holding only that card, and builds the node through `modules/node` with the mapping attached |
+| `modules/gpu_worker` | Optional. For each GPU node: reads the device at its `pci_address` from the host, creates a PCI resource mapping `<cluster>-gpu-<vmid>` holding only that card, and builds the node through `modules/node` with the mapping attached |
 | `modules/pci_device` | Finds the device at an address among the host's PCI devices and turns it into a mapping entry. It fails the plan if nothing is at the address or the device has no IOMMU group |
 | `bootstrap/` | Optional, and a separate root. A Proxmox role, user and API token for each user in its `users` map, such as the one TKS runs as |
 

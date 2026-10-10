@@ -12,7 +12,7 @@ override_module {
       subsystem_id = "1849:5413"
       iommu_group  = 61
     }
-    name = "Navi 48 [Radeon AI PRO R9700]"
+    label = "1002:7551 Navi 48 [Radeon AI PRO R9700]"
   }
 }
 
@@ -78,8 +78,8 @@ run "each_node_gets_its_own_mapping" {
   command = plan
 
   assert {
-    condition     = length(proxmox_hardware_mapping_pci.gpu) == 2 && proxmox_hardware_mapping_pci.gpu["k8s-node-gpu-1"].name == "test-k8s-node-gpu-1-gpu" && proxmox_hardware_mapping_pci.gpu["k8s-node-gpu-2"].name == "test-k8s-node-gpu-2-gpu"
-    error_message = "Each GPU node must get a mapping named after the cluster and the node"
+    condition     = length(proxmox_hardware_mapping_pci.gpu) == 2 && proxmox_hardware_mapping_pci.gpu["k8s-node-gpu-1"].name == "test-gpu-4031" && proxmox_hardware_mapping_pci.gpu["k8s-node-gpu-2"].name == "test-gpu-4032"
+    error_message = "Each GPU node must get a mapping named after the cluster and its VMID"
   }
   assert {
     condition     = alltrue([for m in proxmox_hardware_mapping_pci.gpu : length(m.map) == 1])
@@ -90,7 +90,7 @@ run "each_node_gets_its_own_mapping" {
     error_message = "The mapping must hold the device the lookup found"
   }
   assert {
-    condition     = proxmox_hardware_mapping_pci.gpu["k8s-node-gpu-1"].comment == "TKS cluster test: Navi 48 [Radeon AI PRO R9700]"
+    condition     = proxmox_hardware_mapping_pci.gpu["k8s-node-gpu-1"].comment == "TKS cluster test: 1002:7551 Navi 48 [Radeon AI PRO R9700]"
     error_message = "The mapping's comment must name the device, so a different one shows up in a plan"
   }
 }
@@ -99,7 +99,7 @@ run "each_vm_gets_its_own_mapping_as_pcie" {
   command = plan
 
   assert {
-    condition     = local.nodes["k8s-node-gpu-1"].pci_devices == [{ mapping = "test-k8s-node-gpu-1-gpu", pcie = true }] && local.nodes["k8s-node-gpu-2"].pci_devices == [{ mapping = "test-k8s-node-gpu-2-gpu", pcie = true }]
+    condition     = local.nodes["k8s-node-gpu-1"].pci_devices == [{ mapping = "test-gpu-4031", pcie = true }] && local.nodes["k8s-node-gpu-2"].pci_devices == [{ mapping = "test-gpu-4032", pcie = true }]
     error_message = "Each VM must get its own card through its own mapping, as a PCIe device"
   }
   assert {

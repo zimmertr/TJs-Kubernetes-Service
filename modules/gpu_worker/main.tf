@@ -26,14 +26,15 @@ module "device" {
   node_name = var.proxmox.node_name
 }
 
-# One mapping per node, each holding only that node's card, so no card is ever
+# One mapping per node, named by VMID because VMIDs are unique across the
+# Proxmox cluster, each holding only that node's card, so no card is ever
 # offered to two VMs. Attaching by mapping also works with an API token, where a
 # raw hostpci ID needs root's password.
 resource "proxmox_hardware_mapping_pci" "gpu" {
   for_each = var.nodes
 
-  name    = "${var.cluster.name}-${each.key}-gpu"
-  comment = "TKS cluster ${var.cluster.name}: ${module.device[each.key].name}"
+  name    = "${var.cluster.name}-gpu-${each.value.vm_id}"
+  comment = "TKS cluster ${var.cluster.name}: ${module.device[each.key].label}"
 
   # Spelled out, because the provider rejects a map entry that is unknown as a
   # whole during validation.

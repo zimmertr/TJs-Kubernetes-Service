@@ -3,7 +3,7 @@ variable "devices" {
     id               = string
     vendor           = string
     device           = string
-    device_name      = string
+    device_name      = optional(string)
     subsystem_vendor = string
     subsystem_device = string
     iommu_group      = number

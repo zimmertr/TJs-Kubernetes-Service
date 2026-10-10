@@ -11,7 +11,7 @@
 
 ## Decision
 
-`modules/pci_device` takes the device list and an address as plain variables, and outputs the device at that address as a mapping entry, plus its name. Output preconditions fail the plan when nothing is at the address, and when the device has no IOMMU group. `modules/gpu_worker` keeps the data source and calls the module once per GPU node. The mapping spells out each attribute of the entry, because the provider rejects an entry that is unknown as a whole during validation, even under `count = 0`. [0034](0034-each-gpu-node-names-its-gpu-by-address.md) describes how a GPU is named.
+`modules/pci_device` takes the device list and an address as plain variables, and outputs the device at that address as a mapping entry, plus a label of its model ID and name. Output preconditions fail the plan when nothing is at the address, and when the device has no IOMMU group. `modules/gpu_worker` keeps the data source and calls the module once per GPU node. The mapping spells out each attribute of the entry, because the provider rejects an entry that is unknown as a whole during validation, even under `count = 0`. [0034](0034-each-gpu-node-names-its-gpu-by-address.md) describes how a GPU is named.
 
 ## Evidence
 

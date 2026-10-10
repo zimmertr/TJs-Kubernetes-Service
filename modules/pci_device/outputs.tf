@@ -21,7 +21,9 @@ output "map" {
   }
 }
 
-output "name" {
-  value       = try(local.device.device_name, "")
-  description = "The device's name as Proxmox reports it, so a different device at the address shows up in a plan"
+output "label" {
+  # Proxmox's PCI ID database can be older than the card and have no name for
+  # it (the R9700 had none on 2026-10-10), so the model ID always comes first.
+  value       = try(trimspace("${trimprefix(local.device.vendor, "0x")}:${trimprefix(local.device.device, "0x")} ${local.device.device_name == null ? "" : local.device.device_name}"), "")
+  description = "The device's model ID and, when Proxmox knows it, its name, so a different device at the address shows up in a plan"
 }
