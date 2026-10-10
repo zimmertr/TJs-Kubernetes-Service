@@ -42,6 +42,9 @@ variable "cluster" {
     kubernetes_version   = optional(string, "v1.37.1")
     disable_flannel      = optional(bool, false)
     expose_metrics       = optional(bool, false)
+    # Hands node initialization and cleanup to a cloud controller manager.
+    # Nodes stay tainted until one is running.
+    external_cloud_provider = optional(bool, false)
   })
   description = "Cluster identity, versions and feature switches"
 

@@ -5,6 +5,7 @@
 * [Instructions](#instructions)
 * [Post Install](#post-install)
   * [Installing A Different CNI](#installing-a-different-cni)
+  * [Using a Cloud Controller Manager](#using-a-cloud-controller-manager)
   * [Scaling the Cluster](#scaling-the-cluster)
   * [Upgrading the Cluster](#upgrading-the-cluster)
   * [Installing Other Apps](#installing-other-apps)
@@ -138,6 +139,14 @@ kubectl get csr
 kubectl certificate approve $CSR
 ```
 
+## Using a Cloud Controller Manager
+
+Set `cluster.external_cloud_provider` to `true` to hand nodes to a cloud controller manager. I use the [Proxmox CCM](https://github.com/sergelogvinov/proxmox-cloud-controller-manager), deployed from my project found [here](https://github.com/zimmertr/Kubernetes-Manifests/tree/main/misc/proxmox-cloud-controller-manager). It gives each node its `providerID` and its `topology.kubernetes.io/zone` and `region` labels, and deletes a node from Kubernetes once its VM is gone. Its user is in [`vars/bootstrap.tfvars`](vars/bootstrap.tfvars).
+
+New nodes join with the `node.cloudprovider.kubernetes.io/uninitialized` taint and keep it until the CCM is running. Flannel, CoreDNS and kube-proxy tolerate it, but nothing else will schedule, so install the CCM before anything else.
+
+It's best turned on when the cluster is created. Nodes that joined before it was on are left alone by the CCM until they register again: drain each one, then `kubectl delete node $NODE` and `talosctl -n $IP service kubelet restart`.
+
 ## Exposing Control Plane Metrics
 
 By default, Talos binds the metrics endpoints for etcd, the scheduler, the controller-manager, and kube-proxy to localhost, so a monitoring stack like [kube-prometheus-stack](https://github.com/zimmertr/Kubernetes-Manifests/tree/main/observability) cannot scrape them. Set `cluster.expose_metrics` to `true` to bind them to the node addresses instead. The scheduler and controller-manager still authenticate scrapes with TLS and RBAC; etcd's metrics listener (`2381`) and kube-proxy's (`10249`) are plain HTTP, readable by anything that can reach the node network, which is why this is opt-in.
@@ -151,7 +160,7 @@ On a running cluster, the scheduler, controller-manager, and API server pick the
 
 The Terraform provider makes it quite easy to scale in, out, up, or down. Simply add, remove, or resize nodes in your tfvars and run `terraform plan` again. If the plan looks good, apply it.
 
-To remove a node, run [manage_nodes](bin/manage_nodes) on it first so it leaves the cluster cleanly. It drains the node, takes it out of etcd if it's a controlplane, resets it, and deletes it from Kubernetes. Then remove it from your tfvars and apply to delete the VM. You can remove any node, not just the last one. If you apply first by mistake, run it afterwards anyway and it will clean up after the node. That only works for a controlplane if you had at least three, because etcd needs a majority to remove the dead one. It won't let you remove the last controlplane.
+To remove a node, run [manage_nodes](bin/manage_nodes) on it first so it leaves the cluster cleanly. With a cloud controller manager, a worker can just be removed from your tfvars, and the CCM deletes it from Kubernetes about a minute after its VM is gone. `manage_nodes` still drains it first, and a controlplane always needs it for etcd. It drains the node, takes it out of etcd if it's a controlplane, resets it, and deletes it from Kubernetes. Then remove it from your tfvars and apply to delete the VM. You can remove any node, not just the last one. If you apply first by mistake, run it afterwards anyway and it will clean up after the node. That only works for a controlplane if you had at least three, because etcd needs a majority to remove the dead one. It won't let you remove the last controlplane.
 
 ```bash
 ./bin/manage_nodes remove $NODE

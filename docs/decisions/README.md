@@ -43,3 +43,4 @@ The new record says `Supersedes NNNN` in its status line. The old record changes
 | [0024](0024-secureboot.md) | Every node boots with UEFI SecureBoot | 2026-10-09 | Accepted |
 | [0025](0025-destroy-does-not-reset.md) | Destroying a node only deletes its VM, and `manage_nodes remove` takes a single node out of the cluster | 2026-10-09 | Accepted |
 | [0026](0026-bootstrap-creates-integration-users.md) | `bootstrap/` creates every Proxmox user from a `users` map in `vars/bootstrap.tfvars`, including the one TKS runs as | 2026-10-09 | Accepted |
+| [0027](0027-optional-external-cloud-provider.md) | An optional switch hands nodes to an external cloud controller manager, and `manage_nodes remove` stays for control planes | 2026-10-10 | Accepted |
