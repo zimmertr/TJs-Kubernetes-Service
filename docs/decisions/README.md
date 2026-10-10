@@ -46,3 +46,4 @@ The new record says `Supersedes NNNN` in its status line. The old record changes
 | [0027](0027-optional-external-cloud-provider.md) | An optional switch hands nodes to an external cloud controller manager, and `manage_nodes remove` stays for control planes | 2026-10-10 | Accepted |
 | [0028](0028-manage-nodes-reregister.md) | `manage_nodes reregister` registers existing nodes again after the external cloud provider is turned on | 2026-10-10 | Superseded by 0029 |
 | [0029](0029-reregister-reboots-the-node.md) | `manage_nodes reregister` reboots each node after deleting it, so it comes back on its new pod CIDR | 2026-10-10 | Accepted |
+| [0030](0030-readme-neutral-voice.md) | The README is written in neutral, professional prose and doesn't advertise TJ's other repositories | 2026-10-10 | Accepted |

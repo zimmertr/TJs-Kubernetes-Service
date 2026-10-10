@@ -1,6 +1,6 @@
 # 0020. The README stays in TJ's own voice and remains the main guide, and `docs/` holds the reference pages
 
-- Status: Accepted. Supersedes [0018](0018-docs-for-users.md)
+- Status: Accepted. Supersedes [0018](0018-docs-for-users.md). Its first-person voice is superseded by [0030](0030-readme-neutral-voice.md)
 - Date: 2026-10-09
 - Decider: TJ (review of PR #94)
 - Issues and PRs: #94
