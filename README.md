@@ -39,12 +39,10 @@ TJ's Kubernetes Service, or *TKS*, is a collection of Terraform configurations t
 
    The example file defines a user with only the privileges TKS needs (listed in the [Security](docs/SECURITY_GUIDE.md#the-proxmox-user) guide), plus users for the [Proxmox CSI Plugin](https://github.com/sergelogvinov/proxmox-csi-plugin) and the [Proxmox Cloud Controller Manager](https://github.com/sergelogvinov/proxmox-cloud-controller-manager). 
 
-   The bootstrap root's state is stored locally by default. To store it in HCP Terraform instead, follow [Storing State in HCP Terraform](#storing-state-in-hcp-terraform) before running `terraform init`.
-
    The bootstrap root needs root credentials, so export them in a separate shell used only for this step:
 
    ```bash
-   # The provider prefers a token over a password, so ensure it won't interfere if it's set
+# The provider prefers a token over a password, so ensure it won't interfere if it's set
    unset PROXMOX_VE_API_TOKEN 
    
    export PROXMOX_VE_ENDPOINT="https://earth.sol.milkyway:8006"
@@ -57,7 +55,7 @@ TJ's Kubernetes Service, or *TKS*, is a collection of Terraform configurations t
    terraform apply -var-file=../vars/bootstrap.tfvars
    terraform output -json api_tokens | jq
    ```
-
+   
    After running `terraform output`, each user's token is printed as `<id>=<secret>`. 
 
 2. Copy [`vars/config.env.example`](vars/config.env.example) to `vars/config.env`, configure it, and source it as per the provider's [documentation](https://registry.terraform.io/providers/bpg/proxmox/latest/docs#authentication). 
@@ -66,11 +64,9 @@ TJ's Kubernetes Service, or *TKS*, is a collection of Terraform configurations t
    source vars/config.env
    ```
 
-3. Create a [tfvars](https://developer.hashicorp.com/terraform/language/values/variables#variable-definitions-tfvars-files) file for the cluster. Every input is described in [Configuration](docs/CONFIGURATION.md), and [`vars/test.tfvars`](vars/test.tfvars) is a complete example. Nodes are a map keyed by hostname, each with a static IP and VMID. Nodes are addressed by IP, so DNS records for them are optional.
+3. Create a [tfvars](https://developer.hashicorp.com/terraform/language/values/variables#variable-definitions-tfvars-files) file for the cluster. Every input is described in [Configuration](docs/CONFIGURATION.md), and [`vars/test.tfvars`](vars/test.tfvars) is a complete example. Nodes are a map keyed by hostname, each with a static IP and VMID. 
 
-   `talos_version` is the Talos release installed on the nodes, and raising it upgrades them in place. `talos_config_version` is the release whose machine configuration format TKS generates. Set it to `talos_version` when the cluster is created and leave it there: keeping it pinned means a Talos upgrade changes the installed OS without also rewriting every node's configuration to a newer format. Raising it later is possible, but it changes the configuration of every node, and lowering it is not supported.
-
-4. Initialize Terraform and create a workspace for the cluster. State is stored locally by default. To store it in HCP Terraform instead, follow [Storing State in HCP Terraform](#storing-state-in-hcp-terraform) before running `terraform init`.
+4. Initialize Terraform and create a workspace for the cluster. 
 
    ```bash
    terraform init
