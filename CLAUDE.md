@@ -10,7 +10,7 @@ v2 is under construction. The pinned issue `[Epic] TKS v2 and the GPU worker` ho
 
 ## Documentation
 
-**The README is TJ's, and you keep it current.** Every change to the codebase updates the README in the same PR: instructions, requirements, examples, troubleshooting and links to `docs/`. It must never lie: when a change makes a requirement, step or claim untrue (a tool no longer needed, a manual step that went away), remove or correct it in that PR. Write each edit in TJ's voice and style (plain first-person prose, the linked table of contents, `<hr>` between sections, padded tables) so it reads as if he wrote it. Never overhaul or restructure it, and never add AI-flavoured prose, badges, banners or "under development" notices. Record: [0020](docs/decisions/0020-readme-is-tjs.md)
+**The README is TJ's, and you keep it current.** Every change to the codebase updates the README in the same PR: instructions, requirements, examples, troubleshooting and links to `docs/`. It must never lie: when a change makes a requirement, step or claim untrue (a tool no longer needed, a manual step that went away), remove or correct it in that PR. Write each edit in neutral, professional prose with no first person, keeping the format (the linked table of contents, `<hr>` between sections, padded tables). Don't advertise TJ's other repositories. Never overhaul or restructure it unless TJ asks, and never add AI-flavoured prose, badges, banners or "under development" notices. Records: [0020](docs/decisions/0020-readme-is-tjs.md), [0030](docs/decisions/0030-readme-neutral-voice.md)
 
 `docs/` holds the reference pages the README links to:
 
