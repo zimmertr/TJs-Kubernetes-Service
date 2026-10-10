@@ -78,6 +78,33 @@ run "static_ip_from_cloud_init" {
   }
 }
 
+run "dns_servers_reach_cloud_init" {
+  command = plan
+
+  assert {
+    condition     = proxmox_virtual_environment_vm.this["k8s-node-1"].initialization[0].dns[0].servers == tolist(["192.168.40.1"])
+    error_message = "network.dns_servers must reach cloud-init"
+  }
+}
+
+run "no_dns_servers_leaves_the_host_resolvers" {
+  command = plan
+
+  variables {
+    network = {
+      cidr    = "192.168.40.0/24"
+      gateway = "192.168.40.1"
+      bridge  = "vmbr0"
+      vlan_id = 40
+    }
+  }
+
+  assert {
+    condition     = length(proxmox_virtual_environment_vm.this["k8s-node-1"].initialization[0].dns) == 0
+    error_message = "Without network.dns_servers, no nameserver is set, so Proxmox supplies the host's"
+  }
+}
+
 run "no_balloon_and_trim_reaches_the_datastore" {
   command = plan
 

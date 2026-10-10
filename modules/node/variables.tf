@@ -42,7 +42,7 @@ variable "network" {
   type = object({
     cidr        = string
     gateway     = string
-    dns_servers = list(string)
+    dns_servers = optional(list(string))
     bridge      = string
     vlan_id     = optional(number)
   })

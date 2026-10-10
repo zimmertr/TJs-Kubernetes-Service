@@ -14,7 +14,7 @@ One Terraform root builds one cluster. Use a workspace (or a separate state) per
 
 ## How a node comes up
 
-1. Terraform creates the VM with its disk imported from the pool's image. Cloud-init gives it its static IP, gateway and DNS servers.
+1. Terraform creates the VM with its disk imported from the pool's image. Cloud-init gives it its static IP, gateway and DNS servers. Without `network.dns_servers`, Proxmox supplies its host's resolvers.
 2. On first boot, the image enrolls Talos's SecureBoot keys, because the VM's UEFI starts with none. Talos then boots in maintenance mode.
 3. `talos_machine` applies the machine configuration to the node's IP. The patches in `configs/` set the installer image, the hostname, and the control planes' shared virtual IP, plus Flannel, metrics and external cloud provider settings when they are switched on.
 4. `talos_cluster` bootstraps etcd on the first control plane, and the others join through the virtual IP.

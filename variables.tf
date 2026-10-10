@@ -12,11 +12,11 @@ variable "network" {
   type = object({
     cidr        = string
     gateway     = string
-    dns_servers = list(string)
+    dns_servers = optional(list(string))
     bridge      = optional(string, "vmbr0")
     vlan_id     = optional(number)
   })
-  description = "The network every node is attached to. Node IPs are assigned statically from it through cloud-init"
+  description = "The network every node is attached to. Node IPs are assigned statically from it through cloud-init. Nodes use the Proxmox host's resolvers unless dns_servers is set"
 
   validation {
     condition     = can(cidrhost(var.network.cidr, 0))
