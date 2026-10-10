@@ -45,10 +45,11 @@ The new record says `Supersedes NNNN` in its status line. The old record changes
 | [0026](0026-bootstrap-creates-integration-users.md) | `bootstrap/` creates every Proxmox user from a `users` map in `vars/bootstrap.tfvars`, including the one TKS runs as | 2026-10-09 | Accepted |
 | [0027](0027-optional-external-cloud-provider.md) | An optional switch hands nodes to an external cloud controller manager, and `manage_nodes remove` stays for control planes | 2026-10-10 | Accepted |
 | [0028](0028-manage-nodes-reregister.md) | `manage_nodes reregister` registers existing nodes again after the external cloud provider is turned on | 2026-10-10 | Superseded by 0029 |
-| [0029](0029-reregister-reboots-the-node.md) | `manage_nodes reregister` reboots each node after deleting it, so it comes back on its new pod CIDR | 2026-10-10 | Accepted |
+| [0029](0029-reregister-reboots-the-node.md) | `manage_nodes reregister` reboots each node after deleting it, so it comes back on its new pod CIDR | 2026-10-10 | Superseded by 0036 |
 | [0030](0030-readme-neutral-voice.md) | The README is written in neutral, professional prose and doesn't advertise TJ's other repositories | 2026-10-10 | Accepted |
 | [0031](0031-dns-servers-default-to-the-host.md) | Nodes use the Proxmox host's resolvers unless `network.dns_servers` is set | 2026-10-10 | Accepted |
 | [0032](0032-gpu-image-built-in-the-root.md) | The GPU pool's Talos image is built in the root, beside the general one | 2026-10-10 | Accepted |
 | [0033](0033-pci-device-chosen-in-its-own-module.md) | The PCI device is looked up in its own module, so the lookup can be tested | 2026-10-10 | Accepted |
 | [0034](0034-each-gpu-node-names-its-gpu-by-address.md) | Each GPU node names its GPU by PCI address in the tfvars, and gets a mapping of its own | 2026-10-10 | Accepted |
 | [0035](0035-nodes-resolve-member-names.md) | Every node resolves cluster members' hostnames through Talos's host DNS | 2026-10-10 | Accepted |
+| [0036](0036-reregister-deletes-the-nodes-pods.md) | `manage_nodes reregister` deletes the node's remaining pods along with its Node | 2026-10-10 | Accepted |

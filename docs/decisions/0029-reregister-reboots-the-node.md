@@ -1,6 +1,6 @@
 # 0029. `manage_nodes reregister` reboots each node after deleting it, so it comes back on its new pod CIDR
 
-- Status: Accepted
+- Status: Superseded by 0036
 - Date: 2026-10-10
 - Decider: TJ
 - Issues and PRs: #104

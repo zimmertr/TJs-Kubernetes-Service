@@ -76,6 +76,12 @@ reregister_node(){
   echo "==> $node"
   kubectl drain "$node" --ignore-daemonsets --delete-emptydir-data --timeout=10m
   kubectl delete node "$node"
+  # The reboot would leave its DaemonSet pods Failed or Succeeded and still
+  # bound to the node's name. If it registers again before PodGC removes them,
+  # the DaemonSet controller counts those pods as already on the new Node and
+  # may not sync until something unrelated changes. Only DaemonSet and static
+  # pods remain after the drain, and the reboot is about to stop them anyway.
+  kubectl delete pods --all-namespaces --field-selector "spec.nodeName=$node" --grace-period=0 --force
   # The new Node gets a new pod CIDR, and Flannel and the CNI bridge only take
   # it up on a fresh boot. A kubelet restart leaves pods on the old CIDR with
   # no routes to them from the other nodes.
