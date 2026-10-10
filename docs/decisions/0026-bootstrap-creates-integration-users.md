@@ -1,32 +1,34 @@
-# 0026. `bootstrap/` also creates the Proxmox users that things running in the cluster need, from a `users` map
+# 0026. `bootstrap/` creates every Proxmox user from a `users` map in `vars/bootstrap.tfvars`, including the one TKS runs as
 
 - Status: Accepted
 - Date: 2026-10-09
 - Decider: TJ
 - Issues and PRs: #101
-- Supersedes: the proxmox-csi-plugin consequence of [0005](0005-bootstrap-root-for-terraform-user.md)
+- Supersedes: [0005](0005-bootstrap-root-for-terraform-user.md)
 
 ## Context
 
-[0005](0005-bootstrap-root-for-terraform-user.md) left the proxmox-csi-plugin's user in Bootstrap-Proxmox's Ansible `create_user` role. TJ is moving away from Ansible, and the CSI plugin (and later, perhaps, the Proxmox CCM in #96) needs a Proxmox user and token of its own.
+[0005](0005-bootstrap-root-for-terraform-user.md) gave `bootstrap/` a built-in `tks@pve` user, and left the Proxmox CSI plugin's user in Bootstrap-Proxmox's Ansible `create_user` role. TJ is moving away from Ansible, and the CSI plugin and the Proxmox CCM (#96) each need a Proxmox user and token. TKS should stay a tool that ships Kubernetes to Proxmox and holds as few opinions as possible: an admin might already have a user for TKS.
 
 ## Decision
 
-`bootstrap/` takes a `users` map, keyed by user ID. Each entry names its own role, privileges and token name, and gets a role, a user, an ACL on `/` and a token that is not privilege-separated, exactly like the TKS user. The TKS user is built in: `bootstrap/` merges it into the map last, and validation refuses an entry that reuses its user ID or role. Every user shares one set of `for_each` resources. `api_token` stays the TKS token in `PROXMOX_VE_API_TOKEN` form, and `api_tokens` gives each listed user's token ID and secret separately, because tools such as the CSI plugin take them that way.
+`bootstrap/` takes one required `users` map, keyed by user ID. Each entry names its role, privileges and token name, and gets a role, a user, an ACL on `/` and a token that is not privilege-separated. Nothing is built in: the `tks@pve` user and its privileges are an entry in `vars/bootstrap.tfvars`, next to the cluster tfvars, alongside the CSI and CCM users. The `api_tokens` output maps each user to its token as `<id>=<secret>`. `make test` runs the bootstrap tests with `vars/bootstrap.tfvars`, so the privileges that get applied are the ones tested.
 
 ## Evidence
 
-- The CSI plugin's install guide lists `VM.Audit VM.Config.Disk Datastore.Allocate Datastore.AllocateSpace Datastore.Audit` for its role, granted on `/`, checked on 2026-10-09.
-- `terraform test` covers the merge, the validation and both outputs.
+- The CSI plugin's install guide lists `VM.Audit VM.Config.Disk Datastore.Allocate Datastore.AllocateSpace Datastore.Audit`, and the CCM's lists `VM.Audit VM.GuestAgent.Audit Sys.Audit`, both granted on `/`, checked on 2026-10-09.
+- `terraform test` covers the roles, ACLs, tokens and output for the committed file.
 
 ## Alternatives rejected
 
+- A built-in TKS user merged into the map: it makes TKS opinionated, and an admin with their own user can't leave it out.
 - A second Terraform root just for the CSI user: another state and another apply with root credentials, for four resources.
-- [`sergelogvinov/terraform-proxmox-kubernetes-roles`](https://github.com/sergelogvinov/terraform-proxmox-kubernetes-roles), from the CSI plugin's author: it keeps the privilege lists upstream, but it is a third-party module with its own provider pins, and only covers CSI, CCM and Karpenter.
-- The TKS user as an ordinary map entry: every tfvars file would have to repeat TKS's 25 privileges, and overriding the map would silently drop the TKS user.
-- Hard-coded CSI and CCM toggles: the privilege lists would be TKS's to keep in step with projects it doesn't own.
+- [`sergelogvinov/terraform-proxmox-kubernetes-roles`](https://github.com/sergelogvinov/terraform-proxmox-kubernetes-roles), from the CSI plugin's author: a third-party module with its own provider pins, covering only CSI, CCM and Karpenter.
+- Rewriting Bootstrap-Proxmox in Terraform: most of it configures the host itself (packages, files, the kernel command line), which needs a shell, not an API.
+- `moved` blocks from the old `.tks` addresses: an existing bootstrap is destroyed and applied again instead.
 
 ## Consequences
 
-- The privilege list for each extra user lives in the user's tfvars, copied from that project's docs.
-- The bootstrap resources moved from `.tks` to `.this["tks@pve"]`. `moved` blocks carry an existing bootstrap's state across, so the TKS user and its token survive the upgrade. They only cover the default `user_id` of `tks@pve`.
+- A TKS change that needs a new privilege updates `vars/bootstrap.tfvars` and `docs/SECURITY_GUIDE.md` together. Anyone with their own copy adds it by hand.
+- Applying this over a bootstrap from before it fails on the duplicate role and user IDs. Destroy the old bootstrap first, and put the new `tks@pve` token in `config.env`.
+- Applying without `-var-file` prompts for `users` rather than planning to delete every user.

@@ -7,13 +7,13 @@ How TKS handles credentials and secrets, and what CI scans. To report a vulnerab
 | Credential | Where it lives | Used for |
 | --- | --- | --- |
 | Proxmox API token | `vars/config.env` (gitignored) as `PROXMOX_VE_API_TOKEN` | Every provider API call |
-| Other users' API tokens | `bootstrap/` state, as the `api_tokens` output | Whatever you created them for, such as the Proxmox CSI plugin |
+| Other users' API tokens | `bootstrap/` state, in the `api_tokens` output | Whatever you created them for, such as the Proxmox CSI plugin |
 
 TKS needs no SSH access to the Proxmox host.
 
 ## The Proxmox user
 
-Create a dedicated user and token rather than using `root@pam`. The optional `bootstrap/` root does it for you: apply it once with root credentials, and it outputs a token for `PROXMOX_VE_API_TOKEN`. It creates a role with only the privileges below, granted on `/`, and a token that is not privilege-separated, so the token has the user's role.
+Create a dedicated user and token rather than using `root@pam`. The optional `bootstrap/` root does it for you: apply it once with root credentials and `vars/bootstrap.tfvars`, and it outputs a token for `PROXMOX_VE_API_TOKEN`. Each user in that file gets its own role with only the privileges listed for it, granted on `/`, and a token that is not privilege-separated, so the token has the user's role. The `tks@pve` user there has the privileges below. `make test` runs the bootstrap tests against that file.
 
 | Privileges | Why |
 | --- | --- |
@@ -26,7 +26,7 @@ Create a dedicated user and token rather than using `root@pam`. The optional `bo
 | `VM.Allocate`, `VM.Audit`, `VM.Config.*`, `VM.PowerMgmt` | Create, configure, start, stop and destroy the VMs |
 | `VM.GuestAgent.Audit` | Read the QEMU guest agent's status |
 
-`bootstrap/` can also create users for things running in the cluster, such as the Proxmox CSI plugin, from its `users` map. Each gets its own role with only the privileges listed for it, granted on `/`, and a token that is not privilege-separated. The TKS user is always created, and the map can't replace it or share its role. [0026](decisions/0026-bootstrap-creates-integration-users.md)
+The same file can list users for things running in the cluster, such as the Proxmox CSI plugin and the Proxmox CCM. Their privileges come from those projects' docs. [0026](decisions/0026-bootstrap-creates-integration-users.md)
 
 ## SecureBoot
 

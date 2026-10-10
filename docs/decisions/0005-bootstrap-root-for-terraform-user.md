@@ -1,6 +1,6 @@
 # 0005. An optional `bootstrap/` root module creates the Terraform user, and every cluster shares it
 
-- Status: Accepted. Its proxmox-csi-plugin consequence is superseded by [0026](0026-bootstrap-creates-integration-users.md)
+- Status: Superseded by [0026](0026-bootstrap-creates-integration-users.md)
 - Date: 2026-10-09
 - Decider: TJ (planning interview)
 - Issues and PRs: the v2 planning PR
