@@ -22,14 +22,13 @@ TJ's Kubernetes Service, or *TKS*, is a collection of Terraform configurations t
 
 ## Requirements
 
-| Requirement  | Description                                                  |
-| ------------ | ------------------------------------------------------------ |
-| `terraform`  | Creates and manages the cluster. Version 1.16 or newer       |
-| `kubectl`    | Used by `manage_nodes`                                       |
-| `talosctl`   | Used by `manage_nodes`                                       |
-| `jq`         | Used by `manage_nodes` and to read the bootstrap tokens      |
-| Proxmox VE   | A host or cluster to run the nodes on                        |
-| DNS Resolver | Used by the nodes to pull images and reach time servers. Set it in `network.dns_servers`. DNS records for the nodes are not required |
+| Requirement | Description                                             |
+| ----------- | ------------------------------------------------------- |
+| `terraform` | Creates and manages the cluster. Version 1.16 or newer  |
+| `kubectl`   | Used by `manage_nodes`                                  |
+| `talosctl`  | Used by `manage_nodes`                                  |
+| `jq`        | Used by `manage_nodes` and to read the bootstrap tokens |
+| Proxmox VE  | A host or cluster to run the nodes on                   |
 
 <hr>
 
