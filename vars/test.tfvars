@@ -49,14 +49,3 @@ workers = {
     "test-k8s-node-1" = { ip = "192.168.40.61", vm_id = 4061 }
   }
 }
-
-gpu_workers = {
-  defaults = {
-    cores     = 8
-    memory_mb = 32768
-    tags      = ["app-kubernetes", "clusterid-test", "type-gpuworker"]
-  }
-  nodes = {
-    "test-k8s-node-gpu-1" = { ip = "192.168.40.71", vm_id = 4071, pci_address = "05:00.0" }
-  }
-}
