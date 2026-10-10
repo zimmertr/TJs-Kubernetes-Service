@@ -21,7 +21,7 @@ The new record says `Supersedes NNNN` in its status line. The old record changes
 | [0002](0002-gpu-worker-module.md) | The GPU worker is an optional, GPU-specific module, off by default | 2026-10-09 | Accepted |
 | [0003](0003-v2-breaking-rebuild.md) | v2 is a breaking rewrite, and clusters are rebuilt rather than migrated | 2026-10-09 | Accepted |
 | [0004](0004-ready-hypervisor.md) | TKS assumes a ready hypervisor, and host configuration stays out of it | 2026-10-09 | Accepted |
-| [0005](0005-bootstrap-root-for-terraform-user.md) | An optional `bootstrap/` root module creates the Terraform user, and every cluster shares it | 2026-10-09 | Accepted |
+| [0005](0005-bootstrap-root-for-terraform-user.md) | An optional `bootstrap/` root module creates the Terraform user, and every cluster shares it | 2026-10-09 | Superseded by 0026 |
 | [0006](0006-gpu-found-by-class.md) | The GPU is found by vendor and device class, never by PCI address | 2026-10-09 | Accepted |
 | [0007](0007-local-state-default-hcp-opt-in.md) | Local state stays the default, and HCP Terraform is opt-in through a gitignored override file | 2026-10-09 | Accepted |
 | [0008](0008-static-ips-via-cloud-init.md) | Nodes get static IPs through cloud-init, not DHCP reservations | 2026-10-09 | Accepted |
@@ -42,3 +42,4 @@ The new record says `Supersedes NNNN` in its status line. The old record changes
 | [0023](0023-manage-nodes-returns.md) | A slimmed-down `bin/manage_nodes` returns for node removal and rolling reboots | 2026-10-09 | Accepted |
 | [0024](0024-secureboot.md) | Every node boots with UEFI SecureBoot | 2026-10-09 | Accepted |
 | [0025](0025-destroy-does-not-reset.md) | Destroying a node only deletes its VM, and `manage_nodes remove` takes a single node out of the cluster | 2026-10-09 | Accepted |
+| [0026](0026-bootstrap-creates-integration-users.md) | `bootstrap/` creates every Proxmox user from a `users` map in `vars/bootstrap.tfvars`, including the one TKS runs as | 2026-10-09 | Accepted |

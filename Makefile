@@ -35,7 +35,8 @@ TFDOCS := $(DOCKER) quay.io/terraform-docs/terraform-docs:$(TFDOCS_VERSION)-$(TF
 # picked up without editing this file.
 TF_DIRS := $(sort $(dir $(shell find . -name '*.tf' -not -path '*/.terraform/*' -not -path './.cache/*')))
 # `terraform test` runs in each directory that owns a *.tftest.hcl file, either
-# directly or under its tests/ directory.
+# directly or under its tests/ directory. A root with a matching
+# vars/<dir>.tfvars is tested with it, so the committed values are checked.
 TEST_DIRS := $(sort $(shell find . -name '*.tftest.hcl' -not -path '*/.terraform/*' -not -path './.cache/*' | sed -E 's|/tests/[^/]+$$||; s|/[^/]+\.tftest\.hcl$$||; s|^\./?||; s|^$$|.|'))
 
 # Extra arguments for CI, e.g. SARIF output for code scanning.
@@ -73,7 +74,8 @@ test: cache
 	for d in $(TEST_DIRS); do \
 		echo "==> test $$d"; \
 		$(TERRAFORM) -chdir=$$d init -backend=false -input=false -no-color >/dev/null; \
-		$(TERRAFORM) -chdir=$$d test -no-color; \
+		vf=; if [ -f "vars/$$d.tfvars" ]; then vf="-var-file=../vars/$$d.tfvars"; fi; \
+		$(TERRAFORM) -chdir=$$d test -no-color $$vf; \
 	done
 
 actionlint:

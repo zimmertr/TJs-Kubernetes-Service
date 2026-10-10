@@ -34,7 +34,7 @@ TJ's Kubernetes Service, or *TKS*, is an IaC project that is used to deliver Kub
 
 ## Instructions
 
-1. Create an API token on Proxmox. I use the [bootstrap](bootstrap) Terraform root in this repo to create mine. It creates a `tks@pve` user and outputs a token with only the privileges TKS needs. See the [Security](docs/SECURITY_GUIDE.md#the-proxmox-user) docs for the list. It needs root credentials to do that, so use a fresh shell and export them just for this step:
+1. Create an API token on Proxmox. I use the [bootstrap](bootstrap) Terraform root in this repo to create mine. It creates the users listed in [`vars/bootstrap.tfvars`](vars/bootstrap.tfvars), each with its own role and token. Mine has a `tks@pve` user with only the privileges TKS needs (see the [Security](docs/SECURITY_GUIDE.md#the-proxmox-user) docs for the list), plus users for the [Proxmox CSI Plugin](https://github.com/sergelogvinov/proxmox-csi-plugin) and the [Proxmox Cloud Controller Manager](https://github.com/sergelogvinov/proxmox-cloud-controller-manager). If you already have a user for TKS, remove `tks@pve` from the file, or skip this step. It needs root credentials, so use a fresh shell and export them just for this step:
 
    ```bash
    cd bootstrap
@@ -45,11 +45,11 @@ TJ's Kubernetes Service, or *TKS*, is an IaC project that is used to deliver Kub
    export PROXMOX_VE_PASSWORD="REPLACEME"
 
    terraform init
-   terraform apply
-   terraform output -raw api_token
+   terraform apply -var-file=../vars/bootstrap.tfvars
+   terraform output -json api_tokens | jq
    ```
 
-   The output is the whole value for `PROXMOX_VE_API_TOKEN`, so paste it as is in the next step. If zsh shows a `%` at the end, that's just zsh telling you there was no newline, so leave it off. Then close that shell so the root password doesn't stick around.
+   It prints each user's token as `<id>=<secret>`. The one for your TKS user is the whole value for `PROXMOX_VE_API_TOKEN`, so paste it as is in the next step. Then close that shell so the root password doesn't stick around.
 
    I keep my Terraform state in [HCP Terraform](https://app.terraform.io). If you want to as well, do this before running `terraform init` above:
 

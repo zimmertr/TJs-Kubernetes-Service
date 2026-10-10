@@ -12,7 +12,7 @@ Every pull request is checked, every merge to `main` is released, and Renovate k
 | `validate` | `make validate` | `terraform init -backend=false` and `validate` in every directory that holds `.tf` files |
 | `lint` | `make lint` | tflint with the Terraform ruleset's recommended preset |
 | `scan` | `make scan` | `trivy config` at HIGH and CRITICAL severity. The SARIF report goes to code scanning |
-| `test` | `make test` | `terraform test` (with mocked providers) in every directory that has tests |
+| `test` | `make test` | `terraform test` (with mocked providers) in every directory that has tests. `bootstrap/` is tested with `vars/bootstrap.tfvars` |
 | `actionlint` | `make actionlint` | actionlint on the workflows, and shellcheck on `.github/scripts/` |
 
 `.github/workflows/compat.yml` runs on every pull request too. It reads the Kubernetes range that each pinned Talos version supports from Talos's source, fails if any Talos and Kubernetes pair in `variables.tf` or `vars/*.tfvars` falls outside it, and comments the table on Renovate's PRs that change a version.
