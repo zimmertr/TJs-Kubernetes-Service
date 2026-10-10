@@ -17,13 +17,13 @@ resource "proxmox_virtual_environment_vm" "this" {
   # iothread on the disk only takes effect with one controller per disk.
   scsi_hardware = "virtio-scsi-single"
 
-  # A node bin/manage_nodes already reset is halted, and a guest-agent shutdown
+  # A node bin/tks already reset is halted, and a guest-agent shutdown
   # of a halted VM hangs until the API times out.
   stop_on_destroy = true
 
   # Proxmox would restart the VM the moment its hardware changes, and Terraform
   # moves straight on to the next one, so every control plane could restart
-  # at once. bin/manage_nodes reboot applies the change one node at a time.
+  # at once. bin/tks reboot applies the change one node at a time.
   reboot_after_update = false
 
   cpu {
@@ -136,9 +136,9 @@ resource "talos_machine" "this" {
 
   # Destroying a node only deletes its VM. A reset here would run on every
   # node during a full destroy: the last control plane can't leave etcd, and
-  # the last worker can't drain past PodDisruptionBudgets. bin/manage_nodes
-  # remove does that cleanup for a single node instead. Set explicitly, because
-  # leaving it out would keep an earlier reset = true from state.
+  # the last worker can't drain past PodDisruptionBudgets. bin/tks remove does
+  # that cleanup for a single node instead. Set explicitly, because leaving it
+  # out would keep an earlier reset = true from state.
   on_destroy = {
     reset = false
   }

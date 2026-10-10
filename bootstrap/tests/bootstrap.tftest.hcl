@@ -35,6 +35,10 @@ run "outputs_config_env_tokens" {
     condition     = nonsensitive(output.api_tokens)["tks@pve"] == "tks@pve!terraform=00000000-0000-0000-0000-000000000000"
     error_message = "api_tokens must be in PROXMOX_VE_API_TOKEN's <id>=<secret> form"
   }
+  assert {
+    condition     = contains(split("\n", nonsensitive(output.tks)), "tks@pve tks@pve!terraform=00000000-0000-0000-0000-000000000000")
+    error_message = "bin/tks token reads each user's token as a USER TOKEN line"
+  }
 }
 
 run "no_vm_monitor_privilege" {

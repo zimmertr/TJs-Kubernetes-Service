@@ -7,7 +7,7 @@ How TKS handles credentials and secrets, and what CI scans. To report a vulnerab
 | Credential | Where it lives | Used for |
 | --- | --- | --- |
 | Proxmox API token | `vars/config.env` (gitignored) as `PROXMOX_VE_API_TOKEN` | Every provider API call |
-| Other users' API tokens | `bootstrap/` state, in the `api_tokens` output | Whatever you created them for, such as the Proxmox CSI plugin |
+| Other users' API tokens | `bootstrap/` state, in the `api_tokens` and `tks` outputs. `bin/tks token USER` prints one | Whatever you created them for, such as the Proxmox CSI plugin |
 
 TKS needs no SSH access to the Proxmox host.
 
@@ -40,7 +40,7 @@ State holds everything needed to control the cluster: the Talos machine secrets 
 - Keep it somewhere that is backed up and access-controlled. A remote backend with encryption and locking is better than a laptop. [Storing State in HCP Terraform](../README.md#storing-state-in-hcp-terraform) sets it up for both roots.
 - Anyone who can read the state is a cluster administrator.
 
-The `kubeconfig` and `talosconfig` outputs are marked sensitive, so Terraform does not print them unless asked with `terraform output -raw`. The kubeconfig used to drain nodes during upgrades is ephemeral and never written to state.
+The `kubeconfig` and `talosconfig` outputs are marked sensitive, so Terraform does not print them unless asked with `terraform output -raw`. `bin/tks config` merges them into `~/.talos/config` and `~/.kube/config`. The kubeconfig it writes, and a talosconfig it creates, are readable only by their owner. The kubeconfig used to drain nodes during upgrades is ephemeral and never written to state.
 
 ## What CI scans
 

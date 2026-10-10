@@ -54,6 +54,7 @@ Every input variable, generated from the code by `make docs`. Set them in a tfva
 | Name | Description |
 | ---- | ----------- |
 | kubeconfig | Admin kubeconfig |
-| nodes | Every node's IP, VMID, Proxmox node and role, keyed by hostname. bin/manage\_nodes reads it |
+| nodes | Every node's IP, VMID, Proxmox node and role, keyed by hostname |
 | talosconfig | talosctl config for every node |
+| tks | The cluster's name and versions, and one line per node (name, role, IP, VMID, Proxmox node, pool), control planes first. bin/tks reads it |
 <!-- END_TF_DOCS -->

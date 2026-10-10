@@ -26,9 +26,9 @@ TJ's Kubernetes Service, or *TKS*, is a collection of Terraform configurations t
 | Requirement | Description                                                                                                |
 | ----------- | ---------------------------------------------------------------------------------------------------------- |
 | `terraform` | Creates and manages the cluster. Version 1.16 or newer                                                     |
-| `kubectl`   | Used by `manage_nodes`                                                                                     |
-| `talosctl`  | Used by `manage_nodes`                                                                                     |
-| `jq`        | Used by `manage_nodes` and to read the bootstrap tokens                                                    |
+| `kubectl`   | Used by `tks`                                                                                              |
+| `talosctl`  | Used by `tks`                                                                                              |
+| `openssl`   | Used by `tks` to check kubelet certificate requests before approving them                                  |
 | Proxmox VE  | A host or cluster to run the nodes on                                                                      |
 | IOMMU       | Only for a [GPU worker](#adding-a-gpu-worker). Enabled on the host, with each GPU alone in its IOMMU group |
 
@@ -54,10 +54,11 @@ TJ's Kubernetes Service, or *TKS*, is a collection of Terraform configurations t
    cd bootstrap
    terraform init
    terraform apply -var-file=../vars/bootstrap.tfvars
-   terraform output -json api_tokens | jq
+   cd ..
+   ./bin/tks token tks@pve
    ```
    
-   After running `terraform output`, each user's token is printed as `<id>=<secret>`. 
+   `tks token` prints a user's token as `<id>=<secret>`, the form `PROXMOX_VE_API_TOKEN` takes. 
 
 2. Copy [`vars/config.env.example`](vars/config.env.example) to `vars/config.env`, configure it, and source it as per the provider's [documentation](https://registry.terraform.io/providers/bpg/proxmox/latest/docs#authentication). 
 
@@ -80,17 +81,10 @@ TJ's Kubernetes Service, or *TKS*, is a collection of Terraform configurations t
    terraform apply --var-file="vars/test.tfvars"
    ```
 
-6. Retrieve the Kubernetes and Talos configuration files, taking care not to overwrite existing ones. [kubecm](https://github.com/sunny0826/kubecm) and [kubectx](https://github.com/ahmetb/kubectx) can merge kubeconfigs and switch contexts.
+6. Merge the Talos and Kubernetes configuration files into `~/.talos/config` and `~/.kube/config`. Other clusters' entries are kept, entries from an earlier build of the same cluster are replaced, and the new cluster becomes the current context.
 
    ```bash
-   mkdir -p ~/.{kube,talos}
-   touch ~/.kube/config
-   
-   terraform output -raw talosconfig > ~/.talos/config-test
-   terraform output -raw kubeconfig > ~/.kube/config-test
-   
-   kubecm add -f ~/.kube/config-test
-   kubectx admin@test
+   ./bin/tks config
    ```
 
 7. Confirm that Kubernetes is bootstrapped and that every node has joined. The control plane can take a moment to respond. Each node's status is also visible through `talosctl` or the VM console in Proxmox.
@@ -99,15 +93,16 @@ TJ's Kubernetes Service, or *TKS*, is a collection of Terraform configurations t
    watch kubectl get nodes,all -A
    ```
 
-8. Kubelet serving certificates require their certificate signing requests (CSRs) to be approved. Without an approver such as [Kubelet CSR Approver](https://github.com/postfinance/kubelet-csr-approver), review and approve them manually:
+8. Kubelet serving certificates require their certificate signing requests (CSRs) to be approved. Without an approver such as [Kubelet CSR Approver](https://github.com/postfinance/kubelet-csr-approver), approve them with `tks`. It only approves a CSR that comes from a node and names nothing but that node's hostname and IP.
 
    ```bash
-   # Review pending CSRs to validate they are as expected
-   kubectl get csr
-   kubectl describe csr csr-foobar
-   
-   # Approve all pending CSRs
-   kubectl get csr -o name | xargs kubectl certificate approve
+   ./bin/tks approve-csrs
+   ```
+
+9. Check the cluster's health. `tks doctor` checks the Proxmox API, each VM, each node's Talos and Kubernetes versions against the tfvars, etcd membership, GPU drivers, and `talosctl health`.
+
+   ```bash
+   ./bin/tks doctor
    ```
 
 <hr>
@@ -134,13 +129,13 @@ Set `cluster.external_cloud_provider` to `true` to hand node initialization and 
 
 New nodes join with the `node.cloudprovider.kubernetes.io/uninitialized` taint and keep it until the CCM initializes them. Flannel, CoreDNS and kube-proxy tolerate the taint, but other workloads do not schedule, so install the CCM first.
 
-Enable it when the cluster is created where possible. Nodes that joined before it was enabled are ignored by the CCM until they register again; see `manage_nodes reregister` under [Managing the Cluster](#managing-the-cluster).
+Enable it when the cluster is created where possible. Nodes that joined before it was enabled are ignored by the CCM until they register again; see `tks reregister` under [Managing the Cluster](#managing-the-cluster).
 
 ### Exposing Control Plane Metrics
 
 Talos binds the metrics endpoints for etcd, the scheduler, the controller-manager and kube-proxy to localhost, so a monitoring stack such as kube-prometheus-stack cannot scrape them. Set `cluster.expose_metrics` to `true` to bind them to the node addresses instead. The scheduler and controller-manager still authenticate scrapes with TLS and RBAC, but the etcd (`2381`) and kube-proxy (`10249`) listeners are plain HTTP and readable from the node network, which is why this is opt-in.
 
-On a running cluster, the scheduler, controller-manager and API server apply the change on their own. etcd does not, because Talos refuses API-driven etcd restarts: reboot the control plane nodes with [`manage_nodes reboot`](#managing-the-cluster), naming each of them. It restarts them one at a time and waits for etcd before moving to the next. kube-proxy is a bootstrap manifest and only re-renders on `talosctl upgrade-k8s --to $CURRENT_VERSION`.
+On a running cluster, the scheduler, controller-manager and API server apply the change on their own. etcd does not, because Talos refuses API-driven etcd restarts: reboot the control plane nodes with [`tks reboot`](#managing-the-cluster), naming each of them. It restarts them one at a time and waits for etcd before moving to the next. kube-proxy is a bootstrap manifest and only re-renders on `talosctl upgrade-k8s --to $CURRENT_VERSION`.
 
 ### Adding a GPU Worker
 
@@ -167,10 +162,14 @@ Proxmox starts only one VM per card, so two clusters on the same host cannot run
 
 Scaling and upgrades are driven by the tfvars file. Add, remove or resize nodes, or change `talos_version` or `kubernetes_version`, then run `terraform plan` and apply. Upgrades happen in place, one node at a time with control planes first; nodes are drained before a Talos upgrade, and Kubernetes upgrades are health checked. Renovate opens pull requests for new versions and checks that the Talos and Kubernetes versions are compatible. `talos_config_version` stays at the version the cluster was created with, as described in step 3 of the [Instructions](#instructions).
 
-Some operations need more than an apply. [`bin/manage_nodes`](bin/manage_nodes) handles them, one node at a time, from the repository root in the cluster's workspace after `source vars/config.env`:
+Some operations need more than an apply. [`bin/tks`](bin/tks) handles them from the repository root in the cluster's workspace after `source vars/config.env`:
 
 | Command                       | Use                                                          |
 | ----------------------------- | ------------------------------------------------------------ |
+| `config`                      | Merges the cluster's Talos and Kubernetes configuration files into `~/.talos/config` and `~/.kube/config`, replacing entries from an earlier build of the same cluster |
+| `approve-csrs`                | Approves pending kubelet serving certificate requests that come from a node and name only its own hostname and IP. Needed without an approver in the cluster, after nodes are added and when their certificates rotate |
+| `doctor`                      | Checks the Proxmox API, the VMs, the nodes' Talos and Kubernetes versions against the tfvars, etcd membership, GPU drivers and `talosctl health`, without changing anything |
+| `token USER`                  | Prints a user's API token from the [bootstrap](bootstrap) root as `<id>=<secret>` |
 | `remove NODE`                 | Takes a node out of the cluster: drains it, removes it from etcd if it is a control plane, resets it and deletes it from Kubernetes. Run it before removing the node from the tfvars. If it runs afterwards, it removes the dead etcd member instead, which requires at least three control planes. It refuses to remove the last control plane. With a cloud controller manager, workers can be removed with only the apply, but draining first is still recommended |
 | `reboot [NODE...]`            | Restarts nodes through Proxmox after a change to cores, memory or PCI devices, which Terraform does not apply to running VMs. Each node is drained, restarted, and waited on before the next |
 | `reregister [NODE...]`        | Registers nodes again after `cluster.external_cloud_provider` is enabled on an existing cluster. Each node is drained, deleted from Kubernetes with its remaining pods, rebooted onto its new pod network, and waited on until the CCM has initialized it. Needed once per cluster |
@@ -178,9 +177,10 @@ Some operations need more than an apply. [`bin/manage_nodes`](bin/manage_nodes) 
 Without node names, `reboot` and `reregister` process every node, control planes first.
 
 ```bash
-./bin/manage_nodes remove k8s-node-3
-./bin/manage_nodes reboot
-./bin/manage_nodes reregister k8s-node-2 k8s-node-3
+./bin/tks remove k8s-node-3
+./bin/tks reboot
+./bin/tks reregister k8s-node-2 k8s-node-3
+./bin/tks token kubernetes-ccm@pve
 ```
 
 <hr>
