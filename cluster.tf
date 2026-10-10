@@ -44,5 +44,5 @@ data "talos_client_configuration" "this" {
   cluster_name         = var.cluster.name
   client_configuration = talos_machine_secrets.this.client_configuration
   endpoints            = [for n in local.controlplanes : n.ip]
-  nodes                = [for n in merge(local.controlplanes, local.workers) : n.ip]
+  nodes                = [for n in merge(local.controlplanes, local.workers, local.gpu_workers) : n.ip]
 }

@@ -10,6 +10,8 @@ One Terraform root builds one cluster. Use a workspace (or a separate state) per
 | `nodes.tf` | The node pools, by calling the modules below. It renders each node's Talos patches from `configs/` |
 | `modules/talos_image` | A Talos Image Factory schematic and its SecureBoot `nocloud` `qcow2` image, downloaded to a Proxmox datastore as `tks-<cluster>-<pool>-<version>.qcow2` |
 | `modules/node` | For each node in a pool: the VM, its Talos machine configuration, and the `talos_machine` that applies and upgrades it |
+| `modules/gpu_worker` | Optional. Looks up the host's GPU, creates the `<cluster>-gpu` PCI resource mapping for it, and builds the GPU nodes through `modules/node` with the mapping attached |
+| `modules/pci_device` | Chooses one device from the PCI lookup and turns it into a mapping entry. It fails the plan unless exactly one device matches, or if that device has no IOMMU group |
 | `bootstrap/` | Optional, and a separate root. A Proxmox role, user and API token for each user in its `users` map, such as the one TKS runs as |
 
 ## How a node comes up
@@ -19,7 +21,7 @@ One Terraform root builds one cluster. Use a workspace (or a separate state) per
 3. `talos_machine` applies the machine configuration to the node's IP. The patches in `configs/` set the installer image, the hostname, and the control planes' shared virtual IP, plus Flannel, metrics and external cloud provider settings when they are switched on.
 4. `talos_cluster` bootstraps etcd on the first control plane, and the others join through the virtual IP.
 
-Control planes come up before workers.
+Control planes come up before workers. GPU nodes are workers built from their own image, with the GPU driver extension, and an extra patch that registers them with the `amd.com/gpu:NoSchedule` taint and the `tks.io/pool=gpu` label. [0002](decisions/0002-gpu-worker-module.md), [0006](decisions/0006-gpu-found-by-class.md), [0017](decisions/0017-gpu-taint-extended-resource-toleration.md)
 
 ## Upgrades
 

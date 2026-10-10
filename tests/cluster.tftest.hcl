@@ -117,6 +117,109 @@ run "workers_are_optional" {
   }
 }
 
+run "gpu_workers_are_off_by_default" {
+  command = plan
+
+  assert {
+    condition     = length(module.gpu_image) == 0 && length(module.gpu_workers) == 0
+    error_message = "Without GPU nodes, no GPU image, mapping or VM is planned"
+  }
+}
+
+run "gpu_workers_get_their_own_image_taint_and_label" {
+  command = plan
+
+  variables {
+    cluster = { name = "test", vip = "192.168.40.50", talos_config_version = "v1.14.2", external_cloud_provider = true }
+    gpu_workers = {
+      defaults = { cores = 16, memory_mb = 196608 }
+      nodes = {
+        "test-k8s-node-gpu-1" = { ip = "192.168.40.71", vm_id = 4071 }
+      }
+    }
+  }
+
+  override_module {
+    target = module.gpu_image
+    outputs = {
+      file_id         = "local:import/tks-test-gpu-v1.14.2.qcow2"
+      installer_image = "factory.talos.dev/nocloud-installer/def456:v1.14.2"
+    }
+  }
+  # The PCI lookup can't be mocked here; modules/pci_device tests it.
+  override_module {
+    target = module.gpu_workers
+    outputs = {
+      nodes    = { "test-k8s-node-gpu-1" = { ip = "192.168.40.71", vm_id = 4071, proxmox_node = "earth" } }
+      machines = {}
+      mapping  = "test-gpu"
+    }
+  }
+
+  assert {
+    condition     = local.gpu_workers["test-k8s-node-gpu-1"].cores == 16 && local.gpu_workers["test-k8s-node-gpu-1"].memory_mb == 196608
+    error_message = "GPU nodes must get the GPU pool's defaults"
+  }
+  assert {
+    condition     = strcontains(local.gpu_workers["test-k8s-node-gpu-1"].config_patches[0], "def456") && !strcontains(local.gpu_workers["test-k8s-node-gpu-1"].config_patches[0], "abc123")
+    error_message = "GPU nodes must install and upgrade from the GPU image, which carries the driver"
+  }
+  assert {
+    condition     = strcontains(local.gpu_workers["test-k8s-node-gpu-1"].config_patches[1], "externalCloudProvider")
+    error_message = "Cluster-wide patches must reach GPU nodes too"
+  }
+  assert {
+    condition     = anytrue([for p in local.gpu_workers["test-k8s-node-gpu-1"].config_patches : strcontains(p, "amd.com/gpu: NoSchedule") && strcontains(p, "tks.io/pool: gpu")])
+    error_message = "GPU nodes must carry the GPU taint and pool label"
+  }
+  assert {
+    condition     = !anytrue([for p in local.workers["test-k8s-node-1"].config_patches : strcontains(p, "amd.com/gpu")])
+    error_message = "General workers must not get the GPU taint"
+  }
+  assert {
+    condition     = strcontains(local.gpu_workers["test-k8s-node-gpu-1"].config_patches[length(local.gpu_workers["test-k8s-node-gpu-1"].config_patches) - 1], "test-k8s-node-gpu-1")
+    error_message = "The hostname patch must come last"
+  }
+  assert {
+    condition     = output.nodes["test-k8s-node-gpu-1"].role == "worker"
+    error_message = "GPU nodes must be listed for manage_nodes as workers"
+  }
+  assert {
+    condition     = contains(data.talos_client_configuration.this.nodes, "192.168.40.71")
+    error_message = "talosctl must be able to reach GPU nodes"
+  }
+}
+
+run "rejects_a_gpu_node_ip_in_another_pool" {
+  command = plan
+
+  variables {
+    gpu_workers = { nodes = { "test-k8s-node-gpu-1" = { ip = "192.168.40.61", vm_id = 4071 } } }
+  }
+
+  expect_failures = [var.workers]
+}
+
+run "rejects_a_gpu_hostname_in_another_pool" {
+  command = plan
+
+  variables {
+    gpu_workers = { nodes = { "test-k8s-node-1" = { ip = "192.168.40.71", vm_id = 4071 } } }
+  }
+
+  expect_failures = [var.workers]
+}
+
+run "rejects_a_vip_that_is_a_gpu_node_ip" {
+  command = plan
+
+  variables {
+    gpu_workers = { nodes = { "test-k8s-node-gpu-1" = { ip = "192.168.40.50", vm_id = 4071 } } }
+  }
+
+  expect_failures = [var.cluster]
+}
+
 run "the_first_control_plane_bootstraps" {
   command = plan
 

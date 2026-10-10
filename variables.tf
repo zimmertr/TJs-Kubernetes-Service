@@ -64,7 +64,7 @@ variable "cluster" {
     error_message = "cluster.vip must be inside network.cidr."
   }
   validation {
-    condition     = !contains([for n in merge(var.controlplanes.nodes, var.workers.nodes) : n.ip], var.cluster.vip)
+    condition     = !contains([for n in merge(var.controlplanes.nodes, var.workers.nodes, var.gpu_workers.nodes) : n.ip], var.cluster.vip)
     error_message = "cluster.vip must not be a node IP."
   }
 }
@@ -117,27 +117,52 @@ variable "workers" {
   # Cross-pool checks live here because every pool is in scope of this rule.
   validation {
     condition = alltrue([
-      for n in merge(var.controlplanes.nodes, var.workers.nodes) :
+      for n in merge(var.controlplanes.nodes, var.workers.nodes, var.gpu_workers.nodes) :
       can(cidrhost("${n.ip}/${split("/", var.network.cidr)[1]}", 0)) && cidrhost("${n.ip}/${split("/", var.network.cidr)[1]}", 0) == cidrhost(var.network.cidr, 0)
     ])
     error_message = "Every node IP must be inside network.cidr."
   }
   validation {
     condition = (
-      length(distinct([for n in merge(var.controlplanes.nodes, var.workers.nodes) : n.ip])) ==
-      length(merge(var.controlplanes.nodes, var.workers.nodes))
+      length(distinct([for n in merge(var.controlplanes.nodes, var.workers.nodes, var.gpu_workers.nodes) : n.ip])) ==
+      length(merge(var.controlplanes.nodes, var.workers.nodes, var.gpu_workers.nodes))
     )
     error_message = "Node IPs must be unique."
   }
   validation {
     condition = (
-      length(distinct([for n in merge(var.controlplanes.nodes, var.workers.nodes) : n.vm_id])) ==
-      length(merge(var.controlplanes.nodes, var.workers.nodes))
+      length(distinct([for n in merge(var.controlplanes.nodes, var.workers.nodes, var.gpu_workers.nodes) : n.vm_id])) ==
+      length(merge(var.controlplanes.nodes, var.workers.nodes, var.gpu_workers.nodes))
     )
     error_message = "Node VMIDs must be unique."
   }
   validation {
-    condition     = length(setintersection(keys(var.controlplanes.nodes), keys(var.workers.nodes))) == 0
+    condition     = length(merge(var.controlplanes.nodes, var.workers.nodes, var.gpu_workers.nodes)) == length(var.controlplanes.nodes) + length(var.workers.nodes) + length(var.gpu_workers.nodes)
     error_message = "A hostname can only belong to one pool."
   }
+}
+
+variable "gpu_workers" {
+  type = object({
+    defaults = optional(object({
+      cores     = optional(number, 4)
+      memory_mb = optional(number, 8192)
+      disk_gb   = optional(number, 50)
+      tags      = optional(list(string), [])
+    }), {})
+    nodes = optional(map(object({
+      ip        = string
+      vm_id     = number
+      cores     = optional(number)
+      memory_mb = optional(number)
+      disk_gb   = optional(number)
+      tags      = optional(list(string))
+    })), {})
+    pci_vendor_id = optional(string, "0x1002")
+    pci_class     = optional(string, "0x03")
+    pci_address   = optional(string)
+    extensions    = optional(list(string), ["siderolabs/qemu-guest-agent", "siderolabs/amdgpu"])
+  })
+  default     = {}
+  description = "Worker nodes with the host's GPU passed through, keyed by hostname. The GPU is found by PCI vendor and class (AMD display controllers by default); pci_address chooses one when several match. The mapping holds one GPU and Proxmox starts only one VM per device, so one GPU node can run at a time"
 }

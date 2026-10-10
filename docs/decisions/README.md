@@ -48,3 +48,5 @@ The new record says `Supersedes NNNN` in its status line. The old record changes
 | [0029](0029-reregister-reboots-the-node.md) | `manage_nodes reregister` reboots each node after deleting it, so it comes back on its new pod CIDR | 2026-10-10 | Accepted |
 | [0030](0030-readme-neutral-voice.md) | The README is written in neutral, professional prose and doesn't advertise TJ's other repositories | 2026-10-10 | Accepted |
 | [0031](0031-dns-servers-default-to-the-host.md) | Nodes use the Proxmox host's resolvers unless `network.dns_servers` is set | 2026-10-10 | Accepted |
+| [0032](0032-gpu-image-built-in-the-root.md) | The GPU pool's Talos image is built in the root, beside the general one | 2026-10-10 | Accepted |
+| [0033](0033-pci-device-chosen-in-its-own-module.md) | The PCI device is chosen in its own module, so the choice can be tested | 2026-10-10 | Accepted |
