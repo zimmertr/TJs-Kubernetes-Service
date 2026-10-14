@@ -8,7 +8,7 @@ TERRAFORM_VERSION := 1.16.5
 # renovate: datasource=docker depName=ghcr.io/terraform-linters/tflint
 TFLINT_VERSION := v0.64.0
 # renovate: datasource=docker depName=ghcr.io/aquasecurity/trivy
-TRIVY_VERSION := 0.75.0
+TRIVY_VERSION := 0.76.0
 # renovate: datasource=docker depName=rhysd/actionlint
 ACTIONLINT_VERSION := 1.7.12
 # renovate: datasource=github-releases depName=terraform-docs/terraform-docs extractVersion=^v(?<version>.+)$
