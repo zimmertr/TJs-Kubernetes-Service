@@ -34,7 +34,7 @@ variable "cluster" {
     vip  = string
     # The installed Talos OS. Renovate bumps it, and changing it upgrades
     # nodes in place.
-    talos_version = optional(string, "v1.14.3")
+    talos_version = optional(string, "v1.14.4")
     # The provider's config-generation contract, pinned when the cluster is
     # created. Raising it later changes the generated machine config, not the
     # cluster's secrets.
