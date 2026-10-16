@@ -32,7 +32,7 @@ Every design decision gets a record in `docs/decisions/`, written in the same PR
 ## Rules for every change
 
 - **Never merge to `main` without TJ's approval.** Push branches and open PRs freely; TJ reviews in GitHub. Record: [0019](docs/decisions/0019-a-handful-of-prs.md)
-- **Never run anything against real infrastructure without TJ's approval for that run.** That means `terraform apply` or `destroy`, `talosctl`, `kubectl`, SSH to a Proxmox host, or Proxmox API calls. Read-only commands included. Mocked tests and lint run freely.
+- **Never run anything against real infrastructure without TJ's approval for that run.** That means `terraform apply` or `destroy`, `talosctl`, SSH to a Proxmox host, or Proxmox API calls, read-only commands included. The one exception is reading from TJ's clusters with `kubectl`, which needs no approval; changing anything with `kubectl` still does. Mocked tests and lint run freely.
 - **Work in a clone under `/tmp`, not in TJ's checkout.** TJ runs several agents at once.
 - **PR titles are conventional commits** (`feat:`, `fix:`, `docs:`, `ci:`, …; `!` for breaking). The squash commit title is the PR title, and it decides the release version. Record: [0013](docs/decisions/0013-ci-and-semver-releases.md)
 - **Ship tests with behavior.** `terraform test` with `mock_provider` covers validation, resource counts and planned values. A behavior change without a test is incomplete.
