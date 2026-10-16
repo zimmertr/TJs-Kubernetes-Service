@@ -35,8 +35,8 @@ run "tks_output_lists_the_cluster_and_control_planes_first" {
   assert {
     condition = output.tks == join("\n", [
       "cluster test",
-      "talos_version v1.14.2",
-      "kubernetes_version v1.37.1",
+      "talos_version ${var.cluster.talos_version}",
+      "kubernetes_version ${var.cluster.kubernetes_version}",
       "node test-k8s-cp-1 controlplane 192.168.40.51 4051 earth controlplanes",
       "node test-k8s-cp-2 controlplane 192.168.40.52 4052 earth controlplanes",
       "node test-k8s-node-1 worker 192.168.40.61 4061 earth workers",
