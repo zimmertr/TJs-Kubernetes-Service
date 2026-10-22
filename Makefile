@@ -6,7 +6,7 @@
 # renovate: datasource=docker depName=hashicorp/terraform
 TERRAFORM_VERSION := 1.17.0
 # renovate: datasource=docker depName=ghcr.io/terraform-linters/tflint
-TFLINT_VERSION := v0.64.0
+TFLINT_VERSION := v0.65.0
 # renovate: datasource=docker depName=ghcr.io/aquasecurity/trivy
 TRIVY_VERSION := 0.76.1
 # renovate: datasource=docker depName=rhysd/actionlint
