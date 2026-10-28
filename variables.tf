@@ -39,7 +39,7 @@ variable "cluster" {
     # created. Raising it later changes the generated machine config, not the
     # cluster's secrets.
     talos_config_version = string
-    kubernetes_version   = optional(string, "v1.37.1")
+    kubernetes_version   = optional(string, "v1.37.2")
     disable_flannel      = optional(bool, false)
     expose_metrics       = optional(bool, false)
     # Hands node initialization and cleanup to a cloud controller manager.
