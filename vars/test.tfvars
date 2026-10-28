@@ -20,7 +20,7 @@ cluster = {
   vip                     = "192.168.40.50"
   talos_version           = "v1.14.5"
   talos_config_version    = "v1.14.2"
-  kubernetes_version      = "v1.37.1"
+  kubernetes_version      = "v1.37.2"
   external_cloud_provider = true
 }
 
