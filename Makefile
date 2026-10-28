@@ -4,7 +4,7 @@
 # the `# renovate:` annotations.
 
 # renovate: datasource=docker depName=hashicorp/terraform
-TERRAFORM_VERSION := 1.17.0
+TERRAFORM_VERSION := 1.17.1
 # renovate: datasource=docker depName=ghcr.io/terraform-linters/tflint
 TFLINT_VERSION := v0.65.0
 # renovate: datasource=docker depName=ghcr.io/aquasecurity/trivy
