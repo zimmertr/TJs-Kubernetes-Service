@@ -47,7 +47,8 @@ The `kubeconfig` and `talosconfig` outputs are marked sensitive, so Terraform do
 | Check | What it catches |
 | --- | --- |
 | Trivy (`make scan`) | Generic Terraform misconfigurations at HIGH or CRITICAL severity. It has no Proxmox- or Talos-specific checks. Findings are uploaded to GitHub code scanning |
-| actionlint and shellcheck (`make actionlint`) | Workflow mistakes, including untrusted input interpolated into scripts |
+| actionlint and zizmor (`Lint / actionlint`, `Lint / zizmor`) | Workflow mistakes and insecure patterns, including untrusted input interpolated into scripts and credentials left on disk |
+| shellcheck (`make shellcheck`) | Unsafe quoting and other mistakes in `.github/scripts/` and `bin/tks` |
 | GitHub secret scanning with push protection | Credentials pushed to the repository |
 
 Every GitHub Action is pinned to a commit SHA, and each workflow job gets only the permissions it needs. [`CICD.md`](CICD.md) describes the pipeline.

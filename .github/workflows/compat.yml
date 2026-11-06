@@ -6,15 +6,23 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: compat-${{ github.ref }}
+  cancel-in-progress: true
+
 # Runs on every PR so it can be a required check. It comments only on
 # Renovate's PRs that change a Talos or Kubernetes version, where the comment
 # tells a reviewer whether the bump is safe to merge.
+#
+# A script, not a tool: the Talos provider renders a machine config for an
+# unsupported pair without complaint (records 0021 and 0038).
 jobs:
   talos-kubernetes:
+    name: talos-kubernetes
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      pull-requests: write
+      pull-requests: write # the compatibility comment on Renovate's PRs
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:

@@ -16,6 +16,7 @@ concurrency:
 # same command. Job names are the required checks in the main ruleset.
 jobs:
   fmt:
+    name: fmt
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -24,6 +25,7 @@ jobs:
       - run: make fmt-check
 
   validate:
+    name: validate
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -37,6 +39,7 @@ jobs:
       - run: make validate
 
   lint:
+    name: lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -51,10 +54,11 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
 
   scan:
+    name: scan
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      security-events: write
+      security-events: write # the SARIF upload to code scanning
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -70,6 +74,7 @@ jobs:
       - run: make scan
 
   test:
+    name: test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -82,10 +87,12 @@ jobs:
           restore-keys: plugins-
       - run: make test
 
-  actionlint:
+  # The workflows are linted by lint.yml; this covers the scripts it can't see.
+  shellcheck:
+    name: shellcheck
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - run: make actionlint
+      - run: make shellcheck

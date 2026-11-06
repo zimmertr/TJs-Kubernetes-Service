@@ -1,6 +1,8 @@
 # CI/CD
 
-Every pull request is checked, every merge to `main` is released, and Renovate keeps dependencies current. Nothing here plans or applies against real infrastructure: GitHub's runners cannot reach a Proxmox host, so applies are manual. Decisions: [0012](decisions/0012-renovate-automerge.md), [0013](decisions/0013-ci-and-semver-releases.md).
+Every pull request is checked, every merge to `main` is released, and Renovate keeps dependencies current. Nothing here plans or applies against real infrastructure: GitHub's runners cannot reach a Proxmox host, so applies are manual. Decisions: [0012](decisions/0012-renovate-automerge.md), [0013](decisions/0013-ci-and-semver-releases.md), [0038](decisions/0038-titles-workflow-lint-and-releases-come-from-yggdrasil.md).
+
+The title check, the workflow lint and the release come from [zimmertr/yggdrasil](https://github.com/zimmertr/yggdrasil)'s reusable workflows, pinned by commit SHA with the version beside it. The Terraform checks are this repo's own.
 
 ## Checks
 
@@ -13,7 +15,9 @@ Every pull request is checked, every merge to `main` is released, and Renovate k
 | `lint` | `make lint` | tflint with the Terraform ruleset's recommended preset |
 | `scan` | `make scan` | `trivy config` at HIGH and CRITICAL severity. The SARIF report goes to code scanning |
 | `test` | `make test` | `terraform test` (with mocked providers) in every directory that has tests. `bootstrap/` is tested with `vars/bootstrap.tfvars` |
-| `actionlint` | `make actionlint` | actionlint on the workflows, and shellcheck on `.github/scripts/` |
+| `shellcheck` | `make shellcheck` | shellcheck on `.github/scripts/` and `bin/tks` |
+
+`.github/workflows/lint.yml` runs yggdrasil's `lint` module on every pull request: `Lint / actionlint` (actionlint, with shellcheck on each `run:` block), `Lint / zizmor` (zizmor's pedantic audits of the workflows) and `Lint / semgrep` (a Dockerfile rule; TKS has no Dockerfile, so it scans nothing). A finding is fixed, or silenced inline with a `# zizmor: ignore[<audit>]` comment that gives the reason.
 
 `.github/workflows/compat.yml` runs on every pull request too. It reads the Kubernetes range that each pinned Talos version supports from Talos's source, fails if any Talos and Kubernetes pair in `variables.tf` or `vars/*.tfvars` falls outside it, and comments the table on Renovate's PRs that change a version.
 
@@ -21,11 +25,11 @@ Every pull request is checked, every merge to `main` is released, and Renovate k
 
 ## Pull request titles
 
-PRs are squash-merged, and the PR title becomes the commit title on `main`, so the title has to be a [conventional commit](https://www.conventionalcommits.org): `type(optional scope)!: description`, where `type` is one of `feat`, `fix`, `perf`, `refactor`, `chore`, `docs`, `style`, `test`, `ci` or `build`. `.github/workflows/pr-title.yml` fails any other title, and its job summary shows the version that merging would release.
+PRs are squash-merged, and the PR title becomes the commit title on `main`, so the title has to be a [conventional commit](https://www.conventionalcommits.org): `type(optional scope)!: description`, where `type` is one of `feat`, `fix`, `perf`, `refactor`, `chore`, `docs`, `style`, `test`, `ci` or `build`. `.github/workflows/pr-title.yml` calls yggdrasil's `pr-title` module, whose `PR Title / PR Title` check fails any other title.
 
 ## Releases
 
-`.github/workflows/release.yml` runs on every push to `main`. It reads the merged commit's title, computes the next version from the latest `v*` tag with `.github/scripts/next-version.sh`, then pushes an annotated tag and publishes a GitHub Release with generated notes.
+`.github/workflows/release.yml` calls yggdrasil's `release` module on every push to `main`. GitVersion reads the merged commit's title and counts from the latest `v*` tag, then the module tags the commit and publishes a GitHub Release with generated notes. On a pull request the same module runs as a dry run, and the `Release / Version` job summary shows the version that merging would release.
 
 | Title | Bump | Example |
 | --- | --- | --- |
@@ -39,7 +43,7 @@ Every merge releases, including Renovate's dependency bumps.
 
 Renovate (`.github/renovate.json`) opens PRs for Terraform providers, `required_version`, GitHub Actions (pinned to commit SHAs), the tool images in the `Makefile` (through their `# renovate:` comments), and `talos_version` and `kubernetes_version` in `variables.tf` and `vars/*.tfvars`. It leaves `talos_config_version` alone, because that is pinned when a cluster is created. It keeps a dependency dashboard issue.
 
-Updates below a major (minor, patch, digest and pin) merge themselves through GitHub auto-merge once the required checks pass. Majors and Kubernetes minors wait for a maintainer, since each Talos release supports a limited range of Kubernetes versions.
+Updates below a major (minor, patch, digest and pin) merge themselves through GitHub auto-merge once the required checks pass. Majors and Kubernetes minors wait for a maintainer, since each Talos release supports a limited range of Kubernetes versions. A patch or minor of yggdrasil's workflows merges itself only once the release is three days old.
 
 ## Protecting `main`
 

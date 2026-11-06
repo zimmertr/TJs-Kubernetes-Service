@@ -54,3 +54,4 @@ The new record says `Supersedes NNNN` in its status line. The old record changes
 | [0035](0035-nodes-resolve-member-names.md) | Every node resolves cluster members' hostnames through Talos's host DNS | 2026-10-10 | Accepted |
 | [0036](0036-reregister-deletes-the-nodes-pods.md) | `manage_nodes reregister` deletes the node's remaining pods along with its Node | 2026-10-10 | Accepted |
 | [0037](0037-tks-helper.md) | `bin/manage_nodes` becomes `bin/tks`, which also handles client configs, CSRs, health checks and tokens, without `jq` | 2026-10-10 | Accepted |
+| [0038](0038-titles-workflow-lint-and-releases-come-from-yggdrasil.md) | PR titles, workflow lint and releases come from yggdrasil's modules; the Terraform checks stay here | 2026-11-06 | Accepted |
