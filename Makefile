@@ -9,8 +9,8 @@ TERRAFORM_VERSION := 1.17.1
 TFLINT_VERSION := v0.65.0
 # renovate: datasource=docker depName=ghcr.io/aquasecurity/trivy
 TRIVY_VERSION := 0.76.2
-# renovate: datasource=docker depName=rhysd/actionlint
-ACTIONLINT_VERSION := 1.7.12
+# renovate: datasource=docker depName=koalaman/shellcheck
+SHELLCHECK_VERSION := v0.11.0
 # renovate: datasource=github-releases depName=terraform-docs/terraform-docs extractVersion=^v(?<version>.+)$
 TFDOCS_VERSION := 0.24.0
 
@@ -28,7 +28,7 @@ TERRAFORM := $(DOCKER) -v $(CACHE)/plugins:/plugins -e TF_PLUGIN_CACHE_DIR=/plug
 # GITHUB_TOKEN, when set, lifts the GitHub API rate limit for plugin downloads.
 TFLINT := $(DOCKER) -v $(CACHE)/tflint:/tflint -e TFLINT_PLUGIN_DIR=/tflint -e GITHUB_TOKEN --entrypoint tflint ghcr.io/terraform-linters/tflint:$(TFLINT_VERSION)
 TRIVY := $(DOCKER) -v $(CACHE)/trivy:/trivy-cache ghcr.io/aquasecurity/trivy:$(TRIVY_VERSION) --cache-dir /trivy-cache
-ACTIONLINT := $(DOCKER) $(DOCKERHUB)/rhysd/actionlint:$(ACTIONLINT_VERSION)
+SHELLCHECK := $(DOCKER) $(DOCKERHUB)/koalaman/shellcheck:$(SHELLCHECK_VERSION)
 TFDOCS := $(DOCKER) quay.io/terraform-docs/terraform-docs:$(TFDOCS_VERSION)-$(TFDOCS_ARCH)
 
 # Every directory holding .tf files is validated, so new modules and roots are
@@ -42,9 +42,9 @@ TEST_DIRS := $(sort $(shell find . -name '*.tftest.hcl' -not -path '*/.terraform
 # Extra arguments for CI, e.g. SARIF output for code scanning.
 TRIVY_ARGS ?=
 
-.PHONY: check fmt fmt-check validate lint scan test actionlint docs cache
+.PHONY: check fmt fmt-check validate lint scan test shellcheck docs cache
 
-check: fmt-check validate lint scan test actionlint
+check: fmt-check validate lint scan test shellcheck
 
 cache:
 	@mkdir -p $(CACHE)/plugins $(CACHE)/tflint $(CACHE)/trivy
@@ -78,9 +78,10 @@ test: cache
 		$(TERRAFORM) -chdir=$$d test -no-color $$vf; \
 	done
 
-actionlint:
-	$(ACTIONLINT) -color
-	$(DOCKER) --entrypoint shellcheck $(DOCKERHUB)/rhysd/actionlint:$(ACTIONLINT_VERSION) .github/scripts/*.sh bin/tks
+# The workflows are linted by yggdrasil's lint module (lint.yml), which
+# shellchecks only their `run:` blocks.
+shellcheck:
+	$(SHELLCHECK) .github/scripts/*.sh bin/tks
 
 docs:
 	$(TFDOCS) --config .terraform-docs.yml .

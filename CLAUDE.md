@@ -44,6 +44,15 @@ Every design decision gets a record in `docs/decisions/`, written in the same PR
 - **No backwards-compatibility code.** Use the provider's current resource names, and `proxmox_*` short names where they exist. Record: [0003](docs/decisions/0003-v2-breaking-rebuild.md)
 - **Comments explain why, not what.**
 
+## Issues
+
+File issues with the `create-issue` skill from zimmertr/ai-config: the two-sentence summary, the six sections, the hemingway and humanizer passes, one priority, one type, the area labels and the session label. The skill reads the four things below from this section.
+
+- **The reader**: someone who runs TKS on their own Proxmox host and knows Terraform, but not this codebase.
+- **The gates**: `fmt`, `validate`, `lint`, `scan`, `test`, `shellcheck`, `talos-kubernetes`, `PR Title / PR Title` and the three `Lint /` checks pass; behavior ships with a `terraform test`; the `docs/` page that owns the topic changes in the same PR; the README changes only to stay accurate.
+- **The constraints**: nothing runs against real infrastructure without TJ's okay for that run; no tokens or passwords in the repo or in logs; a version bump never replaces a VM; optional features plan nothing when off.
+- **The areas**: `terraform` (the roots, the modules, `configs/` and `bin/tks`), `ci` (the workflows, the Makefile and Renovate), `docs`, `security`.
+
 ## Development commands
 
-Every CI check is a Make target that runs a pinned container image: `make fmt-check`, `make validate`, `make lint`, `make scan`, `make test` and `make actionlint`, with `make check` for all of them. `make fmt` formats, and `make docs` regenerates `docs/CONFIGURATION.md`. Use the targets rather than local tool installs, so versions match CI. [`docs/CICD.md`](docs/CICD.md) describes the pipeline.
+Every CI check is a Make target that runs a pinned container image: `make fmt-check`, `make validate`, `make lint`, `make scan`, `make test` and `make shellcheck`, with `make check` for all of them. The title check, the workflow lint (actionlint, zizmor, Semgrep) and the release are zimmertr/yggdrasil's reusable workflows, pinned by commit SHA; zizmor's findings are fixed or silenced inline with a reason. Record: [0038](docs/decisions/0038-titles-workflow-lint-and-releases-come-from-yggdrasil.md) `make fmt` formats, and `make docs` regenerates `docs/CONFIGURATION.md`. Use the targets rather than local tool installs, so versions match CI. [`docs/CICD.md`](docs/CICD.md) describes the pipeline.
