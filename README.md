@@ -43,7 +43,7 @@ TJ's Kubernetes Service, or *TKS*, is a collection of Terraform configurations t
    The bootstrap root needs root credentials, so export them in a separate shell used only for this step:
 
    ```bash
-# The provider prefers a token over a password, so ensure it won't interfere if it's set
+   # The provider prefers a token over a password, so ensure it won't interfere if it's set
    unset PROXMOX_VE_API_TOKEN 
    
    export PROXMOX_VE_ENDPOINT="https://earth.sol.milkyway:8006"
