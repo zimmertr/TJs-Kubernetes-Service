@@ -29,7 +29,7 @@ PRs are squash-merged, and the PR title becomes the commit title on `main`, so t
 
 ## Releases
 
-`.github/workflows/release.yml` calls yggdrasil's `release` module on every push to `main`. GitVersion reads the merged commit's title and counts from the latest `v*` tag, then the module tags the commit and publishes a GitHub Release with generated notes. On a pull request the same module runs as `Release Dry Run`, and its job summary shows the version that merging would release.
+`.github/workflows/release.yml` calls yggdrasil's `release` module on every push to `main`. GitVersion reads the merged commit's title and counts from the latest `v*` tag, then the module tags the commit and publishes a GitHub Release with generated notes. On a pull request the same module runs as a dry run, and the `Release / Version` job summary shows the version that merging would release.
 
 | Title | Bump | Example |
 | --- | --- | --- |

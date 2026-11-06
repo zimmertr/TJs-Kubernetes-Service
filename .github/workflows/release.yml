@@ -26,16 +26,11 @@ permissions: {}
 jobs:
   release:
     name: Release
-    if: github.event_name == 'push'
     uses: zimmertr/yggdrasil/.github/workflows/release.yml@95c4f710c3600dba170ed579c0beabab507011b9 # v0.9.2
+    # GitHub refuses the whole run when a module job asks for more than the
+    # caller grants, even a job the dry run skips, so a PR grants write too.
+    # Only the module's Tag and Release job uses it, and never in a dry run.
     permissions:
       contents: write # the tag and release
-
-  dry-run:
-    name: Release Dry Run
-    if: github.event_name == 'pull_request'
-    uses: zimmertr/yggdrasil/.github/workflows/release.yml@95c4f710c3600dba170ed579c0beabab507011b9 # v0.9.2
-    permissions:
-      contents: read # GitVersion reads the history and tags
     with:
-      dry-run: true
+      dry-run: ${{ github.event_name == 'pull_request' }}
