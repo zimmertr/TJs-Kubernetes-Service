@@ -15,9 +15,6 @@ override.tf.json
 terraform.rc
 modules/**/.terraform.lock.hcl
 
-# Tool caches written by the Makefile's containers
-.cache/
-
 # Credentials and generated client configs
 config.env
 talosconfig

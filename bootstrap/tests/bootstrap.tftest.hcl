@@ -1,4 +1,5 @@
-# make test runs these with vars/bootstrap.tfvars, so the users and privileges
+# These run with vars/bootstrap.tfvars, through tests/terraform.tfvars, a link
+# to it that terraform test loads by itself. So the users and privileges
 # checked here are the ones that get applied.
 mock_provider "proxmox" {
   mock_resource "proxmox_user_token" {

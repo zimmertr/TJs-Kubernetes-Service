@@ -1,14 +1,9 @@
-# Every check CI runs is a target here. Each tool runs from a pinned container
-# image, so a local run and a CI run use the same versions and the only local
-# requirements are Docker and Make. Renovate bumps the versions below through
-# the `# renovate:` annotations.
+# The checks only this repo runs, each from a pinned container image, so the
+# only local requirements are Docker and Make. The Terraform checks (fmt,
+# validate, test, tflint, Trivy) come from zimmertr/yggdrasil's terraform module
+# instead (decision record 0039); docs/CICD.md says how to run them locally.
+# Renovate bumps the versions below through the `# renovate:` annotations.
 
-# renovate: datasource=docker depName=hashicorp/terraform
-TERRAFORM_VERSION := 1.17.1
-# renovate: datasource=docker depName=ghcr.io/terraform-linters/tflint
-TFLINT_VERSION := v0.65.0
-# renovate: datasource=docker depName=ghcr.io/aquasecurity/trivy
-TRIVY_VERSION := 0.76.2
 # renovate: datasource=docker depName=koalaman/shellcheck
 SHELLCHECK_VERSION := v0.11.0
 # renovate: datasource=github-releases depName=terraform-docs/terraform-docs extractVersion=^v(?<version>.+)$
@@ -21,62 +16,14 @@ TFDOCS_ARCH := $(if $(filter arm64 aarch64,$(shell uname -m)),arm64,amd64)
 # runners hit Docker Hub's anonymous pull limit and timeouts often.
 DOCKERHUB := mirror.gcr.io
 
-CACHE := $(CURDIR)/.cache
 # Run as the invoking user so files written into the repo are not root-owned.
 DOCKER := docker run --rm -v $(CURDIR):/src -w /src --user $(shell id -u):$(shell id -g) -e HOME=/tmp
-TERRAFORM := $(DOCKER) -v $(CACHE)/plugins:/plugins -e TF_PLUGIN_CACHE_DIR=/plugins -e TF_IN_AUTOMATION=1 $(DOCKERHUB)/hashicorp/terraform:$(TERRAFORM_VERSION)
-# GITHUB_TOKEN, when set, lifts the GitHub API rate limit for plugin downloads.
-TFLINT := $(DOCKER) -v $(CACHE)/tflint:/tflint -e TFLINT_PLUGIN_DIR=/tflint -e GITHUB_TOKEN --entrypoint tflint ghcr.io/terraform-linters/tflint:$(TFLINT_VERSION)
-TRIVY := $(DOCKER) -v $(CACHE)/trivy:/trivy-cache ghcr.io/aquasecurity/trivy:$(TRIVY_VERSION) --cache-dir /trivy-cache
 SHELLCHECK := $(DOCKER) $(DOCKERHUB)/koalaman/shellcheck:$(SHELLCHECK_VERSION)
 TFDOCS := $(DOCKER) quay.io/terraform-docs/terraform-docs:$(TFDOCS_VERSION)-$(TFDOCS_ARCH)
 
-# Every directory holding .tf files is validated, so new modules and roots are
-# picked up without editing this file.
-TF_DIRS := $(sort $(dir $(shell find . -name '*.tf' -not -path '*/.terraform/*' -not -path './.cache/*')))
-# `terraform test` runs in each directory that owns a *.tftest.hcl file, either
-# directly or under its tests/ directory. A root with a matching
-# vars/<dir>.tfvars is tested with it, so the committed values are checked.
-TEST_DIRS := $(sort $(shell find . -name '*.tftest.hcl' -not -path '*/.terraform/*' -not -path './.cache/*' | sed -E 's|/tests/[^/]+$$||; s|/[^/]+\.tftest\.hcl$$||; s|^\./?||; s|^$$|.|'))
+.PHONY: check shellcheck docs
 
-# Extra arguments for CI, e.g. SARIF output for code scanning.
-TRIVY_ARGS ?=
-
-.PHONY: check fmt fmt-check validate lint scan test shellcheck docs cache
-
-check: fmt-check validate lint scan test shellcheck
-
-cache:
-	@mkdir -p $(CACHE)/plugins $(CACHE)/tflint $(CACHE)/trivy
-
-fmt:
-	$(TERRAFORM) fmt -recursive
-
-fmt-check:
-	$(TERRAFORM) fmt -recursive -check -diff
-
-validate: cache
-	@set -e; for d in $(TF_DIRS); do \
-		echo "==> validate $$d"; \
-		$(TERRAFORM) -chdir=$$d init -backend=false -input=false -no-color >/dev/null; \
-		$(TERRAFORM) -chdir=$$d validate -no-color; \
-	done
-
-lint: cache
-	$(TFLINT) --init
-	$(TFLINT) --recursive --config /src/.tflint.hcl
-
-scan: cache
-	$(TRIVY) config --config trivy.yaml $(TRIVY_ARGS) .
-
-test: cache
-	@set -e; if [ -z "$(TEST_DIRS)" ]; then echo "No terraform tests yet."; exit 0; fi; \
-	for d in $(TEST_DIRS); do \
-		echo "==> test $$d"; \
-		$(TERRAFORM) -chdir=$$d init -backend=false -input=false -no-color >/dev/null; \
-		vf=; if [ -f "vars/$$d.tfvars" ]; then vf="-var-file=../vars/$$d.tfvars"; fi; \
-		$(TERRAFORM) -chdir=$$d test -no-color $$vf; \
-	done
+check: shellcheck
 
 # The workflows are linted by yggdrasil's lint module (lint.yml), which
 # shellchecks only their `run:` blocks.
