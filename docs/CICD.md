@@ -1,27 +1,33 @@
 # CI/CD
 
-Every pull request is checked, every merge to `main` is released, and Renovate keeps dependencies current. Nothing here plans or applies against real infrastructure: GitHub's runners cannot reach a Proxmox host, so applies are manual. Decisions: [0012](decisions/0012-renovate-automerge.md), [0013](decisions/0013-ci-and-semver-releases.md), [0038](decisions/0038-titles-workflow-lint-and-releases-come-from-yggdrasil.md).
+Every pull request is checked, every merge to `main` is released, and Renovate keeps dependencies current. Nothing here plans or applies against real infrastructure: GitHub's runners cannot reach a Proxmox host, so applies are manual. Decisions: [0012](decisions/0012-renovate-automerge.md), [0013](decisions/0013-ci-and-semver-releases.md), [0038](decisions/0038-titles-workflow-lint-and-releases-come-from-yggdrasil.md), [0039](decisions/0039-terraform-checks-come-from-yggdrasil.md).
 
-The title check, the workflow lint and the release come from [zimmertr/yggdrasil](https://github.com/zimmertr/yggdrasil)'s reusable workflows, pinned by commit SHA with the version beside it. The Terraform checks are this repo's own.
+The title check, the workflow lint, the Terraform checks and the release come from [zimmertr/yggdrasil](https://github.com/zimmertr/yggdrasil)'s reusable workflows, pinned by commit SHA with the version beside it.
 
 ## Checks
 
-`.github/workflows/pr.yml` runs on every pull request and on every push to `main`. Each job is one Make target, so any failure reproduces locally with the same command. Each target runs its tool from a pinned container image, so local and CI versions match. Docker Hub images are pulled through `mirror.gcr.io`, because GitHub's shared runners often hit Docker Hub's anonymous pull limit.
+`.github/workflows/pr.yml` runs on every pull request and on every push to `main`. Its `Terraform` job calls yggdrasil's `terraform` module, which runs each tool in the container image yggdrasil's `compose.yml` pins. `validate`, `test` and Trivy run in each folder `pr.yml` lists: `.`, `bootstrap` and the four under `modules/`. A new folder with Terraform joins that list.
 
-| Job | Make target | What it does |
-| --- | --- | --- |
-| `fmt` | `make fmt-check` | `terraform fmt -recursive -check` |
-| `validate` | `make validate` | `terraform init -backend=false` and `validate` in every directory that holds `.tf` files |
-| `lint` | `make lint` | tflint with the Terraform ruleset's recommended preset |
-| `scan` | `make scan` | `trivy config` at HIGH and CRITICAL severity. The SARIF report goes to code scanning |
-| `test` | `make test` | `terraform test` (with mocked providers) in every directory that has tests. `bootstrap/` is tested with `vars/bootstrap.tfvars` |
-| `shellcheck` | `make shellcheck` | shellcheck on `.github/scripts/` and `bin/tks` |
+| Check | What it does |
+| --- | --- |
+| `Terraform / fmt` | `terraform fmt -recursive -check` |
+| `Terraform / validate` | `terraform init -backend=false` and `validate` in each listed folder |
+| `Terraform / test` | `terraform test` (with mocked providers) in each listed folder. `bootstrap/tests/terraform.tfvars` is a link to `vars/bootstrap.tfvars`, which `terraform test` loads by itself, so the bootstrap tests check the values that get applied |
+| `Terraform / tflint` | tflint's bundled recommended rules, over every folder |
+| `Terraform / trivy` | `trivy config` with yggdrasil's `defaults/trivy.yaml`, in each listed folder. Any finding fails |
+| `shellcheck` | `make shellcheck`: shellcheck on `.github/scripts/` and `bin/tks` |
+
+To run a Terraform check locally, clone zimmertr/yggdrasil beside this repo and run the module's command through its `compose.yml`, for example:
+
+```sh
+docker compose -f ../yggdrasil/compose.yml --project-directory . run --rm -T terraform fmt -recursive
+```
 
 `.github/workflows/lint.yml` runs yggdrasil's `lint` module on every pull request: `Lint / actionlint` (actionlint, with shellcheck on each `run:` block), `Lint / zizmor` (zizmor's pedantic audits of the workflows) and `Lint / semgrep` (a Dockerfile rule; TKS has no Dockerfile, so it scans nothing). A finding is fixed, or silenced inline with a `# zizmor: ignore[<audit>]` comment that gives the reason.
 
 `.github/workflows/compat.yml` runs on every pull request too. It reads the Kubernetes range that each pinned Talos version supports from Talos's source, fails if any Talos and Kubernetes pair in `variables.tf` or `vars/*.tfvars` falls outside it, and comments the table on Renovate's PRs that change a version.
 
-`make check` runs the Make targets. `make fmt` and `make docs` (which regenerates [`CONFIGURATION.md`](CONFIGURATION.md)) change files rather than check them. The only local requirements are Docker and Make.
+`make check` runs `shellcheck`. `make docs` regenerates [`CONFIGURATION.md`](CONFIGURATION.md). The only local requirements are Docker and Make.
 
 ## Pull request titles
 
@@ -41,7 +47,7 @@ Every merge releases, including Renovate's dependency bumps.
 
 ## Dependency updates
 
-Renovate (`.github/renovate.json`) opens PRs for Terraform providers, `required_version`, GitHub Actions (pinned to commit SHAs), the tool images in the `Makefile` (through their `# renovate:` comments), and `talos_version` and `kubernetes_version` in `variables.tf` and `vars/*.tfvars`. It leaves `talos_config_version` alone, because that is pinned when a cluster is created. It keeps a dependency dashboard issue.
+Renovate (`.github/renovate.json`) opens PRs for Terraform providers, `required_version`, GitHub Actions (pinned to commit SHAs), the shellcheck and terraform-docs versions in the `Makefile` (through their `# renovate:` comments), and `talos_version` and `kubernetes_version` in `variables.tf` and `vars/*.tfvars`. It leaves `talos_config_version` alone, because that is pinned when a cluster is created. It keeps a dependency dashboard issue.
 
 Updates below a major (minor, patch, digest and pin) merge themselves through GitHub auto-merge once the required checks pass. Majors and Kubernetes minors wait for a maintainer, since each Talos release supports a limited range of Kubernetes versions. A patch or minor of yggdrasil's workflows merges itself only once the release is three days old.
 

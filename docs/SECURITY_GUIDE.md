@@ -13,7 +13,7 @@ TKS needs no SSH access to the Proxmox host.
 
 ## The Proxmox user
 
-Create a dedicated user and token rather than using `root@pam`. The optional `bootstrap/` root does it for you: apply it once with root credentials and `vars/bootstrap.tfvars`, and it outputs a token for `PROXMOX_VE_API_TOKEN`. Each user in that file gets its own role with only the privileges listed for it, granted on `/`, and a token that is not privilege-separated, so the token has the user's role. The `tks@pve` user there has the privileges below. `make test` runs the bootstrap tests against that file.
+Create a dedicated user and token rather than using `root@pam`. The optional `bootstrap/` root does it for you: apply it once with root credentials and `vars/bootstrap.tfvars`, and it outputs a token for `PROXMOX_VE_API_TOKEN`. Each user in that file gets its own role with only the privileges listed for it, granted on `/`, and a token that is not privilege-separated, so the token has the user's role. The `tks@pve` user there has the privileges below. The bootstrap tests run against that file, through a link to it in `bootstrap/tests/`.
 
 | Privileges | Why |
 | --- | --- |
@@ -46,7 +46,7 @@ The `kubeconfig` and `talosconfig` outputs are marked sensitive, so Terraform do
 
 | Check | What it catches |
 | --- | --- |
-| Trivy (`make scan`) | Generic Terraform misconfigurations at HIGH or CRITICAL severity. It has no Proxmox- or Talos-specific checks. Findings are uploaded to GitHub code scanning |
+| Trivy (`Terraform / trivy`) | Generic Terraform misconfigurations, through zimmertr/yggdrasil's `terraform` module. It has no Proxmox- or Talos-specific checks. Any finding fails the PR |
 | actionlint and zizmor (`Lint / actionlint`, `Lint / zizmor`) | Workflow mistakes and insecure patterns, including untrusted input interpolated into scripts and credentials left on disk |
 | shellcheck (`make shellcheck`) | Unsafe quoting and other mistakes in `.github/scripts/` and `bin/tks` |
 | GitHub secret scanning with push protection | Credentials pushed to the repository |
