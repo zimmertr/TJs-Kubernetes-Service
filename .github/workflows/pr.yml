@@ -12,80 +12,21 @@ concurrency:
   group: checks-${{ github.ref }}
   cancel-in-progress: true
 
-# Each job is one Make target, so a failure here reproduces locally with the
-# same command. Job names are the required checks in the main ruleset.
+# The main ruleset requires `Terraform / fmt`, `Terraform / validate`,
+# `Terraform / test`, `Terraform / tflint`, `Terraform / trivy` (this job's
+# name, then the module's) and `shellcheck`; renaming a job strands PRs on a
+# check that never reports.
 jobs:
-  fmt:
-    name: fmt
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      - run: make fmt-check
-
-  validate:
-    name: validate
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: .cache/plugins
-          key: plugins-${{ hashFiles('**/.terraform.lock.hcl', '**/*.tf') }}
-          restore-keys: plugins-
-      - run: make validate
-
-  lint:
-    name: lint
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: .cache/tflint
-          key: tflint-${{ hashFiles('.tflint.hcl', 'Makefile') }}
-      - run: make lint
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-
-  scan:
-    name: scan
-    runs-on: ubuntu-latest
+  # zimmertr/yggdrasil's terraform module, in the images its compose.yml pins
+  # (decision record 0039). It runs validate, test and Trivy in each folder
+  # listed here, so a new module joins this list.
+  terraform:
+    name: Terraform
+    uses: zimmertr/yggdrasil/.github/workflows/terraform.yml@a2cc2cdd843c067b1ed53450f9f50a6ce875b16e # v0.10.0
+    with:
+      directories: . bootstrap modules/gpu_worker modules/node modules/pci_device modules/talos_image
     permissions:
       contents: read
-      security-events: write # the SARIF upload to code scanning
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      # SARIF first, without failing, so findings reach code scanning even
-      # when the enforcing run below fails.
-      - run: make scan TRIVY_ARGS="--format sarif --output trivy.sarif --exit-code 0"
-      - uses: github/codeql-action/upload-sarif@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
-        if: always() && hashFiles('trivy.sarif') != ''
-        with:
-          sarif_file: trivy.sarif
-          category: trivy-config
-      - run: make scan
-
-  test:
-    name: test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: .cache/plugins
-          key: plugins-${{ hashFiles('**/.terraform.lock.hcl', '**/*.tf') }}
-          restore-keys: plugins-
-      - run: make test
 
   # The workflows are linted by lint.yml; this covers the scripts it can't see.
   shellcheck:
