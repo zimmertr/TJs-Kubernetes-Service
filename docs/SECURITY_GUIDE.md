@@ -1,6 +1,6 @@
 # Security guide
 
-How TKS handles credentials and secrets, and what CI scans. To report a vulnerability, see [`SECURITY.md`](../SECURITY.md).
+How TKS handles credentials and secrets, and what CI scans. To report a vulnerability, see [the security policy](https://github.com/zimmertr/TJs-Kubernetes-Service/security/policy).
 
 ## Credentials TKS uses
 
