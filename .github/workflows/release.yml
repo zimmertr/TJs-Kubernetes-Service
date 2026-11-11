@@ -26,11 +26,12 @@ permissions: {}
 jobs:
   release:
     name: Release
-    uses: zimmertr/yggdrasil/.github/workflows/release.yml@d8443185af7a5e3b4b197b8ee167533d79c816c5 # v0.14.0
+    uses: zimmertr/yggdrasil/.github/workflows/release.yml@667ac9372b2be9ed09b67c2da14f6fbd93e2b1b3 # v1.0.0
     # GitHub refuses the whole run when a module job asks for more than the
     # caller grants, even a job the dry run skips, so a PR grants write too.
     # Only the module's Tag and Release job uses it, and never in a dry run.
     permissions:
       contents: write # the tag and release
+      packages: write # asked for by the module's Build & Push, which never runs here: TKS ships no image
     with:
       dry-run: ${{ github.event_name == 'pull_request' }}
