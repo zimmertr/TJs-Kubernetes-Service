@@ -1,37 +1,11 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:recommended",
-    "helpers:pinGitHubActionDigests",
-    ":semanticCommits"
+    "github>zimmertr/yggdrasil//defaults/renovate"
   ],
-  "dependencyDashboard": true,
   "prConcurrentLimit": 0,
   "prHourlyLimit": 0,
   "packageRules": [
-    {
-      "description": "Everything below a major merges itself once the required checks pass (decision 0012).",
-      "matchUpdateTypes": [
-        "minor",
-        "patch",
-        "digest",
-        "pin",
-        "pinDigest"
-      ],
-      "automerge": true,
-      "platformAutomerge": true
-    },
-    {
-      "description": "yggdrasil's modules, pinned by SHA with the version beside it. A patch or minor release merges itself once it is three days old, the wait every repo that calls them uses (yggdrasil decision record 0023), instead of right away.",
-      "matchPackageNames": [
-        "zimmertr/yggdrasil"
-      ],
-      "matchUpdateTypes": [
-        "minor",
-        "patch"
-      ],
-      "minimumReleaseAge": "3 days"
-    },
     {
       "description": "Kubernetes minors wait for review: each Talos minor supports a bounded Kubernetes range (decision 0012). The compat check comments on every version PR.",
       "matchDepNames": [
