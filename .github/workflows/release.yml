@@ -32,5 +32,6 @@ jobs:
     # Only the module's Tag and Release job uses it, and never in a dry run.
     permissions:
       contents: write # the tag and release
+      packages: write # asked for by the module's Build & Push, which never runs here: TKS ships no image
     with:
       dry-run: ${{ github.event_name == 'pull_request' }}
