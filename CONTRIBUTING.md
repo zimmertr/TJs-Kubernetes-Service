@@ -1,6 +1,6 @@
 # Contributing
 
-TKS has one maintainer, and contributions are welcome.
+Thanks for your interest in contributing to TKS. Bug reports, fixes, documentation and new features are all welcome.
 
 1. **Open an issue first** for anything beyond a typo, so the approach can be agreed before code is written.
 2. **Keep pull requests small and focused.** One change per PR.
