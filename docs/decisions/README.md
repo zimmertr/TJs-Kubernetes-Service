@@ -54,5 +54,6 @@ The new record says `Supersedes NNNN` in its status line. The old record changes
 | [0035](0035-nodes-resolve-member-names.md) | Every node resolves cluster members' hostnames through Talos's host DNS | 2026-10-10 | Accepted |
 | [0036](0036-reregister-deletes-the-nodes-pods.md) | `manage_nodes reregister` deletes the node's remaining pods along with its Node | 2026-10-10 | Accepted |
 | [0037](0037-tks-helper.md) | `bin/manage_nodes` becomes `bin/tks`, which also handles client configs, CSRs, health checks and tokens, without `jq` | 2026-10-10 | Accepted |
-| [0038](0038-titles-workflow-lint-and-releases-come-from-yggdrasil.md) | PR titles, workflow lint and releases come from yggdrasil's modules; the Terraform checks stay here | 2026-11-06 | Accepted, except the Terraform checks (0039) |
+| [0038](0038-titles-workflow-lint-and-releases-come-from-yggdrasil.md) | PR titles, workflow lint and releases come from yggdrasil's modules; the Terraform checks stay here | 2026-11-06 | Accepted, except the Terraform checks (0039) and Renovate's three-day wait (0040) |
 | [0039](0039-terraform-checks-come-from-yggdrasil.md) | The Terraform checks come from yggdrasil's terraform module, with no config files of TKS's own | 2026-11-07 | Accepted. Supersedes 0038 in part |
+| [0040](0040-renovate-rules-come-from-yggdrasils-preset.md) | Renovate's shared rules come from yggdrasil's preset, and every update waits seven days | 2026-11-11 | Accepted. Supersedes 0038 in part |
