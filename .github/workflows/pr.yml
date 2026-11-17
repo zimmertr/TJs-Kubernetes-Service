@@ -22,7 +22,7 @@ jobs:
   # listed here, so a new module joins this list.
   terraform:
     name: Terraform
-    uses: zimmertr/yggdrasil/.github/workflows/terraform.yml@f81440545f0f987933300d02ae67ab206be59ce5 # v2.0.4
+    uses: zimmertr/yggdrasil/.github/workflows/terraform.yml@bb574d28fc80f75825e3fe41e57a57a6c9ac8769 # v2.1.0
     with:
       directories: . bootstrap modules/gpu_worker modules/node modules/pci_device modules/talos_image
     permissions:
