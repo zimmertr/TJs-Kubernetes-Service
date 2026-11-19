@@ -7,7 +7,7 @@
 # renovate: datasource=docker depName=koalaman/shellcheck
 SHELLCHECK_VERSION := v0.11.0
 # renovate: datasource=github-releases depName=terraform-docs/terraform-docs extractVersion=^v(?<version>.+)$
-TFDOCS_VERSION := 0.24.0
+TFDOCS_VERSION := 0.25.1
 
 # terraform-docs publishes per-architecture tags only.
 TFDOCS_ARCH := $(if $(filter arm64 aarch64,$(shell uname -m)),arm64,amd64)
