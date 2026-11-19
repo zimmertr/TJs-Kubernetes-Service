@@ -26,7 +26,7 @@ permissions: {}
 jobs:
   release:
     name: Release
-    uses: zimmertr/yggdrasil/.github/workflows/release.yml@c57780bea67b45cc5d880c10a9a8123bed5c8889 # v2.1.4
+    uses: zimmertr/yggdrasil/.github/workflows/release.yml@f552af07633fb66c7fc4007920589d0f5f0cfdc1 # v2.1.5
     # GitHub refuses the whole run when a module job asks for more than the
     # caller grants, even a job the dry run skips, so a PR grants write too.
     # Only the module's Tag and Release job uses it, and never in a dry run.
