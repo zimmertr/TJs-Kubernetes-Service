@@ -5,18 +5,6 @@
   ],
   "prConcurrentLimit": 0,
   "prHourlyLimit": 0,
-  "packageRules": [
-    {
-      "description": "Kubernetes minors wait for review: each Talos minor supports a bounded Kubernetes range (decision 0012). The compat check comments on every version PR.",
-      "matchDepNames": [
-        "kubernetes/kubernetes"
-      ],
-      "matchUpdateTypes": [
-        "minor"
-      ],
-      "automerge": false
-    }
-  ],
   "customManagers": [
     {
       "description": "Tool versions in the Makefile, each annotated with a `# renovate:` comment.",
