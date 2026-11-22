@@ -2,7 +2,7 @@ name: PR Title
 
 # The PR title becomes the squash commit's title, and that title alone picks
 # the release bump. yggdrasil's pr-title module refuses a title that isn't
-# `type(scope): summary` with one of the types its GitVersion patterns read,
+# `type(scope): summary` with one of the types its release reads,
 # so every title releases as intended. Renovate's titles (`chore(deps): ...`)
 # already pass.
 #

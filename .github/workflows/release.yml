@@ -1,6 +1,6 @@
 name: Release
 
-# Every merge to main is released through yggdrasil's release module: GitVersion
+# Every merge to main is released through yggdrasil's release module, which
 # reads the bump from the squash commit's title and counts from the latest v*
 # tag, then the commit is tagged and released with generated notes. TKS ships
 # no image, so the module only tags and releases. On a PR, the same module runs
