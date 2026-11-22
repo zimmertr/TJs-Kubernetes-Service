@@ -2,13 +2,12 @@ name: Lint
 
 # yggdrasil's lint module: actionlint and zizmor's pedantic audits over the
 # workflows, and Semgrep's rule that a tagged Dockerfile FROM carries a digest
-# (this repo has no Dockerfile, so that job scans nothing). actionlint checks
-# only the `run:` blocks, so the scripts get their own `shellcheck` job in
-# pr.yml.
+# (this repo has no Dockerfile, so that job scans nothing), shellcheck over
+# `.github/scripts/` and `bin/tks`, and the docs' links and em dashes.
 #
-# The main ruleset requires `Lint / actionlint`, `Lint / zizmor` and
-# `Lint / semgrep` (this job's name, then the module's); renaming either
-# strands PRs on a check that never reports.
+# The main ruleset requires `Lint / actionlint`, `/ zizmor`, `/ semgrep`,
+# `/ shellcheck` and `/ docs` (this job's name, then the module's); renaming
+# either strands PRs on a check that never reports.
 on:
   pull_request:
     branches:
@@ -19,6 +18,6 @@ permissions: {}
 jobs:
   lint:
     name: Lint
-    uses: zimmertr/yggdrasil/.github/workflows/lint.yml@471e1dd37cbd51b1f247fc02f80556677de2a876 # v2.2.1
+    uses: zimmertr/yggdrasil/.github/workflows/lint.yml@e229a6868b9d1bf4a596e0a8844452770a543a6c # v3.0.0
     permissions:
       contents: read

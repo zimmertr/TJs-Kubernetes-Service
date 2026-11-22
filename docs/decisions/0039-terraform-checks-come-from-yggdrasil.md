@@ -1,6 +1,6 @@
 # 0039. The Terraform checks come from yggdrasil's terraform module, with no config files of TKS's own
 
-- Status: Accepted. Supersedes [0038](0038-titles-workflow-lint-and-releases-come-from-yggdrasil.md) in part
+- Status: Accepted. Supersedes [0038](0038-titles-workflow-lint-and-releases-come-from-yggdrasil.md) in part. Superseded in part by [0042](0042-ci-takes-yggdrasil-v3.md): the `Makefile` keeps only `docs`
 - Date: 2026-11-07
 - Decider: TJ (zimmertr/yggdrasil#8). On the shared module: "Shared module". On TKS's choices: link the bootstrap test to `vars/bootstrap.tfvars`, drop the Security tab upload, and remove the Makefile's Terraform targets, each the recommended option.
 - Issues and PRs: zimmertr/yggdrasil#8, zimmertr/yggdrasil#47
