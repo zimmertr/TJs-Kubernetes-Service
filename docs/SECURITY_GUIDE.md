@@ -48,7 +48,8 @@ The `kubeconfig` and `talosconfig` outputs are marked sensitive, so Terraform do
 | --- | --- |
 | Trivy (`Terraform / trivy`) | Generic Terraform misconfigurations, through zimmertr/yggdrasil's `terraform` module. It has no Proxmox- or Talos-specific checks. Any finding fails the PR |
 | actionlint and zizmor (`Lint / actionlint`, `Lint / zizmor`) | Workflow mistakes and insecure patterns, including untrusted input interpolated into scripts and credentials left on disk |
-| shellcheck (`make shellcheck`) | Unsafe quoting and other mistakes in `.github/scripts/` and `bin/tks` |
+| shellcheck (`Lint / shellcheck`) | Unsafe quoting and other mistakes in `.github/scripts/` and `bin/tks` |
+| OpenSSF Scorecard (`scorecard.yml`) | Supply-chain risks in the repo's settings and workflows, such as broad token permissions. Its findings go to the Security tab and fail nothing |
 | GitHub secret scanning with push protection | Credentials pushed to the repository |
 
 Every GitHub Action is pinned to a commit SHA, and each workflow job gets only the permissions it needs. [`CICD.md`](CICD.md) describes the pipeline.

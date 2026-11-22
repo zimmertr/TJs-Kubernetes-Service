@@ -14,26 +14,17 @@ concurrency:
 
 # The main ruleset requires `Terraform / fmt`, `Terraform / validate`,
 # `Terraform / test`, `Terraform / tflint`, `Terraform / trivy` (this job's
-# name, then the module's) and `shellcheck`; renaming a job strands PRs on a
-# check that never reports.
+# name, then the module's); renaming a job strands PRs on a check that never
+# reports.
 jobs:
   # zimmertr/yggdrasil's terraform module, in the images its compose.yml pins
   # (decision record 0039). It runs validate, test and Trivy in each folder
   # listed here, so a new module joins this list.
   terraform:
     name: Terraform
-    uses: zimmertr/yggdrasil/.github/workflows/terraform.yml@c71af5523eef7252d901774a217fe532fdb3209c # v2.7.0
+    uses: zimmertr/yggdrasil/.github/workflows/terraform.yml@571dc1db86efcdaf2d5289b5e8d34f98b8816a18 # v3.0.1
     with:
       directories: . bootstrap modules/gpu_worker modules/node modules/pci_device modules/talos_image
     permissions:
       contents: read
 
-  # The workflows are linted by lint.yml; this covers the scripts it can't see.
-  shellcheck:
-    name: shellcheck
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-      - run: make shellcheck

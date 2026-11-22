@@ -1,0 +1,19 @@
+name: Scorecard
+
+# yggdrasil's scorecard module: OpenSSF Scorecard on every push to main and
+# weekly, with its findings in the Security tab. No badge.
+on:
+  schedule:
+    - cron: "37 6 * * 1"
+  push:
+    branches: [main]
+
+permissions: {}
+
+jobs:
+  scorecard:
+    name: Scorecard
+    uses: zimmertr/yggdrasil/.github/workflows/scorecard.yml@571dc1db86efcdaf2d5289b5e8d34f98b8816a18 # v3.0.1
+    permissions:
+      contents: read
+      security-events: write # the SARIF upload to code scanning

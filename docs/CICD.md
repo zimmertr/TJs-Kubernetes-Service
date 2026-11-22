@@ -1,8 +1,8 @@
 # CI/CD
 
-Every pull request is checked, every merge to `main` is released, and Renovate keeps dependencies current. Nothing here plans or applies against real infrastructure: GitHub's runners cannot reach a Proxmox host, so applies are manual. Decisions: [0012](decisions/0012-renovate-automerge.md), [0013](decisions/0013-ci-and-semver-releases.md), [0038](decisions/0038-titles-workflow-lint-and-releases-come-from-yggdrasil.md), [0039](decisions/0039-terraform-checks-come-from-yggdrasil.md), [0040](decisions/0040-renovate-rules-come-from-yggdrasils-preset.md), [0041](decisions/0041-kubernetes-minors-merge-themselves.md).
+Every pull request is checked, every merge to `main` is released, and Renovate keeps dependencies current. Nothing here plans or applies against real infrastructure: GitHub's runners cannot reach a Proxmox host, so applies are manual. Decisions: [0012](decisions/0012-renovate-automerge.md), [0013](decisions/0013-ci-and-semver-releases.md), [0038](decisions/0038-titles-workflow-lint-and-releases-come-from-yggdrasil.md), [0039](decisions/0039-terraform-checks-come-from-yggdrasil.md), [0040](decisions/0040-renovate-rules-come-from-yggdrasils-preset.md), [0041](decisions/0041-kubernetes-minors-merge-themselves.md), [0042](decisions/0042-ci-takes-yggdrasil-v3.md).
 
-The title check, the workflow lint, the Terraform checks and the release come from [zimmertr/yggdrasil](https://github.com/zimmertr/yggdrasil)'s reusable workflows, pinned by commit SHA with the version beside it.
+The title check, the workflow and script lint, the Terraform checks, Scorecard and the release come from [zimmertr/yggdrasil](https://github.com/zimmertr/yggdrasil)'s reusable workflows, pinned by commit SHA with the version beside it.
 
 ## Checks
 
@@ -15,7 +15,6 @@ The title check, the workflow lint, the Terraform checks and the release come fr
 | `Terraform / test` | `terraform test` (with mocked providers) in each listed folder. `bootstrap/tests/terraform.tfvars` is a link to `vars/bootstrap.tfvars`, which `terraform test` loads by itself, so the bootstrap tests check the values that get applied |
 | `Terraform / tflint` | tflint's bundled recommended rules, over every folder |
 | `Terraform / trivy` | `trivy config` with yggdrasil's `defaults/trivy.yaml`, in each listed folder. Any finding fails |
-| `shellcheck` | `make shellcheck`: shellcheck on `.github/scripts/` and `bin/tks` |
 
 To run a Terraform check locally, clone zimmertr/yggdrasil beside this repo and run the module's command through its `compose.yml`, for example:
 
@@ -23,11 +22,13 @@ To run a Terraform check locally, clone zimmertr/yggdrasil beside this repo and 
 docker compose -f ../yggdrasil/compose.yml --project-directory . run --rm -T terraform fmt -recursive
 ```
 
-`.github/workflows/lint.yml` runs yggdrasil's `lint` module on every pull request: `Lint / actionlint` (actionlint, with shellcheck on each `run:` block), `Lint / zizmor` (zizmor's pedantic audits of the workflows) and `Lint / semgrep` (a Dockerfile rule; TKS has no Dockerfile, so it scans nothing). A finding is fixed, or silenced inline with a `# zizmor: ignore[<audit>]` comment that gives the reason.
+`.github/workflows/lint.yml` runs yggdrasil's `lint` module on every pull request: `Lint / actionlint` (actionlint, with shellcheck on each `run:` block), `Lint / zizmor` (zizmor's pedantic audits of the workflows), `Lint / semgrep` (a Dockerfile rule; TKS has no Dockerfile, so it scans nothing), `Lint / shellcheck` (shellcheck on every script, which here is `.github/scripts/talos-k8s-compat.sh` and `bin/tks`) and `Lint / docs` (lychee over the Markdown links and anchors, and no em dash). A finding is fixed, or silenced inline with a `# zizmor: ignore[<audit>]` comment that gives the reason. Any of them runs locally the same way as a Terraform check, for example `docker compose -f ../yggdrasil/compose.yml --project-directory . run --rm -T shellcheck`.
+
+`.github/workflows/scorecard.yml` runs yggdrasil's `scorecard` module weekly and on every push to `main`. OpenSSF Scorecard's findings land in the repo's Security tab, and nothing fails a PR.
 
 `.github/workflows/compat.yml` runs on every pull request too. It reads the Kubernetes range that each pinned Talos version supports from Talos's source, fails if any Talos and Kubernetes pair in `variables.tf` or `vars/*.tfvars` falls outside it, and comments the table on Renovate's PRs that change a version.
 
-`make check` runs `shellcheck`. `make docs` regenerates [`CONFIGURATION.md`](CONFIGURATION.md). The only local requirements are Docker and Make.
+`make docs` regenerates [`CONFIGURATION.md`](CONFIGURATION.md). The only local requirements are Docker and Make.
 
 ## Pull request titles
 
@@ -47,7 +48,7 @@ Every merge releases, including Renovate's dependency bumps.
 
 ## Dependency updates
 
-Renovate (`.github/renovate.json`) opens PRs for Terraform providers, `required_version`, GitHub Actions (pinned to commit SHAs), the shellcheck and terraform-docs versions in the `Makefile` (through their `# renovate:` comments), and `talos_version` and `kubernetes_version` in `variables.tf` and `vars/*.tfvars`. It leaves `talos_config_version` alone, because that is pinned when a cluster is created. It keeps a dependency dashboard issue.
+Renovate (`.github/renovate.json`) opens PRs for Terraform providers, `required_version`, GitHub Actions (pinned to commit SHAs), the terraform-docs version in the `Makefile` (through its `# renovate:` comment), and `talos_version` and `kubernetes_version` in `variables.tf` and `vars/*.tfvars`. It leaves `talos_config_version` alone, because that is pinned when a cluster is created. It keeps a dependency dashboard issue.
 
 The rules every repo of TJ's shares come from zimmertr/yggdrasil's preset, which `.github/renovate.json` extends ([0040](decisions/0040-renovate-rules-come-from-yggdrasils-preset.md)). Every release waits seven days. Updates below a major (minor, patch, digest and pin) then merge themselves through GitHub auto-merge once the required checks pass. A release of yggdrasil's workflows merges with no wait. Kubernetes minors merge themselves too, because the required `talos-kubernetes` check fails any pair Talos doesn't support, and a merge applies nothing to a cluster ([0041](decisions/0041-kubernetes-minors-merge-themselves.md)). Majors wait for a maintainer.
 

@@ -1,6 +1,6 @@
 # 0038. PR titles, workflow lint and releases come from yggdrasil's modules; the Terraform checks stay here
 
-- Status: Accepted. Superseded in part by [0039](0039-terraform-checks-come-from-yggdrasil.md) and [0040](0040-renovate-rules-come-from-yggdrasils-preset.md)
+- Status: Accepted. Superseded in part by [0039](0039-terraform-checks-come-from-yggdrasil.md), [0040](0040-renovate-rules-come-from-yggdrasils-preset.md) and [0042](0042-ci-takes-yggdrasil-v3.md)
 - Date: 2026-11-06
 - Decider: TJ (zimmertr/yggdrasil#7)
 - Issues and PRs: zimmertr/yggdrasil#7
