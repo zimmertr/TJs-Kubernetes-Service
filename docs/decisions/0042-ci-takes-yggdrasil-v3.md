@@ -11,7 +11,7 @@
 
 ## Decision
 
-- Every module call pins v3.0.0.
+- Every module call pins v3.0.1.
 - `Lint / shellcheck` checks `.github/scripts/talos-k8s-compat.sh` and `bin/tks`. `pr.yml`'s own `shellcheck` job, `make shellcheck` and `make check` are gone, and the `Makefile` keeps only `docs`.
 - `Lint / docs` checks the Markdown links and anchors, and refuses an em dash.
 - `release.yml` grants `attestations: write` and `id-token: write`. TKS pushes no image or chart, so nothing is attested, but GitHub refuses the run if the caller grants less than a module job asks for.
