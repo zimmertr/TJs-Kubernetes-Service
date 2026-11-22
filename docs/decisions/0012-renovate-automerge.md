@@ -1,6 +1,6 @@
 # 0012. Renovate auto-merges everything below a major, except Kubernetes minors, and comments on Talos and Kubernetes compatibility
 
-- Status: Accepted. The compatibility check's mechanism is amended by 0021
+- Status: Accepted. The compatibility check's mechanism is amended by 0021. Superseded in part by 0041: Kubernetes minors merge themselves
 - Date: 2026-10-09
 - Decider: TJ (planning interview)
 - Issues and PRs: the v2 planning PR

@@ -1,6 +1,6 @@
 # CI/CD
 
-Every pull request is checked, every merge to `main` is released, and Renovate keeps dependencies current. Nothing here plans or applies against real infrastructure: GitHub's runners cannot reach a Proxmox host, so applies are manual. Decisions: [0012](decisions/0012-renovate-automerge.md), [0013](decisions/0013-ci-and-semver-releases.md), [0038](decisions/0038-titles-workflow-lint-and-releases-come-from-yggdrasil.md), [0039](decisions/0039-terraform-checks-come-from-yggdrasil.md), [0040](decisions/0040-renovate-rules-come-from-yggdrasils-preset.md).
+Every pull request is checked, every merge to `main` is released, and Renovate keeps dependencies current. Nothing here plans or applies against real infrastructure: GitHub's runners cannot reach a Proxmox host, so applies are manual. Decisions: [0012](decisions/0012-renovate-automerge.md), [0013](decisions/0013-ci-and-semver-releases.md), [0038](decisions/0038-titles-workflow-lint-and-releases-come-from-yggdrasil.md), [0039](decisions/0039-terraform-checks-come-from-yggdrasil.md), [0040](decisions/0040-renovate-rules-come-from-yggdrasils-preset.md), [0041](decisions/0041-kubernetes-minors-merge-themselves.md).
 
 The title check, the workflow lint, the Terraform checks and the release come from [zimmertr/yggdrasil](https://github.com/zimmertr/yggdrasil)'s reusable workflows, pinned by commit SHA with the version beside it.
 
@@ -49,7 +49,7 @@ Every merge releases, including Renovate's dependency bumps.
 
 Renovate (`.github/renovate.json`) opens PRs for Terraform providers, `required_version`, GitHub Actions (pinned to commit SHAs), the shellcheck and terraform-docs versions in the `Makefile` (through their `# renovate:` comments), and `talos_version` and `kubernetes_version` in `variables.tf` and `vars/*.tfvars`. It leaves `talos_config_version` alone, because that is pinned when a cluster is created. It keeps a dependency dashboard issue.
 
-The rules every repo of TJ's shares come from zimmertr/yggdrasil's preset, which `.github/renovate.json` extends ([0040](decisions/0040-renovate-rules-come-from-yggdrasils-preset.md)). Every release waits seven days. Updates below a major (minor, patch, digest and pin) then merge themselves through GitHub auto-merge once the required checks pass. A release of yggdrasil's workflows merges with no wait. Majors and Kubernetes minors wait for a maintainer, since each Talos release supports a limited range of Kubernetes versions.
+The rules every repo of TJ's shares come from zimmertr/yggdrasil's preset, which `.github/renovate.json` extends ([0040](decisions/0040-renovate-rules-come-from-yggdrasils-preset.md)). Every release waits seven days. Updates below a major (minor, patch, digest and pin) then merge themselves through GitHub auto-merge once the required checks pass. A release of yggdrasil's workflows merges with no wait. Kubernetes minors merge themselves too, because the required `talos-kubernetes` check fails any pair Talos doesn't support, and a merge applies nothing to a cluster ([0041](decisions/0041-kubernetes-minors-merge-themselves.md)). Majors wait for a maintainer.
 
 ## Protecting `main`
 

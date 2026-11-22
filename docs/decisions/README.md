@@ -28,7 +28,7 @@ The new record says `Supersedes NNNN` in its status line. The old record changes
 | [0009](0009-nodes-as-maps.md) | Nodes are maps keyed by hostname, with defaults for each pool | 2026-10-09 | Accepted |
 | [0010](0010-qcow2-images-no-ssh.md) | Talos images are downloaded as `qcow2` and imported by the provider, without SSH | 2026-10-09 | Accepted |
 | [0011](0011-in-place-upgrades-by-terraform.md) | Version bumps upgrade nodes in place through `talos_machine` and `talos_cluster`, and never replace VMs | 2026-10-09 | Accepted |
-| [0012](0012-renovate-automerge.md) | Renovate auto-merges everything below a major, except Kubernetes minors, and comments on Talos and Kubernetes compatibility | 2026-10-09 | Accepted |
+| [0012](0012-renovate-automerge.md) | Renovate auto-merges everything below a major, except Kubernetes minors, and comments on Talos and Kubernetes compatibility | 2026-10-09 | Accepted, except Kubernetes minors (0041) |
 | [0013](0013-ci-and-semver-releases.md) | Every pull request runs format, validate, lint, scan, test and workflow lint, and releases are cut from PR titles | 2026-10-09 | Accepted |
 | [0014](0014-right-size-from-measured-usage.md) | `stable` is right-sized from measured usage to make room for a 192 GB GPU node | 2026-10-09 | Accepted |
 | [0015](0015-gpu-reset-risk-accepted.md) | The GPU reset risk is accepted and tested on first attach, rather than in a separate spike | 2026-10-09 | Accepted |
@@ -56,4 +56,5 @@ The new record says `Supersedes NNNN` in its status line. The old record changes
 | [0037](0037-tks-helper.md) | `bin/manage_nodes` becomes `bin/tks`, which also handles client configs, CSRs, health checks and tokens, without `jq` | 2026-10-10 | Accepted |
 | [0038](0038-titles-workflow-lint-and-releases-come-from-yggdrasil.md) | PR titles, workflow lint and releases come from yggdrasil's modules; the Terraform checks stay here | 2026-11-06 | Accepted, except the Terraform checks (0039) and Renovate's three-day wait (0040) |
 | [0039](0039-terraform-checks-come-from-yggdrasil.md) | The Terraform checks come from yggdrasil's terraform module, with no config files of TKS's own | 2026-11-07 | Accepted. Supersedes 0038 in part |
-| [0040](0040-renovate-rules-come-from-yggdrasils-preset.md) | Renovate's shared rules come from yggdrasil's preset, and every update waits seven days | 2026-11-11 | Accepted. Supersedes 0038 in part |
+| [0040](0040-renovate-rules-come-from-yggdrasils-preset.md) | Renovate's shared rules come from yggdrasil's preset, and every update waits seven days | 2026-11-11 | Accepted. Supersedes 0038 in part. Superseded in part by 0041 |
+| [0041](0041-kubernetes-minors-merge-themselves.md) | Kubernetes minors merge themselves like every other update below a major | 2026-11-21 | Accepted. Supersedes 0012 and 0040 in part |

@@ -1,6 +1,6 @@
 # 0040. Renovate's shared rules come from yggdrasil's preset, and every update waits seven days
 
-- Status: Accepted. Supersedes [0038](0038-titles-workflow-lint-and-releases-come-from-yggdrasil.md) in part
+- Status: Accepted. Supersedes [0038](0038-titles-workflow-lint-and-releases-come-from-yggdrasil.md) in part. Superseded in part by 0041: Kubernetes minors merge themselves
 - Date: 2026-11-11
 - Decider: TJ (zimmertr/yggdrasil#40). On the wait: "Lets make sure everything has at least a 1-week cooldown then." On one preset: "I am tempted to switch everything and just define it in yggdrasil and import it into the child repos." On yggdrasil's own modules: "Those can go immediately".
 - Issues and PRs: zimmertr/yggdrasil#40, zimmertr/yggdrasil#90, zimmertr/yggdrasil#94
