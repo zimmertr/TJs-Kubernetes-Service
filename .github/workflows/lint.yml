@@ -18,6 +18,6 @@ permissions: {}
 jobs:
   lint:
     name: Lint
-    uses: zimmertr/yggdrasil/.github/workflows/lint.yml@100f98842aa28262e9e73ebd153af00712bad535 # v3.1.1
+    uses: zimmertr/yggdrasil/.github/workflows/lint.yml@2581d736b8cbff87c94c055f985062a73cffdccb # v3.1.3
     permissions:
       contents: read
