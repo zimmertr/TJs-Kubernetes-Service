@@ -13,7 +13,7 @@ permissions: {}
 jobs:
   scorecard:
     name: Scorecard
-    uses: zimmertr/yggdrasil/.github/workflows/scorecard.yml@2581d736b8cbff87c94c055f985062a73cffdccb # v3.1.3
+    uses: zimmertr/yggdrasil/.github/workflows/scorecard.yml@09f6b632a2fb0f0692df46b92cb04cc664a833a1 # v3.1.4
     permissions:
       contents: read
       security-events: write # the SARIF upload to code scanning
